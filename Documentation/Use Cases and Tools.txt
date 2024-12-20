@@ -1,0 +1,63 @@
+Use Cases:
+
+end goal is structured data storage and involves transforming data. Ingestion needed for retrieval. Incoming data is batch data in nature
+end goal is semi-structured data storage and involves transforming data. Ingestion needed for retrieval. Incoming data is batch data in nature
+end goal is structured data storage without transformation. Ingestion needed for retrieval. Incoming data is batch data in nature
+end goal is semi-structured data storage without transformation. Ingestion needed for retrieval. Incoming data is batch data in nature
+
+
+endgoal is for structured data to be presented on dashboard. Ingestion needed for retrieval. Incoming data is batch data in nature
+endgoal is for semi-structured data to be presented on dashboard. Ingestion needed for retrieval. Incoming data is batch data in nature
+endgoal is for structured data to be presented on dashboard and involves transforming data. Ingestion needed for retrieval. Incoming data is batch data in nature
+endgoal is for semi-structured data to be presented on dashboard and involves transforming data. Ingestion needed for retrieval. Incoming data is batch data in nature
+
+
+end goal is to store graph based data without need for transformation. Ingestion is needed for retrieval. Incoming data is batch data in nature
+end goal is to present graph based data on a dashboard and involves transforming data. Ingestion is needed for retrieval. Incoming data is batch data in nature
+
+
+end goal is for the storage of both structured and unstructured data without need for transformation. Ingestion needed for retrieval. Incoming data is batch data in nature
+end goal is for the storage of both structured and unstructured data and involves transforming data. Ingestion needed for retrieval. Incoming data is batch data in nature
+end goal is the presentation of both structured and unstructured data on a dashboard and involves transforming data. Ingestion needed for retrieval. Incoming data is batch data in nature
+end goal is the presentation of both structured and unstructured data on a dashboard without need for transforming data. Ingestion needed for retrieval. Incoming data is batch data in nature
+
+
+
+
+
+end goal is structured data storage and involves transforming data. Ingestion needed for retrieval. Incoming data is streaming data in nature
+end goal is semi-structured data storage and involves transforming data. Ingestion needed for retrieval. Incoming data is streaming data in nature
+end goal is structured data storage without transformation. Ingestion needed for retrieval. Incoming data is streaming data in nature
+end goal is semi-structured data storage without transformation. Ingestion needed for retrieval. Incoming data is streaming data in nature
+
+
+endgoal is for structured data to be presented on dashboard. Ingestion needed for retrieval. Incoming data is streaming data in nature
+endgoal is for semi-structured data to be presented on dashboard. Ingestion needed for retrieval. Incoming data is streaming data in nature
+endgoal is for structured data to be presented on dashboard and involves transforming data. Ingestion needed for retrieval. Incoming data is streaming data in nature
+endgoal is for semi-structured data to be presented on dashboard and involves transforming data. Ingestion needed for retrieval. Incoming data is streaming data in nature
+
+
+end goal is to store graph based data without need for transformation. Ingestion is needed for retrieval. Incoming data is streaming data in nature
+end goal is to present graph based data on a dashboard and involves transforming data. Ingestion is needed for retrieval. Incoming data is streaming data in nature
+
+
+end goal is for the storage of both structured and unstructured data without need for transformation. Ingestion needed for retrieval. Incoming data is streaming data in nature
+end goal is for the storage of both structured and unstructured data and involves transforming data. Ingestion needed for retrieval. Incoming data is streaming data in nature
+end goal is the presentation of both structured and unstructured data on a dashboard and involves transforming data. Ingestion needed for retrieval. Incoming data is streaming data in nature
+end goal is the presentation of both structured and unstructured data on a dashboard without need for transforming data. Ingestion needed for retrieval. Incoming data is streaming data in nature
+
+
+
+Ingestion Tools: Apache Kafka, Apache Sqoop
+ 
+Storage:
+  Structured: Postgres, MySQL, Hive, Hadoop
+  Semi-structured: MongoDB
+  Graph: Neo4j
+ 
+Processing Tools: Spark
+ 
+Visualization: Superset
+ 
+Orchestration: Airflow
+ 

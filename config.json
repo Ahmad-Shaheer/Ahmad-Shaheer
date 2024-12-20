@@ -1,0 +1,231 @@
+{    "Hive": {
+    "Image": "apache/hive:latest",
+    "EnvironmentVariables": {
+      "HIVE_HOME": "/opt/hive",
+      "HADOOP_HOME": "/opt/hadoop",
+      "JAVA_HOME": "/usr/lib/jvm/java-8-openjdk-amd64"
+    },
+    "Ports": ["10000:10000"],
+    "Volumes": [
+      "/path/to/local/conf:/opt/hive/conf",
+      "/path/to/local/logs:/opt/hive/logs"
+    ]
+  },
+
+  "ApacheFlink": {
+    "Image": "apache/flink:latest",
+    "EnvironmentVariables": {
+      "FLINK_HOME": "/opt/flink",
+      "JAVA_HOME": "/usr/lib/jvm/java-8-openjdk-amd64",
+      "FLINK_CONF_DIR": "/opt/flink/conf"
+    },
+    "Ports": ["8081:8081"],
+    "Volumes": [
+      "/path/to/local/conf:/opt/flink/conf",
+      "/path/to/local/logs:/opt/flink/logs"
+    ]
+  },
+
+  "dbt": {
+    "Image": "dbt-labs/dbt:latest",
+    "EnvironmentVariables": {
+      "DBT_PROJECT_DIR": "/dbt/project",
+      "DBT_PROFILES_DIR": "/dbt/profiles"
+    },
+    "Ports": [],
+    "Volumes": [
+      "/path/to/local/project:/dbt/project",
+      "/path/to/local/profiles:/dbt/profiles"
+    ]
+  },
+
+  "NiFi": {
+    "Image": "apache/nifi:latest",
+    "EnvironmentVariables": {
+      "NIFI_HOME": "/opt/nifi",
+      "JAVA_HOME": "/usr/lib/jvm/java-8-openjdk-amd64",
+      "NIFI_LOG_DIR": "/opt/nifi/logs"
+    },
+    "Ports": ["8080:8080"],
+    "Volumes": [
+      "/path/to/local/conf:/opt/nifi/conf",
+      "/path/to/local/logs:/opt/nifi/logs"
+    ]
+  },
+
+  "ApacheKafka": {
+    "Image": "confluentinc/cp-kafka:latest",
+    "EnvironmentVariables": {
+      "KAFKA_BROKER_ID": "1",
+      "KAFKA_ZOOKEEPER_CONNECT": "zookeeper:2181",
+      "KAFKA_ADVERTISED_LISTENERS": "PLAINTEXT://localhost:9092",
+      "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP": "PLAINTEXT:PLAINTEXT"
+    },
+    "Ports": ["9092:9092"],
+    "Volumes": [
+      "/path/to/local/data:/var/lib/kafka/data",
+      "/path/to/local/logs:/var/log/kafka"
+    ]
+  },
+
+    "ApacheFlume": {
+    "Image": "apache/flume:latest",
+    "EnvironmentVariables": {
+      "FLUME_AGENT_NAME": "agent",
+      "FLUME_CONFIG_DIR": "/flume/conf",
+      "FLUME_LOG_DIR": "/flume/logs",
+      "JAVA_HOME": "/usr/lib/jvm/java-8-openjdk-amd64"
+    },
+    "Ports": ["5140:5140"],
+    "Volumes": [
+      "/path/to/local/conf:/flume/conf",
+      "/path/to/local/logs:/flume/logs"
+    ]
+  },
+    "Python": {
+    "Image": "python:3.10-slim",                  
+    "Command": ["python3", "-m", "http.server"], 
+    "EnvironmentVariables": {
+        "PYTHONUNBUFFERED": "1",                  
+        "PYTHONDONTWRITEBYTECODE": "1",            
+        "PATH": "/usr/local/bin:/usr/bin:/bin",    
+        "HOME": "/root",                          
+        "APP_ENV": "development",                  
+        "PYTHON_ENV": "production"              
+    },
+    "Volumes": [
+        "/path/to/app:/usr/src/app"         
+    ],
+    "Ports": ["8000:8000"],                 
+    "WorkingDir": "/usr/src/app",                
+    "Restart": "always"                          
+},
+    "Postgres": {
+      "Image": "postgres:latest",
+      "EnvironmentVariables": {
+        "POSTGRES_USER": "username",
+        "POSTGRES_PASSWORD": "password",
+        "POSTGRES_DB": "database_name"
+      },
+      "Ports": ["5432:5432"],
+      "Volumes": ["db_data:/var/lib/postgresql/data"]
+    },
+    "MySQL": {
+      "Image": "mysql:latest",
+      "EnvironmentVariables": {
+        "MYSQL_ROOT_PASSWORD": "root_password",
+        "MYSQL_DATABASE": "database_name",
+        "MYSQL_USER": "username",
+        "MYSQL_PASSWORD": "password"
+      },
+      "Ports": ["3306:3306"],
+      "Volumes": ["mysql_data:/var/lib/mysql"]
+    },
+    "ApacheSqoop": {
+    "Image": "bde2020/sqoop:latest",
+    "EnvironmentVariables": {
+        "SQOOP_HOME": "/opt/sqoop",
+        "HADOOP_COMMON_HOME": "/opt/hadoop",
+        "HADOOP_MAPRED_HOME": "/opt/hadoop",
+        "HADOOP_CONF_DIR": "/opt/hadoop/etc/hadoop",
+        "HIVE_HOME": "/opt/hive",
+        "HADOOP_CLASSPATH": "$HADOOP_CLASSPATH:/opt/hadoop/lib/*:/opt/sqoop/lib/*",
+        "JAVA_HOME": "/usr/lib/jvm/java-8-openjdk-amd64"
+    },
+    "Volumes": [
+        "/path/to/sqoop/conf:/opt/sqoop/conf", 
+        "/path/to/hadoop/conf:/opt/hadoop/etc/hadoop", 
+        "/path/to/lib:/opt/sqoop/lib"
+    ],
+    "Ports": [],
+    "DependsOn": ["HadoopStandalone", "MySQL"],
+    "Command": ["/bin/bash", "-c", "tail -f /dev/null"]
+    },
+    "HadoopStandalone": {
+      "Image": "bde2020/hadoop-base:latest",
+
+      "EnvironmentVariables": {
+        "CORE_CONF_fs_defaultFS": "hdfs://localhost:9000",
+        "HDFS_CONF_dfs_replication": "1",
+        "YARN_CONF_yarn_resourcemanager_hostname": "localhost",
+        "YARN_CONF_yarn_nodemanager_aux_services": "mapreduce_shuffle",
+        "MAPRED_CONF_mapreduce_framework_name": "yarn",
+        "HADOOP_HEAPSIZE": "1024"
+    },
+      "Command": "/etc/bootstrap.sh -d",
+      "Ports": ["9870:9870", "9864:9864"]
+    },
+    "MongoDB": {
+      "Image": "mongo:latest",
+      "EnvironmentVariables": {
+        "MONGO_INITDB_ROOT_USERNAME": "root_username",
+        "MONGO_INITDB_ROOT_PASSWORD": "root_password"
+      },
+      "Ports": ["27017:27017"],
+      "Volumes": ["mongo_data:/data/db"]
+    },
+    "Cassandra": {
+      "Image": "cassandra:latest",
+      "EnvironmentVariables": {
+        "CASSANDRA_CLUSTER_NAME": "cluster_name"
+      },
+      "Ports": ["9042:9042"],
+      "Volumes": ["cassandra_data:/var/lib/cassandra"]
+    },
+    "Neo4j": {
+      "Image": "neo4j:latest",
+      "EnvironmentVariables": {
+        "NEO4J_AUTH": "username/password"
+      },
+      "Ports": ["7474:7474", "7687:7687"],
+      "Volumes": ["neo4j_data:/data"]
+    },
+    "ApacheSpark": {
+      "Image": "bitnami/spark:latest",
+      "EnvironmentVariables": {
+        "SPARK_MODE": "standalone"
+      },
+      "Ports": ["8080:8080", "7077:7077"]
+    },
+    "ApacheSuperset": {
+      "Image": "apache/superset:latest",
+      "EnvironmentVariables": {
+        "SUPERSET_ADMIN_USERNAME": "admin",
+        "SUPERSET_ADMIN_PASSWORD": "admin"
+      },
+      "Ports": ["8088:8088"],
+      "Volumes": ["superset_home:/app/superset_home"]
+    },
+    "Airflow": {
+      "Image": "apache/airflow:latest",
+      "EnvironmentVariables": {
+        "AIRFLOW__CORE__LOAD_EXAMPLES": "false",
+        "AIRFLOW__CORE__EXECUTOR": "LocalExecutor"
+      },
+      "Volumes": ["airflow_home:/usr/local/airflow"],
+      "Ports": ["8080:8080"]
+    },
+    "Cron": {
+      "Image": "custom/cron:latest",
+      "EnvironmentVariables": {
+        "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "HOME": "/root",                    
+        "CRON_TZ": "UTC",                   
+        "MAILTO": "",                       
+        "LOGNAME": "root",                 
+        "USER": "root" 
+      },
+      "Volumes": ["./cronjobs:/etc/cron.d"],
+      "Command": "cron -f"
+    },
+    "Volumes": {
+      "db_data": {},
+      "mysql_data": {},
+      "mongo_data": {},
+      "cassandra_data": {},
+      "neo4j_data": {},
+      "superset_home": {},
+      "airflow_home": {}
+    }
+  }
+  

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detailed Form</title>
+  <style>
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #74ebd5, #9face6);
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    form {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+      color: #5d5d8d;
+    }
+
+    label {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #4a4a6a;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    select, input[type="submit"] {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      outline: none;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+
+    select:focus, input[type="submit"]:focus {
+      border-color: #7c7ce0;
+      box-shadow: 0 0 6px rgba(124, 124, 224, 0.5);
+    }
+
+    input[type="submit"] {
+      background: #7c7ce0;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      transition: background 0.3s ease;
+    }
+
+    input[type="submit"]:hover {
+      background: #5a5abb;
+    }
+
+    .d-none {
+      display: none;
+    }
+</style>
+
+
+  
+</head>
+<body>
+  <form action="/submit_form" method="POST">
+
+    <label for="question1">In what format have you stored your data?</label>
+      <select id="question1" name="format" required>
+        <option value="" selected disabled>-- Select an Option --</option>
+        <option value="structured">Structured</option>
+        <option value="semi-structured">Semi-Structured</option>
+        <option value="graph">Graph-Based</option>
+        <option value="mixed_format">A mixture of two or more</option>
+      </select>
+  
+    <label for="question2">What do you intend to do with the data?</label>
+      <select id="question2" name="endgoal" required>
+        <option value="" selected disabled>-- Select an Option --</option>
+        <option value="database_storage">Eventually store data in a Database</option>
+        <option value="analytics_dashboard">Present information to a Dashboard for Analytics</option>
+        <option value="data_warehouse">Accumulate data in a repository i.e., Warehouse/ Lakehouse</option>
+        <option value="high_availability_storage">Multi-zone distribution for High Availability</option>
+      </select>
+  
+    <label for="question3">What is the nature of incoming data?</label>
+      <select id="question3" name="nature" required>
+        <option value="" selected disabled>-- Select an Option --</option>
+        <option value="batch_data">Batch Data</option>
+        <option value="streaming_data">Streaming Data</option>
+      </select>
+  
+    <label for="question4" required>Do you need to implement data transformations?</label>
+      <select id="question4" name="transformation" onchange="handleSelection(this.value)">
+        <option value="" selected disabled>-- Select an Option --</option>
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
+
+<!-- Dropdown for selecting how many transformations -->
+<label for="numTransformations" id="numTransformationsLabel" class="d-none">How many Transformations do you need?</label>
+  <select id="numTransformations" name="num_transformations" class="d-none" onchange="handleTransformationCount(this.value)">
+    <option value="" selected disabled>-- Select an Option --</option>
+    <option value="1">1 Transformation</option>
+    <option value="2">2 Transformations</option>
+  </select>
+
+
+<!-- The label and dropdown for transformation type (hidden initially) -->
+<label for="transformationType" id="transformationLabel" class="d-none">What is your Second Tranformation?</label>
+  <select id="transformationType" name="transformation_type" class="d-none">
+    <option value="" selected disabled>-- Select an Option --</option>
+    <option value="aggregation">Aggregation</option>
+    <option value="filtering">Filtering</option>
+    <option value="normalization">Normalization</option>
+    <option value="other">Other</option>
+  </select>
+
+
+
+<!-- Additional dropdown for the second transformation (hidden initially) -->
+<label for="secondTransformation" id="secondTransformationLabel" class="d-none">Second Transformation Type</label>
+<select id="secondTransformation" name="second_transformation_type" class="d-none">
+  <option value="" selected disabled>-- Select an Option --</option>
+  <option value="aggregation">Aggregation</option>
+  <option value="filtering">Filtering</option>
+  <option value="normalization">Normalization</option>
+  <option value="other">Other</option>
+</select>
+
+<!-- Other dropdowns for non-functional constraints (unchanged) -->
+<label for="question5">Do you have any non-functional constraints?</label>
+<select id="question5" name="constraints">
+  <option value="" selected disabled>-- Select an Option --</option>
+  <option value="scalability">Scalability</option>
+  <option value="low_latency">Low Latency</option>
+  <option value="cost_effectiveness">Cost-Effectiveness</option>
+  <option value="no_constraints">No constraints</option>
+</select>
+
+<!-- Submit Button -->
+<input type="submit" value="Submit">
+
+<script>
+
+
+
+
+  function handleSelection(value) {
+    const numTransformations = document.getElementById("numTransformations");
+    const numTransformationsLabel = document.getElementById("numTransformationsLabel");
+    
+    if (value === "yes") {
+      numTransformations.classList.remove("d-none"); 
+      numTransformationsLabel.classList.remove("d-none"); 
+
+    } else {
+      num_transformations.classList.add("d-none");
+      numTransformationsLabel.classList.add("d-none"); 
+    }
+
+  }
+  function handleTransformationCount(value) {
+    
+    const transformationLabel = document.getElementById("transformationLabel");
+    const transformation_type = document.getElementById("transformationType");
+    const secondTransformationDropdown = document.getElementById("secondTransformation");
+    const secondTransformationLabel = document.getElementById("secondTransformationLabel");
+
+    if (value === "1") {
+      transformationLabel.classList.remove("d-none"); 
+      transformation_type.classList.remove("d-none"); 
+      secondTransformationDropdown.classList.add("d-none"); 
+      secondTransformationLabel.classList.add("d-none");
+    } 
+    else if (value == '2') {
+      secondTransformationDropdown.classList.remove('d-none');
+      secondTransformationLabel.classList.remove('d-none');
+      secondTransformationDropdown.classList.remove("d-none"); 
+      secondTransformationLabel.classList.remove("d-none");
+    }
+    else {
+      transformationLabel.classList.add("d-none"); 
+      transformation_type.classList.add("d-none");
+      secondTransformationDropdown.classList.add("d-none"); 
+      secondTransformationLabel.classList.add("d-none"); 
+
+    }
+  }
+</script>
+
+</body>
+</html>

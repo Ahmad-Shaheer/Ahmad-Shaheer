@@ -1,0 +1,46 @@
+
+
+------------------------------------------------------------------------------------------------------------
+#   tool_names = [tool_name for tool_name in form_data.getlist('tool_names')]
+#   updated_config = {}
+#   for tool_name in tool_names:
+#     if tool_name in docker_config:
+#         tool_config = docker_config[tool_name]
+#         updated_env_vars = {}
+
+#         for var_name, default_value in tool_config["EnvironmentVariables"].items():
+#             input_value = form_data.get(f"{tool_name}['EnvironmentVariables']'[{var_name}]")
+            
+#             if input_value != None:
+#                 updated_env_vars[var_name] = input_value
+#             else:
+#                 updated_env_vars[var_name] = default_value
+#             print(updated_env_vars)
+            
+#             updated_config[tool_name] = {
+#             "EnvironmentVariables": updated_env_vars
+#         }
+
+PLACE BETWEEN THESE IN THE DEPLOY FUNCTION ON MAIN
+form_data = request.form
+
+updated_config = retrieve_config_details(form_data=form_data, docker_config=docker_config)
+
+------------------------------------------------------------------------------------------------------------
+selected_tools = {key: value for key, value in pipeline_dict.items() if value}
+    print(f'These are the selected tools: {selected_tools}')
+    
+
+    shortlisted_tools = {}
+    for type_object, tool in selected_tools.items():
+        if isinstance(tool, list):
+            pass
+        else:
+            tool = tool.replace(' ', '')
+            shortlisted_tools.update({tool : tools_config[tool]})
+            print('Tool successfully added', tool)
+            print(shortlisted_tools)
+
+PLACE BW PIPELINE DICT DEFINTION AND RETURN STATEMENT IN THE CONFIG FUNCTION ON MAIN    
+
+------------------------------------------------------------------------------------------------------------            

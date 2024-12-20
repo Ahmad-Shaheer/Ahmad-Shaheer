@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi Step Form with Progress Bar</title>
+    <style>
+        :root {
+            --primary-color: rgb(32, 158, 27);
+            --background-color-1: rgb(72, 61, 139);
+            --background-color-2: rgb(0, 204, 255);
+        }
+
+        /* Global Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: monospace, 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to right, var(--background-color-1), var(--background-color-2));
+            background-size: 300% 300%;
+            animation: gradientBackground 10s ease infinite;
+        }
+
+        /* Animating the background gradient */
+        @keyframes gradientBackground {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .form {
+            width: 35rem;
+            margin: 0 auto;
+            border: 2px solid #ccc;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        .progressbar {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            counter-reset: step;
+            margin: 2rem 0 4rem;
+        }
+
+        .progressbar::before, .progress {
+            content: "";
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 4px;
+            width: 100%;
+            background-color: #dcdcdc;
+            z-index: -1;
+        }
+
+        .progress {
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: 0.3s;
+            z-index: -1;
+        }
+
+        .progress-step {
+            width: 2.1875rem;
+            height: 2.1875rem;
+            background-color: #dcdcdc;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .progress-step::before {
+            counter-increment: step;
+            content: counter(step);
+        }
+
+        .progress-step::after {
+            content: attr(data-title);
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .progress-step-active {
+            background-color: var(--primary-color);
+            color: #f3f3f3;
+        }
+
+        .form-step {
+            display: none;
+            transform-origin: top;
+            animation: animate 0.5s;
+        }
+
+        @keyframes animate {
+            from {
+                transform: scale(1, 0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1, 1);
+                opacity: 1;
+            }
+        }
+
+        .form-step-active {
+            display: block;
+        }
+
+        .btns-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem;
+            display: block;
+            text-decoration: none;
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 0.25rem;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            box-shadow: 0 0 0 2px #fff, 0 0 0 3px var(--primary-color);
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .option-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 2.5rem;
+            border: 2px solid #ccc;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: 0.3s;
+            background-color: white;
+        }
+
+        .option-box.selected {
+            border-color: var(--primary-color);
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .option-box:hover {
+            border-color: var(--primary-color);
+        }
+
+        .d-none {
+            display: none;
+        }
+        
+        .image-option {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #ccc;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+    
+        .image-option:hover {
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+
+<form action="#" class="form">
+    <h2 class="text-center">Pipeline Deployment Form</h2>
+
+    <!-- Progress Bar -->
+    <div class="progressbar">
+        <div class="progress" id="progress"></div>
+        <div class="progress-step progress-step-active" data-title="Format"></div>
+        <div class="progress-step" data-title="End Goal"></div>
+        <div class="progress-step" data-title="Data Nature"></div>
+        <div class="progress-step" data-title="Transformation"></div>
+        <div class="progress-step" data-title="Constraints"></div>
+    </div>
+
+    <!-- Step 1: Data Format Selection -->
+    <div class="form-step form-step-active">
+        <label>In what format have you stored your data?</label>
+        <div class="options-container" id="question1">
+            <div class="option-box" data-value="structured">Structured</div>
+            <div class="option-box" data-value="unstructured">Unstructured</div>
+            <div class="option-box" data-value="semi_structured">Semi-Structured</div>
+            <div class="option-box" data-value="mixed_format">A mixture of two or more</div>
+        </div>
+
+        <div class="btns-group">
+            <a href="#" class="btn btn-next width-50 ml-auto">Next</a>
+        </div>
+    </div>
+
+    <!-- Step 2: End Goal -->
+    <div class="form-step">
+        <label>What do you intend to do with the data?</label>
+        <div class="options-container" id="question2">
+            <div class="option-box" data-value="database_storage">Store data in a Database</div>
+            <div class="option-box" data-value="analytics_dashboard">Present to a Dashboard for Analytics</div>
+            <div class="option-box" data-value="data_warehouse">Accumulate data in Warehouse/ Lakehouse</div>
+        </div>
+        <div class="btns-group">
+            <a href="#" class="btn btn-prev">Back</a>
+            <a href="#" class="btn btn-next">Next</a>
+        </div>
+    </div>
+
+    <!-- Step 3: Data Nature -->
+    <div class="form-step">
+        <label>What is the nature of incoming data?</label>
+        <div class="options-container" id="question3">
+            <div class="option-box" data-value="batch_data">Batch Data</div>
+            <div class="option-box" data-value="streaming_data">Streaming Data</div>
+        </div>
+        <div class="btns-group">
+            <a href="#" class="btn btn-prev">Back</a>
+            <a href="#" class="btn btn-next">Next</a>
+        </div>
+    </div>
+
+    <!-- Step 4: Transformation -->
+    <div class="form-step">
+        <label>Do you need to implement data transformations?</label>
+        <div class="options-container" id="question4">
+            <div class="option-box" data-value="yes">Yes</div>
+            <div class="option-box" data-value="no">No</div>
+        </div>
+        <div class="btns-group">
+            <a href="#" class="btn btn-prev">Back</a>
+            <a href="#" class="btn btn-next">Next</a>
+        </div>
+    </div>
+
+    <!-- Step 5: Constraints -->
+    <div class="form-step">
+        <label>Do you have any non-functional constraints?</label>
+        <div class="options-container" id="question5">
+            <div class="option-box" data-value="security">Security</div>
+            <div class="option-box" data-value="scalability">Scalability</div>
+            <div class="option-box" data-value="latency">Latency</div>
+            <div class="option-box" data-value="availability">Availability</div>
+        </div>
+        <div class="btns-group">
+            <a href="#" class="btn btn-prev">Back</a>
+            <a href="#" class="btn btn-next">Next</a>
+        </div>
+    </div>
+
+</form>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        let currentStep = 0;
+        let totalSteps = $(".form-step").length;
+
+        function updateProgressBar() {
+            let progress = ((currentStep + 1) / totalSteps) * 100;
+            $("#progress").css("width", progress + "%");
+
+            $(".progress-step").removeClass("progress-step-active");
+            $(".progress-step").eq(currentStep).addClass("progress-step-active");
+        }
+
+        $(".btn-next").click(function (e) {
+            e.preventDefault();
+            if (currentStep < totalSteps - 1) {
+                currentStep++;
+                updateProgressBar();
+                $(".form-step").removeClass("form-step-active");
+                $(".form-step").eq(currentStep).addClass("form-step-active");
+            }
+        });
+
+        $(".btn-prev").click(function (e) {
+            e.preventDefault();
+            if (currentStep > 0) {
+                currentStep--;
+                updateProgressBar();
+                $(".form-step").removeClass("form-step-active");
+                $(".form-step").eq(currentStep).addClass("form-step-active");
+            }
+        });
+
+        $(".option-box").click(function () {
+            const $this = $(this);
+            $this.toggleClass("selected");
+
+            if ($("#question1 .option-box.selected").length > 2) {
+                $this.removeClass("selected");
+            }
+        });
+
+        updateProgressBar();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+We take user requirements as input and based on certain deterministic rule sets, e create a pipeline custom fitted for his use.
+
+The agentic part of this is not based on AI but on the prompts we give to the user and he selects an option as an output. 
+It is wholly deterministic
+
+The human will submit a form.
+
+The agent will shortlist a few tools and provide them to the user as options (human in the loop)
+
+The human can finalize the options and configure settings (additional prompts may be given if needed)
+
+
+Step 1: Create the Agent (This is a form that will take inputs, lets make this a drop down), (This is also the questionairre portion)
+
+Step 2: Create a backend logic that will determine the optimal pipeline tools (for each stage). And design the optimal pipeline
+
+Step 3: Allow for user configuration and selection of the tools
+
+Step 4: Test working of each and document data (all steps)
+
+

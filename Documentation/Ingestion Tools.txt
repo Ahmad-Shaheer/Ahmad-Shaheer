@@ -1,0 +1,32 @@
+Apache Kafka: 
+Nifi Apache: Bus for one kid
+Apache Sqoop:
+Apache Flume: Again, data streaming platform but I suppose we are working on something that will last not something limited to the company
+Python
+
+
+Data Preperation Tools:
+
+
+Processing:
+Spark GraphX: It is used to process graph data which is distributed.
+Hive Apache
+
+
+
+
+
+Total Tools:
+Ingesiton: Apache Kafka, Apache Sqoop, Apache Flume, Python
+Storage:
+    Structued: Postgres, MySQL, Hadoop
+    Semi-structured: MongoDB, Cassandra
+    Graph: Neo4j
+
+Simple Transformations: Normalization, Aggregation, Filtering (Would need to define the script)
+Data Warehouse: Snowflake
+Processing: Spark
+Visulaization: Superset
+Orchestrtation: Cron, Airflow
+
+

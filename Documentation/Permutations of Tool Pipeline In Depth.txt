@@ -1,0 +1,109 @@
+Use Case Tool Combinations
+
+Batch Data Ingestion Use Cases
+
+Structured Data Storage with Transformation
+
+		Pipeline: Apache Sqoop → Postgres/MySQL/Hive/Hadoop → Spark → Postgres/MySQL/Hive/Hadoop
+
+Semi-Structured Data Storage with Transformation
+
+		Pipeline: NiFi → MongoDB → Spark → MongoDB/Cassandra/Hadoop
+
+Structured Data Storage without Transformation
+
+		Pipeline: Apache Sqoop → Postgres/MySQL/Hive/Hadoop
+
+Semi-Structured Data Storage without Transformation
+
+		Pipeline: NiFi → MongoDB/Cassandra/Hadoop
+
+Structured Data Presentation on Dashboard
+
+		Pipeline: Apache Sqoop → Postgres/MySQL/Hive/Hadoop → Superset
+
+Semi-Structured Data Presentation on Dashboard
+
+		Pipeline: NiFi → MongoDB/Cassandra → Postgres/MySQL → Superset
+
+Structured Data Presentation on Dashboard with Transformation
+
+		Pipeline: Apache Sqoop → Postgres/MySQL/Hive/Hadoop → Spark → Postgres/MySQL/Hive/Hadoop → Superset
+
+Semi-Structured Data Presentation on Dashboard with Transformation
+
+		Pipeline: NiFi → MongoDB/Cassandra → Spark → MongoDB/Cassandra/Hadoop → Superset
+
+Graph-Based Data Storage without Transformation
+
+		Pipeline: Postgres/MySQL/Hive/Hadoop → Spark → Neo4j
+
+Structured and Unstructured Data Storage without Transformation
+
+		Pipeline: NiFi → Postgres/MySQL/Hive/Hadoop + MongoDB/Cassandra/Hadoop
+
+Structured and Unstructured Data Storage with Transformation
+
+		Pipeline: NiFi → Postgres/MySQL/Hive/Hadoop + MongoDB/Cassandra/Hadoop → Spark → Postgres/MySQL/Hive/Hadoop
+
+Structured and Unstructured Data Presentation on Dashboard with Transformation
+
+		Pipeline: NiFi → Postgres/MySQL/Hive/Hadoop + MongoDB/Cassandra/Hadoop → Spark → Postgres/MySQL/Hive/Hadoop → Superset
+
+Structured and Unstructured Data Presentation on Dashboard without Transformation
+
+		Pipeline: NiFi → Postgres/MySQL/Hive/Hadoop + MongoDB/Cassandra/Hadoop → Spark → Postgres/MySQL/Hive/Hadoop → Superset
+
+Streaming Data Ingestion Use Cases
+
+Structured Data Storage with Transformation
+
+		Pipeline: Apache Kafka → Kafka Connect → Spark → Postgres/MySQL/Hive/Hadoop
+
+Semi-Structured Data Storage with Transformation
+
+		Pipeline: Apache Kafka → Kafka Connect → Spark → MongoDB/Cassandra/Hadoop
+
+Structured Data Storage without Transformation
+
+		Pipeline: Apache Kafka → Kafka Connect → Postgres/MySQL/Hive/Hadoop
+
+Semi-Structured Data Storage without Transformation
+
+		Pipeline: Apache Kafka → Kafka Connect → MongoDB/Cassandra/Hadoop
+
+Structured Data Presentation on Dashboard
+
+		Pipeline: Apache Kafka → Kafka Connect → Postgres/MySQL/Hive/Hadoop → Superset
+
+Semi-Structured Data Presentation on Dashboard
+
+		Pipeline: Apache Kafka → MongoDB/Cassandra/Hadoop → Postgres/MySQL/Hive/Hadoop → Superset
+
+Structured Data Presentation on Dashboard with Transformation
+
+		Pipeline: Apache Kafka → Kafka Connect → Spark → Postgres/MySQL/Hive/Hadoop → Superset
+
+Semi-Structured Data Presentation on Dashboard with Transformation
+
+		Pipeline: Apache Kafka → Kafka Connect → MongoDB/Cassandra/Hadoop → Spark  → Superset
+
+Graph-Based Data Storage without Transformation
+
+		Pipeline: Apache Kafka → Kafka Connect → Spark → Neo4j
+
+Structured and Unstructured Data Storage without Transformation
+
+		Pipeline: Apache Kafka → Kafka Connect → Postgres/MySQL/Hive/Hadoop + MongoDB/Cassandra/Hadoop
+
+Structured and Unstructured Data Storage with Transformation
+
+		Pipeline: Apache Kafka → Kafka Connect → Spark → Postgres/MySQL/Hive/Hadoop + MongoDB/Cassandra/Hadoop
+
+Structured and Unstructured Data Presentation on Dashboard with Transformation
+
+		Pipeline: Apache Kafka → Kafka Connect → Spark → Postgres/MySQL/Hive/Hadoop → Superset
+
+Structured and Unstructured Data Presentation on Dashboard without Transformation
+
+		Pipeline: Apache Kafka → Kafka Connect → Spark → Postgres/MySQL/Hive/Hadoop → Superset

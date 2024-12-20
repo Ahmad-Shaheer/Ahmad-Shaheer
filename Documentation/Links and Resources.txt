@@ -1,0 +1,16 @@
+Docker:
+
+https://www.freecodecamp.org/news/docker-simplified-96639a35ff36/
+
+https://github.com/priyam-choksi/Scalable-Data-Engineering-Pipeline-using-Apache-Kafka-Apache-Spark-and-Cassandra/tree/main
+
+https://blog.techfura.com/building-a-real-time-data-pipeline-with-python-docker-airflow-spark-kafka-and-cassandra/
+
+https://epe.lac-bac.gc.ca/100/201/300/modern_applied_science/2020/MAS2020-V14N9-All.pdf#page=15
+
+https://towardsdatascience.com/apache-sqoop-1113ce453639 (Apache Sqoop loads data from RDBMS and stores it in HDFS format for use by datalakes and warehouses)
+
+https://docs.cloudera.com/documentation/enterprise/5-4-x/topics/cdh_ig_jdbc_driver_install.html
+
+
+

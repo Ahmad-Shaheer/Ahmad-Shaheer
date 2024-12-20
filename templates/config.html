@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Environment Configuration</title>
+  <style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(to bottom, #1e3c72, #2a5298);
+        color: #ffffff;
+    }
+
+    h1 {
+        text-align: center;
+        margin: 20px 0;
+        font-size: 2.5rem;
+        color: #ffffff;
+    }
+
+    p {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 1.2rem;
+        color: #d9e6f2;
+    }
+
+    form {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+        padding: 20px 30px;
+        color: #333333;
+    }
+
+    .tool-form {
+        margin-bottom: 30px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        background: linear-gradient(to bottom, #f9f9f9, #eef3f9);
+        box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .tool-header {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #2a5298;
+    }
+
+    .env-variable {
+        margin-bottom: 15px;
+    }
+
+    .env-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        color: #555555;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .input-field:focus {
+        border-color: #2a5298;
+        box-shadow: 0px 0px 5px rgba(42, 82, 152, 0.5);
+        outline: none;
+    }
+
+    .submit-btn {
+        display: block;
+        width: 100%;
+        margin-top: 20px;
+        padding: 12px 20px;
+        background-color: #2a5298;
+        color: #ffffff;
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .submit-btn:hover {
+        background-color: #1e3c72;
+        transform: translateY(-2px);
+    }
+
+    .submit-btn:active {
+        background-color: #1b365d;
+        transform: translateY(0px);
+    }
+
+    @media (max-width: 768px) {
+        form {
+            padding: 15px;
+        }
+
+        .tool-header {
+            font-size: 1.2rem;
+        }
+
+        .submit-btn {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+</head>
+<body>
+
+  <h1>Environment Configuration</h1>
+  <p>Fill in the environment variables for each tool. Leave blank to use the default values.</p>
+
+  <form action="/deploy" method="POST">
+    {% for tool_name, tool_details in tools.items() %}
+      <div class="tool-form">
+        <div class="tool-header">{{ tool_name }}</div>
+        <input type="hidden" name="tool_names" value="{{ tool_name }}">
+
+        {% for var_name, default_value in tool_details.EnvironmentVariables.items() %}
+          <div class="env-variable">
+            <label class="env-label" for="{{ tool_name }}-{{ var_name }}">
+              {{ var_name }}
+            </label>
+            <input
+              type="text"
+              id="{{ tool_name }}-{{ var_name }}"
+              name="{{ tool_name }}['EnvironmentVariables'][{{ var_name }}]"
+              class="input-field"
+              placeholder="{{ default_value }}">
+          </div>
+
+        {% endfor %}
+          
+
+      </div>
+    {% endfor %}
+    
+    <button type="submit" class="submit-btn">Submit</button>
+  </form>
+
+</body>
+</html>

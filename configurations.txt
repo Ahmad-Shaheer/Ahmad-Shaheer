@@ -1,0 +1,112 @@
+- Postgres:
+  - Image: `postgres:latest`
+  - Environment variables:
+    - `POSTGRES_USER`: username
+    - `POSTGRES_PASSWORD`: password
+    - `POSTGRES_DB`: database_name
+  - Ports:
+    - `5432:5432`
+  - Volumes:
+    - `db_data:/var/lib/postgresql/data`
+
+- MySQL:
+  - Image: `mysql:latest`
+  - Environment variables:
+    - `MYSQL_ROOT_PASSWORD`: root_password
+    - `MYSQL_DATABASE`: database_name
+    - `MYSQL_USER`: username
+    - `MYSQL_PASSWORD`: password
+  - Ports:
+    - `3306:3306`
+  - Volumes:
+    - `mysql_data:/var/lib/mysql`
+
+- Hadoop standalone:
+  - Image: `bde2020/hadoop-base:latest`
+  - Command: `/etc/bootstrap.sh -d`
+  - Ports:
+    - `9870:9870`
+    - `9864:9864`
+
+- MongoDB:
+  - Image: `mongo:latest`
+  - Environment variables:
+    - `MONGO_INITDB_ROOT_USERNAME`: root_username
+    - `MONGO_INITDB_ROOT_PASSWORD`: root_password
+  - Ports:
+    - `27017:27017`
+  - Volumes:
+    - `mongo_data:/data/db`
+
+- Cassandra:
+  - Image: `cassandra:latest`
+  - Environment variables:
+    - `CASSANDRA_CLUSTER_NAME`: cluster_name
+  - Ports:
+    - `9042:9042`
+  - Volumes:
+    - `cassandra_data:/var/lib/cassandra`
+
+- Neo4j:
+  - Image: `neo4j:latest`
+  - Environment variables:
+    - `NEO4J_AUTH`: "username/password"
+  - Ports:
+    - `7474:7474`
+    - `7687:7687`
+  - Volumes:
+    - `neo4j_data:/data`
+
+- Spark:
+  - Image: `bitnami/spark:latest`
+  - Environment variables:
+    - `SPARK_MODE`: standalone
+  - Ports:
+    - `8080:8080`
+    - `7077:7077`
+
+- Superset:
+  - Image: `apache/superset:latest`
+  - Environment variables:
+    - `SUPERSET_ADMIN_USERNAME`: admin
+    - `SUPERSET_ADMIN_PASSWORD`: admin
+  - Ports:
+    - `8088:8088`
+  - Volumes:
+    - `superset_home:/app/superset_home`
+
+- Airflow:
+  - Image: `apache/airflow:latest`
+  - Environment variables:
+    - `AIRFLOW__CORE__LOAD_EXAMPLES`: "false"
+    - `AIRFLOW__CORE__EXECUTOR`: "LocalExecutor"
+  - Volumes:
+    - `airflow_home:/usr/local/airflow`
+  - Ports:
+    - `8080:8080`
+
+- Cron:
+  - Image: `custom/cron:latest`
+  - Volumes:
+    - `./cronjobs:/etc/cron.d`
+  - Command: `cron -f`
+
+- Volumes:
+  - `db_data:`
+  - `mysql_data:`
+  - `mongo_data:`
+  - `cassandra_data:`
+  - `neo4j_data:`
+  - `superset_home:`
+  - `airflow_home:`
+
+
+
+Prompt : "i want you to find what are the essential configuration paramaeters that I need to set for each of these softwares to deploy them on a docker compose yaml file. just the bare minimum configuration parameters that i could use to deploy it successfully
+
+Data inputs: sheets, csv, json, xmls, structured, semi-structured, graphs
+Ingestion tools: Sqoop, Python
+Storage: Postgres, MySQL, Hadoop standalone, MongoDB, Cassandra, Neo4j
+Processing: Spark – Visualization: Superset – Orchestration: Airflow, Cron
+
+only these ones"

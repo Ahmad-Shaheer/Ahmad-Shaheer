@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Data Pipeline Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f9;
+    }
+    form {
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    .selection-box {
+      display: inline-block;
+      margin: 20px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .selection-box img {
+      width: 100px;
+      height: 100px;
+      border-radius: 8px;
+    }
+    .selection-box p {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    input[type="submit"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      background-color: #5cb85c;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    input[type="submit"]:hover {
+      background-color: #4cae4c;
+    }
+    .progress-bar-container {
+      width: 100%;
+      background-color: #f3f3f3;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .progress-bar {
+      height: 20px;
+      width: 0%;
+      background-color: #5cb85c;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Dynamic Data Pipeline Form</h1>
+  
+  <!-- Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+
+  <form action="/" method="POST">
+    <!-- Question 1 -->
+
+    <label for="question1">In what format have you stored your data?</label>
+    <div class="selection-box" onclick="selectOption('structured')">
+        <div onclick="selectSVG('structured')">
+            <p>Structured</p>
+          </div>
+
+    </div>
+    <div class="selection-box" onclick="selectOption('unstructured')">
+      <img src="images\data-unstructured-svgrepo-com.svg" alt="Unstructured">
+      <p>Unstructured</p>
+    </div>
+    <div class="selection-box" onclick="selectOption('semi_structured')">
+      <img src="path_to_your_images/semi_structured.svg" alt="Semi-Structured">
+      <p>Semi-Structured</p>
+    </div>
+    <div class="selection-box" onclick="selectOption('mixed_format')">
+      <img src="path_to_your_images/mixed_format.svg" alt="Mixed Format">
+      <p>Mixed Format</p>
+    </div>
+
+    <!-- Question 2 -->
+    <label for="question2">What do you intend to do with the data?</label>
+    <div class="selection-box" onclick="selectOption('database_storage')">
+      <img src="path_to_your_images/database_storage.svg" alt="Database Storage">
+      <p>Database Storage</p>
+    </div>
+    <div class="selection-box" onclick="selectOption('analytics_dashboard')">
+      <img src="path_to_your_images/analytics_dashboard.svg" alt="Analytics Dashboard">
+      <p>Analytics Dashboard</p>
+    </div>
+    <div class="selection-box" onclick="selectOption('data_warehouse')">
+      <img src="path_to_your_images/data_warehouse.svg" alt="Data Warehouse">
+      <p>Data Warehouse</p>
+    </div>
+    <div class="selection-box" onclick="selectOption('high_availability')">
+      <img src="path_to_your_images/high_availability.svg" alt="High Availability">
+      <p>High Availability</p>
+    </div>
+
+    <!-- Question 3 -->
+    <label for="question3">What is the nature of incoming data?</label>
+    <div class="selection-box" onclick="selectOption('batch_data')">
+      <img src="path_to_your_images/batch_data.svg" alt="Batch Data">
+      <p>Batch Data</p>
+    </div>
+    <div class="selection-box" onclick="selectOption('streaming_data')">
+      <img src="path_to_your_images/streaming_data.svg" alt="Streaming Data">
+      <p>Streaming Data</p>
+    </div>
+
+    <!-- Question 4 -->
+    <label for="question4">Do you need to implement data transformations?</label>
+    <select id="question4" name="transformation" onchange="handleSelection(this.value)">
+      <option value="" selected disabled>-- Select an Option --</option>
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select>
+
+    <label for="transformationType">What type of transformation do you need?</label>
+    <select id="transformationType" name="transformation_type" class="d-none">
+      <option value="" selected disabled>-- Select an Option --</option>
+      <option value="aggregation">Aggregation</option>
+      <option value="filtering">Filtering</option>
+      <option value="normalization">Normalization</option>
+      <option value="other">Other</option>
+    </select>
+
+    <!-- Question 5 -->
+    <label for="question5">Do you have any non-functional constraints?</label>
+    <select id="question5" name="constraints">
+      <option value="" selected disabled>-- Select an Option --</option>
+      <option value="scalability">Scalability</option>
+      <option value="low_latency">Low Latency</option>
+      <option value="cost_effectiveness">Cost-Effectiveness</option>
+      <option value="no_constraints">No Constraints</option>
+    </select>
+
+    <!-- Submit Button -->
+    <input type="submit" value="Submit">
+  </form>
+
+  <script>
+    function handleSelection(value) {
+      const transformationType = document.getElementById("transformationType");
+      if (value === "yes") {
+        transformationType.classList.remove("d-none"); // Show the transformation type dropdown
+      } else {
+        transformationType.classList.add("d-none"); // Hide the transformation type dropdown
+      }
+    }
+
+    function selectOption(option) {
+      console.log(option); // Handle option selection (can be customized for your form logic)
+      updateProgressBar();
+    }
+
+    function updateProgressBar() {
+      const progressBar = document.getElementById("progress-bar");
+      const currentProgress = parseInt(progressBar.style.width);
+      progressBar.style.width = (currentProgress + 20) + "%"; // Update progress bar with each step
+    }
+  </script>
+
+</body>
+</html>

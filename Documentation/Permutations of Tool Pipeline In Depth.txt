@@ -54,6 +54,12 @@ Structured and Unstructured Data Presentation on Dashboard without Transformatio
 
 		Pipeline: NiFi → Postgres/MySQL/Hive/Hadoop + MongoDB/Cassandra/Hadoop → Spark → Postgres/MySQL/Hive/Hadoop → Superset
 
+
+
+
+
+
+
 Streaming Data Ingestion Use Cases
 
 Structured Data Storage with Transformation

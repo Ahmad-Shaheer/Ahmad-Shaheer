@@ -121,6 +121,7 @@
       "Ports": ["3306:3306"],
       "Volumes": ["mysql_data:/var/lib/mysql"]
     },
+    
     "ApacheSqoop": {
     "Image": "bde2020/sqoop:latest",
     "EnvironmentVariables": {
@@ -205,27 +206,20 @@
       "Volumes": ["airflow_home:/usr/local/airflow"],
       "Ports": ["8080:8080"]
     },
-    "Cron": {
-      "Image": "custom/cron:latest",
-      "EnvironmentVariables": {
-        "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-        "HOME": "/root",                    
-        "CRON_TZ": "UTC",                   
-        "MAILTO": "",                       
-        "LOGNAME": "root",                 
-        "USER": "root" 
-      },
-      "Volumes": ["./cronjobs:/etc/cron.d"],
-      "Command": "cron -f"
+
+  "Prefect": {
+    "Image": "prefecthq/prefect:latest",
+    "EnvironmentVariables": {
+      "PREFECT_HOME": "/opt/prefect",
+      "PREFECT_API_URL": "http://localhost:4200"
     },
-    "Volumes": {
-      "db_data": {},
-      "mysql_data": {},
-      "mongo_data": {},
-      "cassandra_data": {},
-      "neo4j_data": {},
-      "superset_home": {},
-      "airflow_home": {}
-    }
+    "Ports": ["4200:4200"],
+    "Volumes": [
+      "/path/to/local/config:/opt/prefect/config",
+      "/path/to/local/logs:/opt/prefect/logs"
+    ]
+  }
+
+
   }
   

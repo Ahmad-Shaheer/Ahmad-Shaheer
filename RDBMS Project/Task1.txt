@@ -1,0 +1,18 @@
+Entity List:
+1. staff
+2. slaes_outlet
+3. sales_transaction
+4. customer
+5. product
+
+
+Attributes of  Sales Transaction Data
+1. Transaction ID
+2. Transaction Date
+3. Transaction Time
+4. Sales outlet ID
+5. Staff ID
+6. Customer ID
+7. Product ID
+8. Quantity
+9. Price

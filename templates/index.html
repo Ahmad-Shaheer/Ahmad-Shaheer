@@ -4,81 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Detailed Form</title>
-  <style>
-    body {
-      font-family: "Helvetica Neue", Arial, sans-serif;
-      background: linear-gradient(135deg, #74ebd5, #9face6);
-      color: #333;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    form {
-      background: #fff;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-      max-width: 600px;
-      width: 100%;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 1.8rem;
-      color: #5d5d8d;
-    }
-
-    label {
-      font-size: 1rem;
-      font-weight: bold;
-      color: #4a4a6a;
-      margin-bottom: 6px;
-      display: block;
-    }
-
-    select, input[type="submit"] {
-      width: 100%;
-      padding: 12px 16px;
-      font-size: 1rem;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      outline: none;
-      box-sizing: border-box;
-      transition: all 0.3s ease;
-    }
-
-    select:focus, input[type="submit"]:focus {
-      border-color: #7c7ce0;
-      box-shadow: 0 0 6px rgba(124, 124, 224, 0.5);
-    }
-
-    input[type="submit"] {
-      background: #7c7ce0;
-      color: #fff;
-      font-weight: bold;
-      cursor: pointer;
-      border: none;
-      transition: background 0.3s ease;
-    }
-
-    input[type="submit"]:hover {
-      background: #5a5abb;
-    }
-
-    .d-none {
-      display: none;
-    }
-</style>
-
-
-  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link rel = "stylesheet"  href = "/static/style/index.css"> 
+ 
 </head>
+<h1> Pipeline Form </h1>
 <body>
   <form action="/submit_form" method="POST">
 
@@ -112,13 +44,66 @@
         <option value="yes">Yes</option>
         <option value="no">No</option>
       </select>
+      <input type="submit" value="Submit">
+  </form>
 
 
-<input type="submit" value="Submit">
 
-<script>
+<div class="coach">
+  <div class = 'flowrence'>
+    Flowrence 
+    </div>
 
+  <div class = 'flowrence_prompt'>
+  Stuck? Ask Flowrence for help with your data pipeline questions! 
+  </div>
+  <br>
+
+  <div class="options">
+    <button class="option"  id="dataFormatOption">What's my data format?</button>
+    <button class="option"  id="dataSourceOption">How do I identify data sources?</button>
+    <button class="option"  id="dataTransformOption">What are transformations?</button>
+  </div>
+
+  
+</div>
+
+
+
+
+<section class="chat-window">
+  <button class="close">x close</button>
+  <div class="chat">
+      <div class="model">
+          <p>Hi, how can I help you?</p>
+      </div>
+      
+  </div>
+  <div class="input-area">
+      <input placeholder="Ask me anything..." type="text">
+      <button>
+          <img src="send-icon.png" alt="send">
+      </button>
+  </div>
+</section>
+
+<div class="chat-button">
+  <img src="chat-icon.png" alt="start chat">
+</div>
+
+<script type="importmap">
+  {
+    "imports": {
+      "@google/generative-ai": "https://esm.run/@google/generative-ai"
+    }
+  }
 </script>
+
+
+
+
+
+<script type="module" src = '/static/js/index.js'> </script>
 
 </body>
 </html>

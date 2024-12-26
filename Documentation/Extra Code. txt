@@ -44,3 +44,25 @@ selected_tools = {key: value for key, value in pipeline_dict.items() if value}
 PLACE BW PIPELINE DICT DEFINTION AND RETURN STATEMENT IN THE CONFIG FUNCTION ON MAIN    
 
 ------------------------------------------------------------------------------------------------------------            
+function updateScreenIntermediateTool(selectElement) {
+      const selectedTool = selectElement.value;
+      const previousTool = currentIntermediateTool;
+      currentIntermediateTool = selectedTool;
+      const intermediateToolElement = document.getElementById('intermediate-storage-tool');
+      intermediateToolElement.innerHTML = `
+      <img src="/static/images/${currentIntermediateTool}.svg" alt="${currentIntermediateTool} Icon" style="width: 40px; height: 40px;"/>
+      <strong>Intermediate Storage:</strong> ${currentIntermediateTool}
+      `;
+
+      const option = document.createElement('option');
+      option.value = previousTool;
+      option.textContent = previousTool;
+      selectElement.appendChild(option);
+      selectElement.querySelector(`option[value="${selectedTool}"]`).remove();
+      selectElement.selectedIndex = 0;
+    }
+
+    FUCK JAVASCRIPT
+------------------------------------------------------------------------------------------------------------            
+
+

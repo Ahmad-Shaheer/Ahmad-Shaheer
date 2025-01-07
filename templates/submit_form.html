@@ -6,6 +6,7 @@
     <title>Pipeline Visualization</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel = "stylesheet"  href = "/static/style/form.css"> 
+    
 
 </head>
 <body>
@@ -85,7 +86,7 @@
             </div>
           
             <div class="tool" id="processing-tool">
-                <img src="/static/images/{{pipelineProcessing}}.svg"  style="width: 40px; height: 40px;"/>
+                <img src="/static/images/{{pipeline.Processing}}.svg"  style="width: 40px; height: 40px;"/>
                 <strong>Processing:</strong> {{ pipeline.Processing }}
             </div>
             
@@ -118,6 +119,18 @@
     </div>    
     
     <div class = 'selection'>
+
+        {% if pipeline['Orchestration'] %}
+        <div class="dropdown-container">
+            <label for="alternate_orchestration">Orchestration Tool:</label>
+            <select id="alternate_orchestration" onchange="handleOrchestrationChange(this)">
+                <option value="" disabled selected>Select a tool</option>
+                {% for tool in pipeline['Alternate Orchestration'] %}
+                    <option value="{{ tool }}">{{ tool }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
 
         {% if pipeline['Alternate Structured Storage Tools'] %}
             <div class="dropdown-container">
@@ -172,6 +185,8 @@
         </div>
         {% endif %}
 
+
+
     
 
     <input type="hidden" id="ingestion_tool_value" name="ingestion_tool" value="{{ pipeline.Ingestion if pipeline.Ingestion else '' }}">
@@ -181,6 +196,7 @@
     <input type="hidden" id="intermediate_storage_tool_value" name="intermediate_storage_tool" value="{{ pipeline['Intermediate Storage'] if pipeline['Intermediate Storage'] else '' }}">
     <input type="hidden" id="structured_tool_value" name="structured_tool" value="{{ pipeline['Structured'] if pipeline['Structured'] else '' }}">
     <input type="hidden" id="semi_structured_tool_value" name="semi_structured_tool" value="{{ pipeline['Semi'] if pipeline['Semi'] else '' }}">
+    <input type="hidden" id="orchestration_tool_value" name="orchestration_tool" value="{{ pipeline['Orchestration'] if pipeline['Orchestration'] else '' }}">
     
     <input type="hidden" id="ingestion_tool_value_temp" name="ingestion_tool" value="{{ pipeline.Ingestion if pipeline.Ingestion else '' }}">
     <input type="hidden" id="processing_tool_value_temp" name="processing_tool" value="{{ pipeline.Processing if pipeline.Processing else '' }}">
@@ -189,6 +205,7 @@
     <input type="hidden" id="intermediate_storage_tool_value_temp" name="intermediate_storage_tool" value="{{ pipeline['Intermediate Storage'] if pipeline['Intermediate Storage'] else '' }}">
     <input type="hidden" id="structured_tool_value_temp" name="structured_tool" value="{{ pipeline['Structured'] if pipeline['Structured'] else '' }}">
     <input type="hidden" id="semi_structured_tool_value_temp" name="semi_structured_tool" value="{{ pipeline['Semi'] if pipeline['Semi'] else '' }}">
+    <input type="hidden" id="orchestration_tool_value_temp" name="orchestration_tool" value="{{ pipeline['Orchestration'] if pipeline['Orchestration'] else '' }}">
     
 
 
@@ -196,6 +213,64 @@
     <button type="submit">Submit Pipeline</button>
 </form>   
 
+<div class="coach">
+    <div class='flowrence'>
+      Flowrence
+    </div>
+  
+    <div class='flowrence_prompt'>
+      Stuck? Ask Flowrence for help with your data pipeline questions!
+    </div>
+    <br>
+  
+    <div class="options">
+        {% if pipeline.Ingestion %}
+          <button class="option" id="ingestionToolOption" type="button" data-tool="{{ pipeline.Ingestion }}">What is the benefit of using the {{ pipeline.Ingestion }} ingestion tool in my pipeline?</button>
+        {% endif %}
+      
+        {% if pipeline.Processing %}
+          <button class="option" id="processingToolOption" type="button" data-tool="{{ pipeline.Processing }}">What is the use of the {{ pipeline.Processing }} processing tool in my pipeline?</button>
+        {% endif %}
+      
+        {% if pipeline.Storage %}
+          <button class="option" id="storageToolOption" type="button" data-tool="{{ pipeline.Storage }}">What is the role of the {{ pipeline.Storage }} storage tool in my pipeline?</button>
+        {% endif %}
+      
+        {% if pipeline['Orchestration'] %}
+          <button class="option" id="orchestrationToolOption" type="button" data-tool="{{ pipeline['Orchestration'] }}">What role does the {{ pipeline['Orchestration'] }} orchestration tool play in my pipeline?</button>
+        {% endif %}
+      </div>
+      
+  </div>
+
+<section class="chat-window">
+    <button class="close" type = button>x close</button>
+    <div class="chat">
+        <div class="model">
+            <p>Hi, how can I help you?</p>
+        </div>
+        
+    </div>
+    <div class="input-area">
+        <input placeholder="Ask me anything..." type="text">
+        <button type = button>
+            <img src="send-icon.png" alt="send">
+        </button>
+    </div>
+  </section>
+  
+  <div class="chat-button" type = button>
+    <img src="chat-icon.png" alt="start chat">
+  </div>
+  
+  <script type="importmap">
+    {
+      "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
+      }
+    }
+  </script>
+<script src = '/static/js/index.js' type = module> </script>
 
 <script src = '/static/js/form.js'> </script>
   

@@ -3,32 +3,32 @@ def get_pipeline(data_type, nature, end_goal, transformation):
         "batch": {
             "structured": {
                 "storage": {
-                    "yes":  {'Ingestion': 'Apache Sqoop', 
+                    "yes":  {'Ingestion': 'NiFi', 
                              'Storage' : 'Postgres', 
                              'Processing': 'Apache Spark', 
                              'Intermediate Storage': 'Postgres'},
                     
-                    "no": {'Ingestion': 'Apache Sqoop', 
+                    "no": {'Ingestion': 'NiFi', 
                              'Storage' : 'Postgres', 
                              }
                 },
                 "dashboard": {
-                    "yes": {'Ingestion': 'Apache Sqoop', 
+                    "yes": {'Ingestion': 'NiFi', 
                              'Storage' : 'Postgres', 
                              'Processing': 'Apache Spark', 
                              'Intermediate Storage': 'Postgres',
                              'Visualization': 'Apache Superset'},
-                    "no": {'Ingestion': 'Apache Sqoop', 
+                    "no": {'Ingestion': 'NiFi', 
                              'Storage' : 'Postgres', 
                              'Visualization': 'Apache Superset'}
                 },
                 "graph": {
-                    "yes" :{'Ingestion': 'Apache Sqoop', 
+                    "yes" :{'Ingestion': 'NiFi', 
                              'Storage' : 'Neo4j', 
                              'Processing': 'Apache Spark', 
                              'Intermediate Storage': 'Postgres'},
                     
-                    "no" : {'Ingestion': 'Apache Sqoop', 
+                    "no" : {'Ingestion': 'NiFi', 
                              'Storage' : 'Neo4j', 
                              'Processing': 'Apache Spark', 
                              'Intermediate Storage': 'Postgres'}
@@ -178,7 +178,7 @@ def get_pipeline(data_type, nature, end_goal, transformation):
                     "yes": {'Ingestion': 'Apache Kafka',
                             'Processing': 'Apache Spark',  
                             'Structured' : 'Postgres', 
-                            'Semi': 'MongoDB'},
+                            'Semi': 'MongoDB'},  # requires attention
                     "no": {'Ingestion': 'Apache Kafka', 
                             'Structured' : 'Postgres', 
                             'Semi': 'MongoDB'}
@@ -215,6 +215,7 @@ def get_pipeline(data_type, nature, end_goal, transformation):
 
     pipe=  pipelines[nature][data_type][end_goal][transformation]
     
+    
 
     if pipe.get("Semi") == "MongoDB" or pipe.get("Structured") == "Postgres":
         pipe.update({
@@ -232,6 +233,7 @@ def get_pipeline(data_type, nature, end_goal, transformation):
         pipe.update({'Alternate Intermediate Storage Tools': ["Cassandra", "Hadoop Standalone"]})
     
     pipe.update({'Orchestration': 'Airflow'})
+    pipe.update({'Alternate Orchestration': ['Prefect']})
     return pipe
 
 

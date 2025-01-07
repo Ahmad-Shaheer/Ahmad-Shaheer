@@ -23,7 +23,7 @@ Example: "Thank you for reaching out! Please let us know if you need further ass
 
 `;
 
-const API_KEY = "AIzaSyBmKpWqQkTSgbgwXTE8_FymsXj7B_Jg8aA";
+const API_KEY = "AIzaSyAauJBD2r7UKp_gI7W6YSqYNoRQpyP2AvM";
 const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({ 
     model: "gemini-1.5-pro",
@@ -38,6 +38,8 @@ async function sendMessage() {
 
 
     const userMessage = document.querySelector('.chat-window input').value;
+    console.log("User message in sendMessage:", userMessage);  // Debugging line
+
     if (userMessage.length) {
 
         try {
@@ -108,3 +110,36 @@ document.querySelector(".chat-window button.close")
     document.querySelector("body").classList.remove("chat-open");
 });
 
+
+
+
+// Event listeners for buttons to trigger chat, set value, and open chat box
+document.getElementById("dataFormatOption").addEventListener("click", function() {
+    console.log("dataFormatOption clicked");  // Debugging line
+    document.querySelector('.chat-window input').value = "What's my data format?";
+    console.log("Value set to input:", document.querySelector('.chat-window input').value);  // Debugging line
+    sendMessage();
+
+    // Open the chat box simultaneously
+    document.querySelector("body").classList.add("chat-open");
+});
+
+document.getElementById("dataSourceOption").addEventListener("click", function() {
+    console.log("dataSourceOption clicked");  // Debugging line
+    document.querySelector('.chat-window input').value = "How do I identify data sources?";
+    console.log("Value set to input:", document.querySelector('.chat-window input').value);  // Debugging line
+    sendMessage();
+
+    // Open the chat box simultaneously
+    document.querySelector("body").classList.add("chat-open");
+});
+
+document.getElementById("dataTransformOption").addEventListener("click", function() {
+    console.log("dataTransformOption clicked");  // Debugging line
+    document.querySelector('.chat-window input').value = "What are transformations?";
+    console.log("Value set to input:", document.querySelector('.chat-window input').value);  // Debugging line
+    sendMessage();
+
+    // Open the chat box simultaneously
+    document.querySelector("body").classList.add("chat-open");
+});

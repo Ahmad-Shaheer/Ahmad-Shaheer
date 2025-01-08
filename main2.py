@@ -236,7 +236,6 @@ def merge_docker_compose(tool_names, base_directory="docker_templates"):
 
             all_service_envs[new_service_name] = env_vars
 
-    # --- 8. Detect environment variable conflicts across services ---
     env_conflicts = {}
     for service_name, envs in all_service_envs.items():
         for k, v in envs.items():
@@ -252,23 +251,14 @@ def merge_docker_compose(tool_names, base_directory="docker_templates"):
     with open("docker-compose.yml", 'w') as outfile:
         yaml.dump(merged_compose, outfile, sort_keys=False, indent=2)
 
-    # --- 10. Print out the final port assignments ---
-    print("\nPort Assignments:")
-    for service, ports in port_assignments.items():
-        print(f"- {service}: {', '.join(ports)}")
+   
+    return port_assignments
 
-    # Clean up temporary volumes directory
-    # shutil.rmtree(temp_merged_volumes, ignore_errors=True)
+    
 
 
 if __name__ == "__main__":
-    # Example usage: Tools to merge
-    # tools_to_merge = ["airflow", "kafka", "postgres", "superset"]
-    # tools_to_merge = ["prefect"]
-    # tools_to_merge = ["Neo4j", "mysql", "hadoop", "flink", "cassandra"]
     
-    # Semi-Structured Data Storage with Transformation
-    # NiFi → MongoDB → Spark → Hadoop
     tools_to_merge = ["NIFI", "MongoDB", "Spark", "Hadoop", "airflow"]
     
     merge_docker_compose(tools_to_merge)

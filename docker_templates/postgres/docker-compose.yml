@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER_PG}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PG}
+      POSTGRES_DB: ${POSTGRES_DB_PG}
+    ports:
+      - "5432:5432"
+    volumes:
+      - "postgres_data:/var/lib/postgresql/data"
+    networks:
+      - data_pipeline_net
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    networks:
+      - data_pipeline_net
+
+networks:
+  data_pipeline_net:
+    driver: bridge
+
+volumes:
+  postgres_data:

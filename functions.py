@@ -1,4 +1,5 @@
 import json
+from main2 import merge_docker_compose
 
 def tool_definition(pipeline_dict, tools_config):
     selected_tools = {key: value for key, value in pipeline_dict.items() if value}
@@ -9,6 +10,7 @@ def tool_definition(pipeline_dict, tools_config):
         else:
             tool = tool.replace(' ', '')
             shortlisted_tools.update({tool : tools_config[tool]})
+    merge_docker_compose(shortlisted_tools)
     return shortlisted_tools
 
 
@@ -31,15 +33,22 @@ def retrieve_config_details(form_data, docker_config ):
             updated_env_vars = {}
 
             for var_name, default_value in tool_config["EnvironmentVariables"].items():
+                
                 input_value = form_data.get(f"{tool_name}['EnvironmentVariables']'[{var_name}]")
                 
                 if input_value != None:
                     updated_env_vars[var_name] = input_value
                 else:
                     updated_env_vars[var_name] = default_value
+                    
+                if not updated_env_vars:
+                    updated_config[tool_name] = {
+                        "EnvironmentVariables": "No config required"
+                    }
                 print(updated_env_vars)
                 
                 updated_config[tool_name] = {
                 "EnvironmentVariables": updated_env_vars
             }
+        
     return updated_config

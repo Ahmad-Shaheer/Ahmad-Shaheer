@@ -238,34 +238,55 @@ document.querySelector(".chat-button").addEventListener("click", () => {
 document.querySelector(".chat-window .input-area button")
 .addEventListener("click", ()=>sendMessage());
 
+
+// close is working fine
 document.querySelector(".chat-window button.close").addEventListener("click", () => {
-  document.querySelector("body").classList.remove("chat-open");
-  document.querySelector(".chat-window").style.display = "none"; // Hide the chat window
+  const body = document.querySelector("body");
+  const chatWindow = document.querySelector(".chat-window");
+
+  body.classList.remove("chat-open"); // Remove the chat-open class to close the chat
+  chatWindow.style.display = "none"; // Hide the chat window
 });
 
 
-document.addEventListener("DOMContentLoaded", function() {
-  document.querySelectorAll(".option").forEach(button => {
-    button.addEventListener("click", function(event) {
-      console.log(`${event.target.id} clicked`);  // Debugging line
+document.getElementById("ingestionToolOption").addEventListener("click", function() {
+  console.log("ingestionToolOption clicked");  // Debugging line
+  document.querySelector('.chat-window input').value = "What's my data format?";
+  console.log("Value set to input:", document.querySelector('.chat-window input').value);  // Debugging line
+  sendMessage();
 
-      // Get the tool name from the data-tool attribute of the clicked button
-      const toolName = event.target.getAttribute("data-tool");
+  // Open the chat box simultaneously
+  document.querySelector("body").classList.add("chat-open");
+});
 
-      // Set the value in the input box with the dynamic tool name
-      const chatInput = document.querySelector('.chat-window input');
-      chatInput.value = `What is the role of the ${toolName} tool in my pipeline?`;
-      console.log("Value set to input:", chatInput.value);  // Debugging line
+document.getElementById("processingToolOption").addEventListener("click", function() {
+  console.log("processingToolOption clicked");  // Debugging line
+  document.querySelector('.chat-window input').value = "What's my data format?";
+  console.log("Value set to input:", document.querySelector('.chat-window input').value);  // Debugging line
+  sendMessage();
 
-      // Call sendMessage function to send the message
-      sendMessage(); // this is fuckery
+  // Open the chat box simultaneously
+  document.querySelector("body").classList.add("chat-open");
+});
 
-      // Only open the chat box if there is a message to send
-      
-      document.querySelector("body").classList.add("chat-open");
- 
-    });
-  });
+document.getElementById("storageToolOption").addEventListener("click", function() {
+  console.log("storageToolOption clicked");  // Debugging line
+  document.querySelector('.chat-window input').value = "What's my data format?";
+  console.log("Value set to input:", document.querySelector('.chat-window input').value);  // Debugging line
+  sendMessage();
+
+  // Open the chat box simultaneously
+  document.querySelector("body").classList.add("chat-open");
+});
+
+document.getElementById("orchestrationToolOption").addEventListener("click", function() {
+  console.log("orchestrationToolOption clicked");  // Debugging line
+  document.querySelector('.chat-window input').value = "What's my data format?";
+  console.log("Value set to input:", document.querySelector('.chat-window input').value);  // Debugging line
+  sendMessage();
+
+  // Open the chat box simultaneously
+  document.querySelector("body").classList.add("chat-open");
 });
 
 

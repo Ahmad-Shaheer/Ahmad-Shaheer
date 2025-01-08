@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  cassandra:
+    image: cassandra:4.0
+    container_name: cassandra_service
+    environment:
+      CASSANDRA_CLUSTER_NAME: ${CASSANDRA_CLUSTER_NAME}
+      CASSANDRA_SEEDS: ${CASSANDRA_SEEDS}
+    ports:
+      - "9042:9042" # CQL port
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    networks:
+      - data_pipeline_net
+    restart: unless-stopped
+
+networks:
+  data_pipeline_net:
+    external: false
+
+volumes:
+  cassandra_data:

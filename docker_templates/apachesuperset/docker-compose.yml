@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  superset-metadata-db:
+    image: postgres:14
+    container_name: superset-metadata-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER_SUPERSET}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_SUPERSET}
+      POSTGRES_DB: ${POSTGRES_DB_SUPERSET}
+    volumes:
+      - superset_db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - superset_network
+
+  superset:
+    build:
+      context: .
+    container_name: superset
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_SUPERSET}
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+      SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI_SUPERSET}
+    depends_on:
+      superset-metadata-db:
+        condition: service_started
+    ports:
+      - "8088:8088"
+    networks:
+      - superset_network
+
+networks:
+  superset_network:
+
+volumes:
+  superset_db_data:

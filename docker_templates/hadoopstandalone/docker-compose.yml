@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: hadoop-namenode
+    environment:
+      CLUSTER_NAME: ${HADOOP_CLUSTER_NAME}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:8020
+    volumes:
+      - namenode_data:/hadoop/dfs/name
+    ports:
+      - "9870:9870"  # NameNode web UI
+      - "8020:8020"  # NameNode RPC port
+    networks:
+      - hadoop
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: hadoop-datanode
+    environment:
+      CORE_CONF_fs_defaultFS: hdfs://namenode:8020
+    volumes:
+      - datanode_data:/hadoop/dfs/data
+    networks:
+      - hadoop
+    depends_on:
+      namenode:
+        condition: service_started
+
+networks:
+  hadoop:
+
+volumes:
+  namenode_data:
+  datanode_data:

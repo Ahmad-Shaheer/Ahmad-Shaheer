@@ -77,7 +77,7 @@ def deploy():
   
   updated_config = retrieve_config_details(form_data=form_data, docker_config=docker_config)
     
-  generate_env_file(updated_config, output_file="2.env")
+  generate_env_file(updated_config, output_file=".env")
 
     
   return updated_config

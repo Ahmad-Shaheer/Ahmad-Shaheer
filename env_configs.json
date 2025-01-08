@@ -1,48 +1,45 @@
 { 
     "Airflow": {
- "Read" :" Yes",
+ 
   "EnvironmentVariables": {
-    "AIRFLOW_ADMIN_USER": "admin", 
-    "AIRFLOW_ADMIN_PASS": "admin", 
     "POSTGRES_USER": "airflow",
-    "POSTGRES_PASSWORD": "airflow", 
-    "POSTGRES_DB": "airflow", 
-    "AIRFLOW_DB_CONN": "postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow", 
-    "AIRFLOW_FERNET_KEY": "6zmqqduR7+IEsu7YeWcgt3Y8GRBkxE3sNoremc2b2JU=", 
-    "AIRFLOW_LOAD_EXAMPLES": "true", 
-    "AIRFLOW_ADMIN_EMAIL": "admin@example.com" 
+    "POSTGRES_PASSWORD": "airflow",
+    "POSTGRES_DB": "airflow",
+    "AIRFLOW_DB_CONN": "postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow",
+    "AIRFLOW_FERNET_KEY": "6zmqqduR7+IEsu7YeWcgt3Y8GRBkxE3sNoremc2b2JU=",
+    "AIRFLOW_LOAD_EXAMPLES": "true",
+    "AIRFLOW_ADMIN_USER": "admin",
+    "AIRFLOW_ADMIN_PASS": "admin",
+    "AIRFLOW_ADMIN_EMAIL": "admin@example.com"
   }
 
 },
 
 "Cassandra": {
-  "Read" :" Yes",
   "EnvironmentVariables": {
-    "CASSANDRA_CLUSTER_NAME": "MyCassandraCluster", 
-    "CASSANDRA_SEEDS": "cassandra" 
+    "CASSANDRA_CLUSTER_NAME": "MyCassandraCluster",
+    "CASSANDRA_SEEDS": "cassandra"
   }
 },
 
 "ApacheFlink": {
-  "Read" :" No",
     "EnvironmentVariables": {
-      "FLINK_JOB_MANAGER_RPC_ADDRESS" :"jobmanager" 
+      "FLINK_JOB_MANAGER_RPC_ADDRESS" :"jobmanager"
     }
   },
 
   "HadoopStandalone": {
-      "Read" :" Yes",
+
       "EnvironmentVariables": {
-        "HADOOP_CLUSTER_NAME":"docker-hadoop-cluster"  
+        "HADOOP_CLUSTER_NAME":"docker-hadoop-cluster"
     }
     },
 
 
     "ApacheKafka": {
-      "Read" :" No",
 
     "EnvironmentVariables": {
-        "KAFKA_BROKER_ID": "1", 
+        "KAFKA_BROKER_ID": "1",
         "KAFKA_ZOOKEEPER_CONNECT": "zoo1:2181",
         "KAFKA_ADVERTISED_LISTENERS": "INTERNAL://kafka1:19092,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092,DOCKER://host.docker.internal:29092",
         "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP": "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,DOCKER:PLAINTEXT",
@@ -95,38 +92,32 @@
   }
 },
 "MongoDB": {
-  "Read" :" Yes",
 
   "EnvironmentVariables": {
-    "ME_CONFIG_BASICAUTH_USERNAME": "admin", 
-    "ME_CONFIG_BASICAUTH_PASSWORD": "password",
     "MONGO_INITDB_ROOT_USERNAME": "root",
     "MONGO_INITDB_ROOT_PASSWORD": "password",
     "ME_CONFIG_MONGODB_ADMINUSERNAME": "root",
     "ME_CONFIG_MONGODB_ADMINPASSWORD": "password",
     "ME_CONFIG_MONGODB_PORT": "27017",
-    "ME_CONFIG_MONGODB_SERVER": "mongodb"
-    
+    "ME_CONFIG_MONGODB_SERVER": "mongodb",
+    "ME_CONFIG_BASICAUTH_USERNAME": "admin",
+    "ME_CONFIG_BASICAUTH_PASSWORD": "password"
   }
 },
 "MySQL": {
-  "Read" :" Yes",
   "EnvironmentVariables": {
-    "PMA_USER": "example_user", 
-    "PMA_PASSWORD": "example_pass", 
     "MYSQL_ROOT_PASSWORD": "example_root_password",
     "MYSQL_DATABASE": "example_db",
     "MYSQL_USER": "example_user",
     "MYSQL_PASSWORD": "example_pass",
-    "PMA_HOST": "mysql"
-    
+    "PMA_HOST": "mysql",
+    "PMA_USER": "example_user",
+    "PMA_PASSWORD": "example_pass"
   }
 },
 "Neo4j": {
-  "Read" :" Yes",
       "EnvironmentVariables": {
-        
-        "NEO4J_AUTH": "neo4j/password" 
+        "NEO4J_AUTH": "neo4j/password"
       }
     },
 "NiFi": {
@@ -137,14 +128,12 @@
    
   },
   "Postgres": {
-    "Read" :" Yes",
   "EnvironmentVariables": {
-    "PGADMIN_DEFAULT_EMAIL": "admin@example.com",
-    "PGADMIN_DEFAULT_PASSWORD": "adminpass" ,
     "POSTGRES_USER": "admin",
     "POSTGRES_PASSWORD": "admin123",
-    "POSTGRES_DB": "mydb"
-    
+    "POSTGRES_DB": "mydb",
+    "PGADMIN_DEFAULT_EMAIL": "admin@example.com",
+    "PGADMIN_DEFAULT_PASSWORD": "adminpass"
   }
 },
 
@@ -156,22 +145,20 @@
     }
 },
 "ApacheSpark": {
- "Read" :" Yes",
+ 
   "EnvironmentVariables": {
-    "SPARK_WORKER_MEMORY": "1G", 
-    "SPARK_WORKER_CORES": "1" ,
     "SPARK_WORKLOAD_MASTER": "master",
     "SPARK_MASTER_PORT": "7077",
     "SPARK_MASTER_WEBUI_PORT": "8080",
     "SPARK_WORKLOAD_WORKER": "worker",
-    "SPARK_MASTER_URL": "spark://spark-master:7077"
-    
+    "SPARK_MASTER_URL": "spark://spark-master:7077",
+    "SPARK_WORKER_MEMORY": "1G",
+    "SPARK_WORKER_CORES": "1"
   }
 
 },
 "ApacheSuperset": {
 
-  "Read" :" No",
   "EnvironmentVariables": {
     "POSTGRES_USER_SUPERSET": "superset",
     "POSTGRES_PASSWORD_SUPERSET": "superset",

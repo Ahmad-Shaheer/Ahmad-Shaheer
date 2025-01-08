@@ -129,31 +129,37 @@
 
   <form action="/deploy" method="POST">
     {% for tool_name, tool_details in tools.items() %}
-      <div class="tool-form">
-        <div class="tool-header">{{ tool_name }}</div>
-        <input type="hidden" name="tool_names" value="{{ tool_name }}">
+        <div class="tool-form">
+            <div class="tool-header">{{ tool_name }}</div>
+            <input type="hidden" name="tool_names" value="{{ tool_name }}">
 
-        {% for var_name, default_value in tool_details.EnvironmentVariables.items() %}
-          <div class="env-variable">
-            <label class="env-label" for="{{ tool_name }}-{{ var_name }}">
-              {{ var_name }}
-            </label>
-            <input
-              type="text"
-              id="{{ tool_name }}-{{ var_name }}"
-              name="{{ tool_name }}['EnvironmentVariables'][{{ var_name }}]"
-              class="input-field"
-              placeholder="{{ default_value }}">
-          </div>
-
-        {% endfor %}
-          
-
-      </div>
+            {% if tool_details.Read == "No" %}
+                <div class="env-variable">
+                    <p>No config required</p>
+                </div>
+            {% else %}
+                {% for var_name, default_value in tool_details.EnvironmentVariables.items() %}
+                    {% if loop.index <= 2 %}
+                        <div class="env-variable">
+                            <label class="env-label" for="{{ tool_name }}-{{ var_name }}">
+                                {{ var_name }}
+                            </label>
+                            <input
+                                type="text"
+                                id="{{ tool_name }}-{{ var_name }}"
+                                name="{{ tool_name }}['EnvironmentVariables'][{{ var_name }}]"
+                                class="input-field"
+                                placeholder="{{ default_value }}">
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
     {% endfor %}
     
     <button type="submit" class="submit-btn">Submit</button>
-  </form>
+</form>
+
 
 </body>
 </html>

@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  neo4j:
+    image: neo4j:5.7
+    container_name: neo4j_service
+    environment:
+      NEO4J_AUTH: ${NEO4J_AUTH}
+      # Uncomment the following if you need them:
+      # NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+      # NEO4J_APOC_IMPORT_FILE_ENABLED: "true"
+    ports:
+      - "7474:7474"  # HTTP web interface and REST API
+      - "7687:7687"  # Bolt protocol port for driver connections
+    volumes:
+      - neo4j_data:/data
+    networks:
+      - data_pipeline_net
+    restart: unless-stopped
+
+networks:
+  data_pipeline_net:
+    external: false
+
+volumes:
+  neo4j_data:

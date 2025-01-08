@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  prefect-orion:
+    image: prefecthq/prefect:2-latest
+    container_name: prefect-orion
+    command: >
+      bash -c "
+        prefect server start --host 0.0.0.0 --port 4200
+      "
+    ports:
+      - "4200:4200"
+    volumes:
+      - prefect_data:/root/.prefect
+    networks:
+      - prefect_network
+
+  prefect-worker:
+    image: prefecthq/prefect:2-latest
+    container_name: prefect-worker
+    depends_on:
+      prefect-orion:
+        condition: service_started  # Wait for Orion's healthcheck
+    environment:
+      PREFECT_API_URL: "http://prefect-orion:4200/api"
+    command: >
+      bash -c "
+        echo 'Waiting 10 seconds for Orion...' &&
+        sleep 10 &&
+        prefect worker start -p default
+      "
+    networks:
+      - prefect_network
+    restart: always
+
+networks:
+  prefect_network:
+    driver: bridge
+
+volumes:
+  prefect_data:

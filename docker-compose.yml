@@ -1,0 +1,102 @@
+version: '3.9'
+services:
+  nifi:
+    build:
+      context: docker_templates\nifi
+    container_name: nifi
+    environment:
+    - NIFI_WEB_HTTP_PORT=8080
+    - NIFI_WEB_HTTPS_PORT=8443
+    ports:
+    - 8080:8080
+    - 8443:8443
+    networks:
+    - data_pipeline_network
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER_PG}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PG}
+      POSTGRES_DB: ${POSTGRES_DB_PG}
+    ports:
+    - 5432:5432
+    volumes:
+    - postgres_postgres_postgres_data:/var/lib/postgresql/data
+    networks:
+    - data_pipeline_network
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+    - 5050:80
+    networks:
+    - data_pipeline_network
+  spark-master:
+    image: apache/spark:3.4.1
+    container_name: spark-master
+    command:
+    - /bin/bash
+    - -c
+    - /opt/spark/sbin/start-master.sh && tail -f /dev/null
+    environment:
+    - SPARK_WORKLOAD=${SPARK_WORKLOAD_MASTER}
+    - SPARK_MASTER_PORT=${SPARK_MASTER_PORT}
+    - SPARK_MASTER_WEBUI_PORT=${SPARK_MASTER_WEBUI_PORT}
+    ports:
+    - 8081:8080
+    - 7077:7077
+    networks:
+    - data_pipeline_network
+  spark-worker:
+    image: apache/spark:3.4.1
+    command:
+    - /bin/bash
+    - -c
+    - /opt/spark/sbin/start-worker.sh spark://spark-master:7077 && tail -f /dev/null
+    environment:
+    - SPARK_WORKLOAD=${SPARK_WORKLOAD_WORKER}
+    - SPARK_MASTER_URL=${SPARK_MASTER_URL}
+    - SPARK_WORKER_MEMORY=${SPARK_WORKER_MEMORY}
+    - SPARK_WORKER_CORES=${SPARK_WORKER_CORES}
+    depends_on:
+      spark-master:
+        condition: service_started
+    ports:
+    - 8082:8081
+    networks:
+    - data_pipeline_network
+  superset-metadata-db:
+    image: postgres:14
+    container_name: superset-metadata-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER_SUPERSET}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_SUPERSET}
+      POSTGRES_DB: ${POSTGRES_DB_SUPERSET}
+    volumes:
+    - apachesuperset_superset-metadata-db_superset_db_data:/var/lib/postgresql/data
+    ports:
+    - 5433:5432
+    networks:
+    - data_pipeline_network
+  superset:
+    build:
+      context: docker_templates\apachesuperset
+    container_name: superset
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_SUPERSET}
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+      SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI_SUPERSET}
+    depends_on:
+      superset-metadata-db:
+        condition: service_started
+    ports:
+    - 8088:8088
+    networks:
+    - data_pipeline_network
+networks:
+  data_pipeline_network: {}
+volumes:
+  postgres_postgres_postgres_data: {}
+  apachesuperset_superset-metadata-db_superset_db_data: {}

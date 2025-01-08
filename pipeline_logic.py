@@ -219,16 +219,16 @@ def get_pipeline(data_type, nature, end_goal, transformation):
 
     if pipe.get("Semi") == "MongoDB" or pipe.get("Structured") == "Postgres":
         pipe.update({
-            'Alternate Structured Storage Tools': ["MySQL", "Hive", "Hadoop Standalone"], 
+            'Alternate Structured Storage Tools': ["MySQL", "Hadoop Standalone"], 
             'Alternate Semi-Structured Storage Tools' :["Cassandra", "Hadoop Standalone"]
         })
     if pipe.get("Storage") == "Postgres":
-         pipe.update({'Alternate Final Storage Tools': ["MySQL", "Hive", "Hadoop Standalone"]})
+         pipe.update({'Alternate Final Storage Tools': ["MySQL",  "Hadoop Standalone"]})
     if pipe.get("Storage") == "MongoDB":
          pipe.update({'Alternate Final Storage Tools': ["Cassandra", "Hadoop Standalone"]})
          
     if pipe.get('Intermediate Storage') == "Postgres":
-        pipe.update({'Alternate Intermediate Storage Tools': ["MySQL", "Hive", "Hadoop Standalone"]})
+        pipe.update({'Alternate Intermediate Storage Tools': ["MySQL", "Hadoop Standalone"]})
     elif pipe.get("Intermediate Storage") == "MongoDB":
         pipe.update({'Alternate Intermediate Storage Tools': ["Cassandra", "Hadoop Standalone"]})
     

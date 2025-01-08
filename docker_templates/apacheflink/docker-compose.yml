@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  jobmanager:
+    image: apache/flink:1.16.0
+    container_name: flink-jobmanager
+    command: jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=${FLINK_JOB_MANAGER_RPC_ADDRESS}
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: ${FLINK_JOB_MANAGER_RPC_ADDRESS}
+    ports:
+      - "8081:8081"   # Flink Web UI
+    networks:
+      - flink-network
+    volumes:
+      - jobmanager-logs:/opt/flink/log
+
+  taskmanager:
+    image: apache/flink:1.16.0
+    container_name: flink-taskmanager
+    command: taskmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=${FLINK_JOB_MANAGER_RPC_ADDRESS}
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: ${FLINK_JOB_MANAGER_RPC_ADDRESS}
+    depends_on:
+      jobmanager:
+        condition: service_started
+    networks:
+      - flink-network
+    volumes:
+      - taskmanager-logs:/opt/flink/log
+
+
+networks:
+  flink-network:
+    driver: bridge
+
+volumes:
+  jobmanager-logs:
+  taskmanager-logs:

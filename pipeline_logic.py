@@ -38,60 +38,60 @@ def get_pipeline(data_type, nature, end_goal, transformation):
             "semi-structured": {
                 "storage": {
                     "yes": {'Ingestion': 'NiFi', 
-                             'Storage' : 'MongoDB', 
+                             'Storage' : 'Mongo', 
                              'Processing': 'Apache Spark', 
-                             'Intermediate Storage': 'MongoDB'},
+                             'Intermediate Storage': 'Mongo'},
                     
                     "no": {'Ingestion': 'NiFi', 
-                             'Storage' : 'MongoDB'}
+                             'Storage' : 'Mongo'}
                 },
                 "dashboard": {
                     "yes": {'Ingestion': 'NiFi', 
                              'Storage' : 'Postgres', 
                              'Processing': 'Apache Spark', 
-                             'Intermediate Storage': 'MongoDB',
+                             'Intermediate Storage': 'Mongo',
                              'Visualization': 'Apache Superset'},
                     "no": {'Ingestion': 'NiFi', 
                              'Storage' : 'Postgres', 
                              'Processing': 'Apache Spark', 
-                             'Intermediate Storage': 'MongoDB',
+                             'Intermediate Storage': 'Mongo',
                              'Visualization': 'Apache Superset'}
                 },
                 "graph": {
                     "yes" :{'Ingestion': 'NiFi', 
                              'Storage' : 'Neo4j', 
                              'Processing': 'Apache Spark', 
-                             'Intermediate Storage': 'MongoDB'},
+                             'Intermediate Storage': 'Mongo'},
                     
                     "no" : {'Ingestion': 'NiFi', 
                              'Storage' : 'Neo4j', 
                              'Processing': 'Apache Spark', 
-                             'Intermediate Storage': 'MongoDB'}
+                             'Intermediate Storage': 'Mongo'}
                 },
             },
             "mixture": {
                 "storage": {
                     "yes": {'Ingestion': 'NiFi', 
                             'Structured' : 'Postgres', 
-                            'Semi': 'MongoDB', 
+                            'Semi': 'Mongo', 
                             'Processing': 'Apache Spark', 
                             'Storage': 'Postgres'},
                     
                     "no": {'Ingestion': 'NiFi', 
                             'Structured' : 'Postgres', 
-                            'Semi': 'MongoDB'}
+                            'Semi': 'Mongo'}
                 },
                 "dashboard": {
                     "yes": {'Ingestion': 'NiFi', 
                             'Structured' : 'Postgres', 
-                            'Semi': 'MongoDB', 
+                            'Semi': 'Mongo', 
                             'Processing': 'Apache Spark', 
                             'Storage': 'Postgres',
                             'Visualization' : 'Apache Superset'}
                     ,
                     "no": {'Ingestion': 'NiFi', 
                             'Structured' : 'Postgres', 
-                            'Semi': 'MongoDB', 
+                            'Semi': 'Mongo', 
                             'Processing': 'Apache Spark', 
                             'Storage': 'Postgres',
                             'Visualization' : 'Apache Superset'}
@@ -99,13 +99,13 @@ def get_pipeline(data_type, nature, end_goal, transformation):
                 "graph": {
                     "yes" :{'Ingestion': 'NiFi', 
                             'Structured' : 'Postgres', 
-                            'Semi': 'MongoDB', 
+                            'Semi': 'Mongo', 
                             'Processing': 'Apache Spark', 
                             'Storage': 'Neo4j'},
                     
                     "no" : {'Ingestion': 'NiFi', 
                             'Structured' : 'Postgres', 
-                            'Semi': 'MongoDB', 
+                            'Semi': 'Mongo', 
                             'Processing': 'Apache Spark', 
                             'Storage': 'Neo4j'}
                 },
@@ -146,10 +146,10 @@ def get_pipeline(data_type, nature, end_goal, transformation):
                 "storage": {
                     "yes":{'Ingestion' :'Apache Kafka',
                             'Processing':' Apache Flink',
-                            'Storage': 'MongoDB'},
+                            'Storage': 'Mongo'},
                     
                     "no": {'Ingestion' :'Apache Kafka',
-                            'Storage': 'MongoDB'}
+                            'Storage': 'Mongo'}
                 },
                 "dashboard": {
                     "yes": {'Ingestion' :'Apache Kafka',
@@ -178,10 +178,10 @@ def get_pipeline(data_type, nature, end_goal, transformation):
                     "yes": {'Ingestion': 'Apache Kafka',
                             'Processing': 'Apache Flink',  
                             'Structured' : 'Postgres', 
-                            'Semi': 'MongoDB'},  # requires attention
+                            'Semi': 'Mongo'},  # requires attention
                     "no": {'Ingestion': 'Apache Kafka', 
                             'Structured' : 'Postgres', 
-                            'Semi': 'MongoDB'}
+                            'Semi': 'Mongo'}
                 },
                 "dashboard": {
                     "yes": {'Ingestion': 'Apache Kafka',
@@ -198,12 +198,12 @@ def get_pipeline(data_type, nature, end_goal, transformation):
                     "yes" :{'Ingestion': 'Apache Kafka',
                             'Processing': 'Apache Flink',  
                             'Structured' : 'Postgres', 
-                            'Semi': 'MongoDB',
+                            'Semi': 'Mongo',
                             'Storage' :'Neo4j'},
                     
                     "no" : {'Ingestion': 'Apache Kafka',
                             'Structured' : 'Postgres', 
-                            'Semi': 'MongoDB', 
+                            'Semi': 'Mongo', 
                             'Storage' : 'Neo4j', 
                             'Processing': 'Apache Flink'}
                 },
@@ -217,19 +217,19 @@ def get_pipeline(data_type, nature, end_goal, transformation):
     
     
 
-    if pipe.get("Semi") == "MongoDB" or pipe.get("Structured") == "Postgres":
+    if pipe.get("Semi") == "Mongo" or pipe.get("Structured") == "Postgres":
         pipe.update({
             'Alternate Structured Storage Tools': ["MySQL", "Hadoop Standalone"], 
             'Alternate Semi-Structured Storage Tools' :["Cassandra", "Hadoop Standalone"]
         })
     if pipe.get("Storage") == "Postgres":
          pipe.update({'Alternate Final Storage Tools': ["MySQL",  "Hadoop Standalone"]})
-    if pipe.get("Storage") == "MongoDB":
+    if pipe.get("Storage") == "Mongo":
          pipe.update({'Alternate Final Storage Tools': ["Cassandra", "Hadoop Standalone"]})
          
     if pipe.get('Intermediate Storage') == "Postgres":
         pipe.update({'Alternate Intermediate Storage Tools': ["MySQL", "Hadoop Standalone"]})
-    elif pipe.get("Intermediate Storage") == "MongoDB":
+    elif pipe.get("Intermediate Storage") == "Mongo":
         pipe.update({'Alternate Intermediate Storage Tools': ["Cassandra", "Hadoop Standalone"]})
     
     pipe.update({'Orchestration': 'Airflow'})

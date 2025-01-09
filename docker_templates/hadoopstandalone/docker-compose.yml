@@ -1,5 +1,5 @@
 version: "3"
-
+ 
 services:
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
@@ -14,7 +14,7 @@ services:
       - "8020:8020"  # NameNode RPC port
     networks:
       - hadoop
-
+ 
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
     container_name: hadoop-datanode
@@ -27,10 +27,11 @@ services:
     depends_on:
       namenode:
         condition: service_started
-
+    restart: always
+ 
 networks:
   hadoop:
-
+ 
 volumes:
   namenode_data:
   datanode_data:

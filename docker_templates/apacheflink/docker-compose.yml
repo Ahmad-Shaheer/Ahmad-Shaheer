@@ -1,5 +1,5 @@
 version: '3.8'
-
+ 
 services:
   jobmanager:
     image: apache/flink:1.16.0
@@ -16,7 +16,7 @@ services:
       - flink-network
     volumes:
       - jobmanager-logs:/opt/flink/log
-
+ 
   taskmanager:
     image: apache/flink:1.16.0
     container_name: flink-taskmanager
@@ -29,16 +29,17 @@ services:
     depends_on:
       jobmanager:
         condition: service_started
+    restart: always
     networks:
       - flink-network
     volumes:
       - taskmanager-logs:/opt/flink/log
-
-
+ 
+ 
 networks:
   flink-network:
     driver: bridge
-
+ 
 volumes:
   jobmanager-logs:
   taskmanager-logs:

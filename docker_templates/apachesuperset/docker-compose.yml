@@ -1,5 +1,5 @@
 version: '3'
-
+ 
 services:
   superset-metadata-db:
     image: postgres:14
@@ -14,7 +14,7 @@ services:
       - "5432:5432"
     networks:
       - superset_network
-
+ 
   superset:
     build:
       context: .
@@ -26,13 +26,14 @@ services:
     depends_on:
       superset-metadata-db:
         condition: service_started
+    restart: always
     ports:
       - "8088:8088"
     networks:
       - superset_network
-
+ 
 networks:
   superset_network:
-
+ 
 volumes:
   superset_db_data:

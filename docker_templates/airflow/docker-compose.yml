@@ -1,5 +1,5 @@
 version: "3.9"
-
+ 
 services:
   airflow-db:
     image: postgres:14
@@ -14,7 +14,7 @@ services:
       - "5432:5432"
     networks:
       - airflow_network
-
+ 
   airflow-init:
     image: apache/airflow:2.6.2
     container_name: airflow-init
@@ -43,7 +43,7 @@ services:
       start_period: 5s
     networks:
       - airflow_network
-
+ 
   airflow-scheduler:
     image: apache/airflow:2.6.2
     container_name: airflow-scheduler
@@ -52,6 +52,8 @@ services:
         condition: service_started
       airflow-init:
         condition: service_healthy
+    restart: always
+ 
     environment:
       AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
@@ -63,7 +65,7 @@ services:
     command: ["airflow", "scheduler"]
     networks:
       - airflow_network
-
+ 
   airflow-webserver:
     image: apache/airflow:2.6.2
     container_name: airflow-webserver
@@ -72,6 +74,7 @@ services:
         condition: service_started
       airflow-init:
         condition: service_healthy
+    restart: always
     environment:
       AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
@@ -85,10 +88,10 @@ services:
     command: ["airflow", "webserver"]
     networks:
       - airflow_network
-
+ 
 networks:
   airflow_network:
-
+ 
 volumes:
   airflow_db_data:
   airflow_dags:

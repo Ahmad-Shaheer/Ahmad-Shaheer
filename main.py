@@ -1,11 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import threading
 from flask_cors import CORS
-import socket
 from flask_session import Session
 from pipeline_logic import get_pipeline
 from functions import generate_env_file, retrieve_config_details, tool_definition,\
-run_docker_compose, extract_signin_configs, extract_nifi_credentials, wait_for_docker_containers, refine_access_links, get_services
+run_docker_compose, extract_signin_configs, extract_nifi_credentials, refine_access_links
 import json
 
 
@@ -79,43 +78,37 @@ def deploy():
         docker_config = json.load(f)
         
   form_data = request.form
-  session['form_data'] = form_data
   updated_config, ports = retrieve_config_details(form_data=form_data, docker_config=docker_config)
+  
+  session['form_data'] = form_data
+  session['updated_config'] = updated_config  # Save updated config in session
+  session['ports'] = ports
   
   generate_env_file(updated_config, output_file=".env")
 
-  
-  thread = threading.Thread(target=run_docker_compose)
-  thread.start()
+  # thread = threading.Thread(target=run_docker_compose)
+  # thread.start()
     
-  return redirect(url_for('loading'))
+  return redirect(url_for('final'))
 
 @app.route('/loading')
 def loading():
-    with open('config.json', 'r') as f:
-        docker_config = json.load(f)
-    form_data = session.get('form_data', None)
-
-    updated_config, ports = retrieve_config_details(form_data=form_data, docker_config=docker_config)      
-    services = get_services(ports)    
+    ports = session.get('ports', None)
+    services = refine_access_links(ports)    
 
     return render_template('loading.html', services = services)
   
   
 @app.route('/final')
 def final():
-  with open('config.json', 'r') as f:
-        docker_config = json.load(f)
-  form_data = session.get('form_data', None)
-
-  updated_config, ports = retrieve_config_details(form_data=form_data, docker_config=docker_config)      
-  services = get_services(ports)
   
-
+  ports = session.get('ports', None)
   signin_conf = extract_signin_configs(ports)
   nifi_name, nifi_pass = extract_nifi_credentials()
   signin_conf.update({'nifi': [nifi_name, nifi_pass]})
   links = refine_access_links(ports=ports)   
+  
+
   return render_template('present.html', ports=ports, signin_conf=signin_conf, links= links)
 
 

@@ -1,5 +1,5 @@
 version: '3.8'
-
+ 
 services:  
   zoo1:
     image: confluentinc/cp-zookeeper:7.3.2
@@ -11,7 +11,7 @@ services:
       ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_CLIENT_PORT}
       ZOOKEEPER_SERVER_ID: ${ZOOKEEPER_SERVER_ID}
       ZOOKEEPER_SERVERS: ${ZOOKEEPER_SERVERS}
-
+ 
   kafka1:
     image: confluentinc/cp-kafka:7.3.2
     hostname: kafka1
@@ -38,7 +38,8 @@ services:
     depends_on:
       zoo1:
         condition: service_started
-
+    restart: always
+ 
   kafka-schema-registry:
     image: confluentinc/cp-schema-registry:7.3.2
     hostname: kafka-schema-registry
@@ -54,7 +55,8 @@ services:
         condition: service_started
       kafka1:
         condition: service_started
-
+    restart: always
+ 
   kafka-rest-proxy:
     image: confluentinc/cp-kafka-rest:7.3.2
     hostname: kafka-rest-proxy
@@ -73,7 +75,8 @@ services:
         condition: service_started
       kafka-schema-registry:
         condition: service_started
-
+    restart: always
+ 
   kafka-connect:
     image: confluentinc/cp-kafka-connect:7.3.2
     hostname: kafka-connect
@@ -111,7 +114,8 @@ services:
         condition: service_started
       kafka-rest-proxy:
         condition: service_started
-
+    restart: always
+ 
   conduktorDB:
     image: postgres:14
     hostname: conduktorDB
@@ -131,7 +135,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
-
+ 
   conduktor-console:
     image: conduktor/conduktor-console:1.26.0
     hostname: conduktor-console
@@ -154,7 +158,8 @@ services:
         condition: service_healthy
       kafka1:
         condition: service_started
-
+    restart: always
+ 
 volumes:
   pg_data: 
   conduktor_data:

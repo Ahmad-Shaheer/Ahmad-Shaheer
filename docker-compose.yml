@@ -33,6 +33,7 @@ services:
     - 5050:80
     networks:
     - data_pipeline_network
+    restart: always
   spark-master:
     image: apache/spark:3.4.1
     container_name: spark-master
@@ -115,6 +116,7 @@ services:
         condition: service_started
       airflow-init:
         condition: service_healthy
+    restart: always
     environment:
       AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
@@ -136,6 +138,7 @@ services:
         condition: service_started
       airflow-init:
         condition: service_healthy
+    restart: always
     environment:
       AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}

@@ -4,122 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Environment Configuration</title>
-  <style>
-    body {
-        font-family: 'Roboto', sans-serif;
-        margin: 0;
-        padding: 0;
-        background: linear-gradient(to bottom, #1e3c72, #2a5298);
-        color: #ffffff;
-    }
+  <link rel = "stylesheet"  href = "/static/style/config.css"> 
 
-    h1 {
-        text-align: center;
-        margin: 20px 0;
-        font-size: 2.5rem;
-        color: #ffffff;
-    }
-
-    p {
-        text-align: center;
-        margin-bottom: 30px;
-        font-size: 1.2rem;
-        color: #d9e6f2;
-    }
-
-    form {
-        max-width: 800px;
-        margin: 0 auto;
-        background: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
-        padding: 20px 30px;
-        color: #333333;
-    }
-
-    .tool-form {
-        margin-bottom: 30px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 20px;
-        background: linear-gradient(to bottom, #f9f9f9, #eef3f9);
-        box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .tool-header {
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin-bottom: 15px;
-        color: #2a5298;
-    }
-
-    .env-variable {
-        margin-bottom: 15px;
-    }
-
-    .env-label {
-        display: block;
-        margin-bottom: 8px;
-        font-size: 1rem;
-        font-weight: 500;
-        color: #555555;
-    }
-
-    .input-field {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 1rem;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .input-field:focus {
-        border-color: #2a5298;
-        box-shadow: 0px 0px 5px rgba(42, 82, 152, 0.5);
-        outline: none;
-    }
-
-    .submit-btn {
-        display: block;
-        width: 100%;
-        margin-top: 20px;
-        padding: 12px 20px;
-        background-color: #2a5298;
-        color: #ffffff;
-        font-size: 1.2rem;
-        font-weight: bold;
-        text-transform: uppercase;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-
-    .submit-btn:hover {
-        background-color: #1e3c72;
-        transform: translateY(-2px);
-    }
-
-    .submit-btn:active {
-        background-color: #1b365d;
-        transform: translateY(0px);
-    }
-
-    @media (max-width: 768px) {
-        form {
-            padding: 15px;
-        }
-
-        .tool-header {
-            font-size: 1.2rem;
-        }
-
-        .submit-btn {
-            font-size: 1rem;
-        }
-    }
-</style>
 
 </head>
 <body>
@@ -159,7 +45,58 @@
     
     <button type="submit" class="submit-btn">Submit</button>
 </form>
+<div class="coach">
+    <div class='flowrence'>
+      Flowrence
+    </div>
+  
+    <div class='flowrence_prompt'>
+      Stuck? Ask Flowrence for help with your data pipeline questions!
+    </div>
+    <br>
+  
+    <div class="options">
+          <button class="option" id="Option1" type="button" >Do I need to set up everything manually, or can the tool configure itself for my data?</button>
+  
+          <button class="option" id="Option2" type="button" > How can I make sure all the parts of my pipeline work together without breaking? </button>
 
+          <button class="option" id="Option3" type="button" >What happens if my data grows or changes? Will the pipeline still work?</button>
+
+          <button class="option" id="Option14" type="button" >Are there any tools or features that automatically monitor and optimize the pipeline?        </button>
+
+      </div>
+      
+  </div>
+
+<section class="chat-window">
+    <button class="close" type = button>x close</button>
+    <div class="chat">
+        <div class="model">
+            <p>Hi, how can I help you?</p>
+        </div>
+        
+    </div>
+    <div class="input-area">
+        <input placeholder="Ask me anything..." type="text">
+        <button type = button>
+            <img src="send-icon.png" alt="send">
+        </button>
+    </div>
+  </section>
+  
+  <div class="chat-button" type = button>
+    <img src="chat-icon.png" alt="start chat">
+  </div>
+  
+  <script type="importmap">
+    {
+      "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
+      }
+    }
+  </script>
+<script src = '/static/js/index.js' type = module> </script>
+<script src = '/static/js/config.js'> </script>
 
 </body>
 </html>

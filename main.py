@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import threading
-from flask_cors import CORS
 from flask_session import Session
 from pipeline_logic import get_pipeline
 from functions import generate_env_file, retrieve_config_details, tool_definition,\
@@ -11,7 +10,6 @@ import json
 
 
 app = Flask(__name__)
-CORS(app)
 app.secret_key = 'your_secret_key'
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)

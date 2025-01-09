@@ -53,18 +53,7 @@ function updateSemiTool(selectElement) {
     document.getElementById('semi_structured_tool_value').value = selectElement.value;
     console.log("Ingestion tool value successfully updated to:", selectElement.value);
   }
-
   
-
-
-
-//  let currentStorageTool = "{{ pipeline['Storage'] }}";
-//  let currentIntermediateTool = "{{ pipeline['Intermediate Storage'] }}";
-//  let currentStructuredTool = "{{ pipeline['Structured'] }}";
-//  let currentSemiTool = "{{ pipeline['Semi'] }}";
-  
-
-
 
   function updateScreenStorageTool(selectElement) {
       const selectedTool = selectElement.value;
@@ -222,71 +211,59 @@ async function sendMessage() {
   }
 }
 
-
+// Chat button (to open chat)
 document.querySelector(".chat-button").addEventListener("click", () => {
   const body = document.querySelector("body");
+  const chatWindow = document.querySelector(".chat-window");
+  
   if (!body.classList.contains("chat-open")) {
-      console.log("Opening chat...");
-      body.classList.add("chat-open"); // Add the class to open the chat
-      document.querySelector(".chat-window").style.display = "flex"; // Ensure visibility
+    console.log("Opening chat...");
+    body.classList.add("chat-open"); // Add the class to open the chat
+    chatWindow.style.display = "flex"; // Ensure visibility
   } else {
-      console.log("Chat is already open.");
+    console.log("Chat is already open.");
   }
 });
 
+// Send message button inside the chat window
+document.querySelector(".chat-window .input-area button").addEventListener("click", () => sendMessage());
 
-document.querySelector(".chat-window .input-area button")
-.addEventListener("click", ()=>sendMessage());
-
-
-// close is working fine
+// Close button inside the chat window
 document.querySelector(".chat-window button.close").addEventListener("click", () => {
   const body = document.querySelector("body");
   const chatWindow = document.querySelector(".chat-window");
-
+  
+  console.log("Closing chat...");
   body.classList.remove("chat-open"); // Remove the chat-open class to close the chat
   chatWindow.style.display = "none"; // Hide the chat window
 });
 
+// Option buttons to trigger chat and send messages
+const optionButtons = document.querySelectorAll(".options .option");
 
-document.getElementById("ingestionToolOption").addEventListener("click", function() {
-  console.log("ingestionToolOption clicked");  // Debugging line
-  document.querySelector('.chat-window input').value = "What's my data format?";
-  console.log("Value set to input:", document.querySelector('.chat-window input').value);  // Debugging line
-  sendMessage();
+optionButtons.forEach(button => {
+  button.addEventListener("click", function () {
+    const buttonText = this.textContent.trim();
+    const chatInput = document.querySelector('.chat-window input');
+    const body = document.querySelector("body");
+    const chatWindow = document.querySelector(".chat-window");
 
-  // Open the chat box simultaneously
-  document.querySelector("body").classList.add("chat-open");
-});
+    console.log("Button clicked:", buttonText);
+    
+    // Set the button's text content to the chat window input
+    chatInput.value = buttonText;
+    console.log("Value set to input:", chatInput.value);
 
-document.getElementById("processingToolOption").addEventListener("click", function() {
-  console.log("processingToolOption clicked");  // Debugging line
-  document.querySelector('.chat-window input').value = "What's my data format?";
-  console.log("Value set to input:", document.querySelector('.chat-window input').value);  // Debugging line
-  sendMessage();
+    // Send the message
+    sendMessage();
 
-  // Open the chat box simultaneously
-  document.querySelector("body").classList.add("chat-open");
-});
-
-document.getElementById("storageToolOption").addEventListener("click", function() {
-  console.log("storageToolOption clicked");  // Debugging line
-  document.querySelector('.chat-window input').value = "What's my data format?";
-  console.log("Value set to input:", document.querySelector('.chat-window input').value);  // Debugging line
-  sendMessage();
-
-  // Open the chat box simultaneously
-  document.querySelector("body").classList.add("chat-open");
-});
-
-document.getElementById("orchestrationToolOption").addEventListener("click", function() {
-  console.log("orchestrationToolOption clicked");  // Debugging line
-  document.querySelector('.chat-window input').value = "What's my data format?";
-  console.log("Value set to input:", document.querySelector('.chat-window input').value);  // Debugging line
-  sendMessage();
-
-  // Open the chat box simultaneously
-  document.querySelector("body").classList.add("chat-open");
+    // Ensure the chat box is open
+    if (!body.classList.contains("chat-open")) {
+      console.log("Reopening chat...");
+      body.classList.add("chat-open");
+      chatWindow.style.display = "flex"; // Ensure visibility
+    }
+  });
 });
 
 

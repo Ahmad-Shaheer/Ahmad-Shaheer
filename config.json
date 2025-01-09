@@ -101,7 +101,7 @@
         "CDK_CLUSTERS_0_KAFKACONNECTS_0_NAME": "full stack kafka connect"
   }
 },
-"MongoDB": {
+"Mongo": {
   "Read" :" Yes",
 
   "EnvironmentVariables": {

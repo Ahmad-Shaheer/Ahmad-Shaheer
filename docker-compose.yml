@@ -106,7 +106,7 @@ services:
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: ${CONNECT_STATUS_STORAGE_REPLICATION_FACTOR}
       CONNECT_PLUGIN_PATH: ${CONNECT_PLUGIN_PATH}
     volumes:
-    - C:\Users\AHMAD.SHAHEER\Desktop\Capstone\temp_merged_volumes\apachekafka_kafka-connect_connectors:/etc/kafka-connect/jars/
+    - /home/cmdadmin/Desktop/CAP/Ahmad-Shaheer/temp_merged_volumes/apachekafka_kafka-connect_connectors:/etc/kafka-connect/jars/
     depends_on:
       zoo1:
         condition: service_started
@@ -132,14 +132,6 @@ services:
       POSTGRES_USER: ${CONDUKTOR_POSTGRES_USER}
       POSTGRES_PASSWORD: ${CONDUKTOR_POSTGRES_PASSWORD}
       POSTGRES_HOST_AUTH_METHOD: ${CONDUKTOR_POSTGRES_HOST_AUTH_METHOD}
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - pg_isready -U conduktor -d conduktor-console -h localhost
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
     networks:
     - data_pipeline_network
   conduktor-console:
@@ -161,34 +153,49 @@ services:
       CDK_CLUSTERS_0_KAFKACONNECTS_0_NAME: ${CDK_CLUSTERS_0_KAFKACONNECTS_0_NAME}
     depends_on:
       conduktorDB:
-        condition: service_healthy
+        condition: service_started
       kafka1:
         condition: service_started
     restart: always
     networks:
     - data_pipeline_network
-  postgres:
-    image: postgres:14
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER_PG}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PG}
-      POSTGRES_DB: ${POSTGRES_DB_PG}
-    ports:
-    - 5433:5432
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    hostname: mongo
     volumes:
-    - postgres_postgres_postgres_data:/var/lib/postgresql/data
-    networks:
-    - data_pipeline_network
-  pgadmin:
-    image: dpage/pgadmin4:latest
+    - mongo_mongo_mongodb-data:/data/db/
+    - mongo_mongo_mongodb-log:/var/log/mongodb/
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     ports:
-    - 5050:80
+    - 27017:27017
     networks:
     - data_pipeline_network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok'
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
     restart: always
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${ME_CONFIG_MONGODB_ADMINUSERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${ME_CONFIG_MONGODB_ADMINPASSWORD}
+      ME_CONFIG_MONGODB_PORT: ${ME_CONFIG_MONGODB_PORT}
+      ME_CONFIG_MONGODB_SERVER: ${ME_CONFIG_MONGODB_SERVER}
+      ME_CONFIG_BASICAUTH_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_CONFIG_BASICAUTH_PASSWORD}
+    ports:
+    - 8084:8081
+    networks:
+    - data_pipeline_network
+    depends_on:
+      mongo:
+        condition: service_healthy
   jobmanager:
     image: apache/flink:1.16.0
     container_name: flink-jobmanager
@@ -201,7 +208,7 @@ services:
 
       '
     ports:
-    - 8084:8081
+    - 8085:8081
     networks:
     - data_pipeline_network
     volumes:
@@ -235,7 +242,7 @@ services:
     volumes:
     - airflow_airflow-db_airflow_db_data:/var/lib/postgresql/data
     ports:
-    - 5434:5432
+    - 5433:5432
     networks:
     - data_pipeline_network
   airflow-init:
@@ -302,7 +309,7 @@ services:
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
       AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
     ports:
-    - 8085:8080
+    - 8086:8080
     volumes:
     - airflow_airflow-webserver_airflow_dags:/opt/airflow/dags
     - airflow_airflow-webserver_airflow_logs:/opt/airflow/logs
@@ -316,7 +323,8 @@ networks:
 volumes:
   apachekafka_conduktorDB_pg_data: {}
   apachekafka_conduktor-console_conduktor_data: {}
-  postgres_postgres_postgres_data: {}
+  mongo_mongo_mongodb-data: {}
+  mongo_mongo_mongodb-log: {}
   apacheflink_jobmanager_jobmanager-logs: {}
   apacheflink_taskmanager_taskmanager-logs: {}
   airflow_airflow-db_airflow_db_data: {}

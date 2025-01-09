@@ -129,12 +129,6 @@ services:
       POSTGRES_USER: ${CONDUKTOR_POSTGRES_USER}
       POSTGRES_PASSWORD: ${CONDUKTOR_POSTGRES_PASSWORD}
       POSTGRES_HOST_AUTH_METHOD: ${CONDUKTOR_POSTGRES_HOST_AUTH_METHOD}
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U conduktor -d conduktor-console -h localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
  
   conduktor-console:
     image: conduktor/conduktor-console:1.26.0
@@ -155,7 +149,7 @@ services:
       CDK_CLUSTERS_0_KAFKACONNECTS_0_NAME: ${CDK_CLUSTERS_0_KAFKACONNECTS_0_NAME}
     depends_on:
       conduktorDB:
-        condition: service_healthy
+        condition: service_started
       kafka1:
         condition: service_started
     restart: always

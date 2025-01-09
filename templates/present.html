@@ -61,20 +61,27 @@
                 <td>{{ service }}</td>
                 <td>{{ ', '.join(port_list) }}</td>
                 <td>
-                    {% if service == 'nifi' %}
-                        <a href="https://localhost:{{ port_list[1].split(':')[0] }}" target="_blank">https://localhost:{{ port_list[1].split(':')[0] }}</a><br>
-                    {% else %}
-                    {% for port in port_list %}
-                        <a href="http://localhost:{{ port.split(':')[0] }}" target="_blank">http://localhost:{{ port.split(':')[0] }}</a><br>
-                    {% endfor %}
+                    
+
+                {% if service in links %}
+                        {% if service == 'nifi' %}
+                                <a href="https://localhost:{{ links[service] }}" target="_blank">https://localhost:{{ links[service] }}</a><br>
+    
+                            {%else%}
+                        <a href="http://localhost:{{ links[service] }}" target="_blank">http://localhost:{{ links[service] }}</a><br>
                     {% endif%}
+                {% endif%}
                 </td>
                 <td>
                     {% if signin_conf.get(service) %}
                         <ul>
-                            {% for conf in signin_conf[service] %}
-                            <li>{{ conf }}</li>
-                            {% endfor %}
+                            {% if service == 'nifi' %}
+                                <li>username: {{ signin_conf[service][0] }} password: {{ signin_conf[service][1] }}</li>
+                            {% else %}
+                                {% for credential, value in signin_conf[service].items() %}
+                                    <li>{{ credential }}: {{ value }}</li>
+                                {% endfor %}
+                            {% endif %}
                         </ul>
                     {% else %}
                         <!-- Leave blank if no sign-in configurations -->

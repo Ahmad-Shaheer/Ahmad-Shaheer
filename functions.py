@@ -52,14 +52,44 @@ def retrieve_config_details(form_data, docker_config ):
                 "EnvironmentVariables": updated_env_vars
             }
             ports = merge_docker_compose(tool_names)
-        
+
     return updated_config, ports
 
+def refine_access_links(ports):
+    services_w_ports  = ['airflow-webserver', \
+        'jobmanager', 'conduktor-console', 'spark-master', \
+        'superset', 'namenode', 'mongo-express', 'phpmyadmin',\
+        'neo4j', 'nifi', 'pgadmin']
+    extracted_services = {}
+    for service in services_w_ports:
+        if service in ports.keys():
+            if service == 'nifi':
+                extracted_services[service] = ports[service][1].split(':')[0]
+            else:
+                extracted_services[service] = ports[service][0].split(':')[0]  # Take the first value in the list
+    
+        
+    return extracted_services
 
+def get_services(ports):
+    services_alias  = {'airflow-webserver' : 'Airflow', \
+        'jobmanager': 'Apache FLink', 'conduktor-console' : 'Apache Kafka', 'spark-master': 'Apache Spark', \
+        'superset' :'Superset', 'namenode':'Hadoop', 'mongo-express':'MongoDB', 'phpmyadmin':'MySQL',\
+        'neo4j': 'Neo4j', 'nifi': 'NiFi', 'pgadmin' :'Postgres'}
+    extracted_services = {}
+    for service in ports.keys():
+        if service in services_alias.keys():
+            if service == 'nifi':
+                extracted_services[service] = ports[service][1].split(':')[0]
+            else:
+            # For other services, get the port number from the first item (list index 0)
+                extracted_services[service] = ports[service][0].split(':')[0]
+    return extracted_services
+    
 
 def run_docker_compose():
     try:
-        command = "docker compose up -d"
+        command = "docker compose up --build"
         password = "CureMD786"
 
         result = subprocess.run(f"echo {password} | sudo {command}", shell=True, check=True)
@@ -79,7 +109,7 @@ def run_docker_compose():
 
 def get_running_containers():
     # Get the list of all running container names dynamically
-    containers = subprocess.check_output("docker ps --format '{{.Names}}'", shell=True).decode('utf-8').splitlines()
+    containers = subprocess.check_output("sudo docker ps --format '{{.Names}}'", shell=True).decode('utf-8').splitlines()
     return containers
 
 def check_containers():
@@ -87,7 +117,7 @@ def check_containers():
     
     for container in containers:
         # Check if the container is running
-        status = subprocess.check_output(f"docker inspect -f '{{{{.State.Status}}}}' {container}", shell=True).decode('utf-8').strip()
+        status = subprocess.check_output(f"sudo docker inspect -f '{{{{.State.Status}}}}' {container}", shell=True).decode('utf-8').strip()
         if status != "running":
             print(f"{container} is not running. Waiting...")
             return False
@@ -186,7 +216,7 @@ def wait_for_docker_containers(timeout=60):
     while True:
         # Run the docker-compose logs command to fetch logs of all containers
         result = subprocess.run(
-            ['docker-compose', 'logs', '--tail', '10'], capture_output=True, text=True
+            ['sudo docker compose', 'logs', '--tail', '10'], capture_output=True, text=True
         )
         logs = result.stdout
         

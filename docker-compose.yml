@@ -12,38 +12,27 @@ services:
     - 8443:8443
     networks:
     - data_pipeline_network
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
-    hostname: mongodb
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER_PG}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PG}
+      POSTGRES_DB: ${POSTGRES_DB_PG}
+    ports:
+    - 5432:5432
     volumes:
-    - mongodb_mongodb_mongodb-data:/data/db/
-    - mongodb_mongodb_mongodb-log:/var/log/mongodb/
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    ports:
-    - 27017:27017
+    - postgres_postgres_postgres_data:/var/lib/postgresql/data
     networks:
     - data_pipeline_network
-  mongo-express:
-    image: mongo-express:latest
-    container_name: mongo-express
-    restart: always
+  pgadmin:
+    image: dpage/pgadmin4:latest
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${ME_CONFIG_MONGODB_ADMINUSERNAME}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${ME_CONFIG_MONGODB_ADMINPASSWORD}
-      ME_CONFIG_MONGODB_PORT: ${ME_CONFIG_MONGODB_PORT}
-      ME_CONFIG_MONGODB_SERVER: ${ME_CONFIG_MONGODB_SERVER}
-      ME_CONFIG_BASICAUTH_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_CONFIG_BASICAUTH_PASSWORD}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     ports:
-    - 8081:8081
+    - 5050:80
     networks:
     - data_pipeline_network
-    depends_on:
-      mongodb:
-        condition: service_started
   spark-master:
     image: apache/spark:3.4.1
     container_name: spark-master
@@ -56,7 +45,7 @@ services:
     - SPARK_MASTER_PORT=${SPARK_MASTER_PORT}
     - SPARK_MASTER_WEBUI_PORT=${SPARK_MASTER_WEBUI_PORT}
     ports:
-    - 8082:8080
+    - 8081:8080
     - 7077:7077
     networks:
     - data_pipeline_network
@@ -75,11 +64,99 @@ services:
       spark-master:
         condition: service_started
     ports:
-    - 8083:8081
+    - 8082:8081
+    networks:
+    - data_pipeline_network
+  airflow-db:
+    image: postgres:14
+    container_name: airflow-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+    - airflow_airflow-db_airflow_db_data:/var/lib/postgresql/data
+    ports:
+    - 5433:5432
+    networks:
+    - data_pipeline_network
+  airflow-init:
+    image: apache/airflow:2.6.2
+    container_name: airflow-init
+    depends_on:
+      airflow-db:
+        condition: service_started
+    environment:
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
+    command: "bash -c \"\n  echo 'Initializing Airflow DB...' &&\n  airflow db init\
+      \ &&\n  echo 'Creating Airflow admin user...' &&\n  airflow users create --username\
+      \ ${AIRFLOW_ADMIN_USER} --password ${AIRFLOW_ADMIN_PASS} --firstname Airflow\
+      \ --lastname Admin --role Admin --email ${AIRFLOW_ADMIN_EMAIL} &&\n  echo 'Airflow\
+      \ initialization is complete! Container will stay alive for healthcheck...'\
+      \ &&\n  tail -f /dev/null\n\"\n"
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - airflow db check
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+    networks:
+    - data_pipeline_network
+  airflow-scheduler:
+    image: apache/airflow:2.6.2
+    container_name: airflow-scheduler
+    depends_on:
+      airflow-db:
+        condition: service_started
+      airflow-init:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
+    volumes:
+    - airflow_airflow-scheduler_airflow_dags:/opt/airflow/dags
+    - airflow_airflow-scheduler_airflow_logs:/opt/airflow/logs
+    command:
+    - airflow
+    - scheduler
+    networks:
+    - data_pipeline_network
+  airflow-webserver:
+    image: apache/airflow:2.6.2
+    container_name: airflow-webserver
+    depends_on:
+      airflow-scheduler:
+        condition: service_started
+      airflow-init:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
+    ports:
+    - 8083:8080
+    volumes:
+    - airflow_airflow-webserver_airflow_dags:/opt/airflow/dags
+    - airflow_airflow-webserver_airflow_logs:/opt/airflow/logs
+    command:
+    - airflow
+    - webserver
     networks:
     - data_pipeline_network
 networks:
   data_pipeline_network: {}
 volumes:
-  mongodb_mongodb_mongodb-data: {}
-  mongodb_mongodb_mongodb-log: {}
+  postgres_postgres_postgres_data: {}
+  airflow_airflow-db_airflow_db_data: {}
+  airflow_airflow-scheduler_airflow_dags: {}
+  airflow_airflow-scheduler_airflow_logs: {}
+  airflow_airflow-webserver_airflow_dags: {}
+  airflow_airflow-webserver_airflow_logs: {}

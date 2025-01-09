@@ -115,7 +115,7 @@ def get_pipeline(data_type, nature, end_goal, transformation):
             "structured": {
                 "storage": {
                     "yes": {'Ingestion' :'Apache Kafka',
-                            'Processing':' Apache Spark',
+                            'Processing':' Apache Flink',
                             'Storage': 'Postgres'},
                     
                     "no": {'Ingestion' :'Apache Kafka',
@@ -123,7 +123,7 @@ def get_pipeline(data_type, nature, end_goal, transformation):
                 },
                 "dashboard": {
                     "yes": {'Ingestion' :'Apache Kafka',
-                            'Processing':' Apache Spark',
+                            'Processing':' Apache Flink',
                             'Storage': 'Postgres',
                             'Visualization': 'Apache Superset'},
                     
@@ -135,17 +135,17 @@ def get_pipeline(data_type, nature, end_goal, transformation):
                 "graph": {
                     "yes" :{'Ingestion': 'Apache Kafka', 
                              'Storage' : 'Neo4j', 
-                             'Processing': 'Apache Spark'},
+                             'Processing': 'Apache Flink'},
                     
                     "no" : {'Ingestion': 'Apache Kafka', 
                              'Storage' : 'Neo4j', 
-                             'Processing': 'Apache Spark'}
+                             'Processing': 'Apache Flink'}
                 },
             },
             "semi-structured": {
                 "storage": {
                     "yes":{'Ingestion' :'Apache Kafka',
-                            'Processing':' Apache Spark',
+                            'Processing':' Apache Flink',
                             'Storage': 'MongoDB'},
                     
                     "no": {'Ingestion' :'Apache Kafka',
@@ -153,12 +153,12 @@ def get_pipeline(data_type, nature, end_goal, transformation):
                 },
                 "dashboard": {
                     "yes": {'Ingestion' :'Apache Kafka',
-                            'Processing':' Apache Spark',
+                            'Processing':' Apache Flink',
                             'Storage': 'Postgres',
                             'Visualization': 'Apache Superset'},
                     
                     "no": {'Ingestion' :'Apache Kafka',
-                            'Processing':' Apache Spark',  
+                            'Processing':' Apache Flink',  
                             'Storage': 'Postgres',
                             'Visualization': 'Apache Superset'}
                 },
@@ -166,17 +166,17 @@ def get_pipeline(data_type, nature, end_goal, transformation):
                 "graph": {
                     "yes" :{'Ingestion': 'Apache Kafka', 
                              'Storage' : 'Neo4j', 
-                             'Processing': 'Apache Spark'},
+                             'Processing': 'Apache Flink'},
                     
                     "no" : {'Ingestion': 'Apache Kafka', 
                              'Storage' : 'Neo4j', 
-                             'Processing': 'Apache Spark'}
+                             'Processing': 'Apache Flink'}
                 },
             },
             "mixture": {
                 "storage": {
                     "yes": {'Ingestion': 'Apache Kafka',
-                            'Processing': 'Apache Spark',  
+                            'Processing': 'Apache Flink',  
                             'Structured' : 'Postgres', 
                             'Semi': 'MongoDB'},  # requires attention
                     "no": {'Ingestion': 'Apache Kafka', 
@@ -185,18 +185,18 @@ def get_pipeline(data_type, nature, end_goal, transformation):
                 },
                 "dashboard": {
                     "yes": {'Ingestion': 'Apache Kafka',
-                            'Processing': 'Apache Spark',  
+                            'Processing': 'Apache Flink',  
                             'Storage' : 'Postgres', 
                             'Visualization': 'Apache Superset'},
                     "no": {'Ingestion': 'Apache Kafka',
-                            'Processing': 'Apache Spark',  
+                            'Processing': 'Apache Flink',  
                             'Storage' : 'Postgres', 
                             'Visualization': 'Apache Superset'}
                 },
                 
                 "graph": {
                     "yes" :{'Ingestion': 'Apache Kafka',
-                            'Processing': 'Apache Spark',  
+                            'Processing': 'Apache Flink',  
                             'Structured' : 'Postgres', 
                             'Semi': 'MongoDB',
                             'Storage' :'Neo4j'},
@@ -205,7 +205,7 @@ def get_pipeline(data_type, nature, end_goal, transformation):
                             'Structured' : 'Postgres', 
                             'Semi': 'MongoDB', 
                             'Storage' : 'Neo4j', 
-                            'Processing': 'Apache Spark'}
+                            'Processing': 'Apache Flink'}
                 },
             },
         },

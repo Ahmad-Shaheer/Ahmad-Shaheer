@@ -160,6 +160,36 @@
             
         {% endif %}
         
+        {% if pipeline['Alternate Final Structured Storage Tools'] %}
+                <div class="arrow-container">
+                    <span class="arrow">→</span>
+                </div>
+
+            <div class="tool-wrapper">  
+                <div class="tool" id="final-structured-tool" >
+                    <img src="/static/images/{{ pipeline['Final Structured'] }}.svg" style="width: 40px; height: 40px;"/>
+                    {{ pipeline['Final Structured'] }}
+                </div>
+                <div class="tool-type-label">Final Structured Tool</div>
+            </div>
+            
+        {% endif %}
+        
+        {% if pipeline['Alternate Final Semi Storage Tools'] %}
+                <div class="arrow-container">
+                    <span class="arrow">→</span>
+                </div>
+
+            <div class="tool-wrapper">  
+                <div class="tool" id="final-semi-tool" >
+                    <img src="/static/images/{{ pipeline['Final Semi'] }}.svg" style="width: 40px; height: 40px;"/>
+                    {{ pipeline['Final Semi'] }}
+                </div>
+                <div class="tool-type-label">Final Semi Tool</div>
+            </div>
+            
+        {% endif %}
+        
     </div>    
 </div>
 
@@ -183,6 +213,20 @@
             </select>
         </div>
         {% endif %}
+
+
+        {% if pipeline['Alternate Processing Tools'] %}
+        <div class="dropdown-container" id= 'alt-storage' >
+            <label for="processing">Processing Tool:</label>
+            <select id="processin" onchange="handleProcessingChange(this)">
+                <option value="" disabled selected>Select a tool</option>
+                {% for tool in pipeline['Alternate Processing Tools'] %}
+                    <option value="{{ tool }}">{{ tool }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
 
         {% if pipeline['Alternate Structured Storage Tools'] %}
             <div class="dropdown-container">
@@ -237,6 +281,33 @@
         </div>
         {% endif %}
 
+        {% if pipeline['Alternate Final Structured Storage Tools'] %}
+        <div class="dropdown-container" id= 'alt-storage' >
+            <label for="final_structured_storage">Final Structured Storage Tool:</label>
+            <select id="final_structured_storage" onchange="handleFinalStructuredChange(this)">
+                <option value="" disabled selected>Select a tool</option>
+                {% for tool in pipeline['Alternate Final Structured Storage Tools'] %}
+                    <option value="{{ tool }}">{{ tool }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        {% if pipeline['Alternate Final Semi Storage Tools'] %}
+        <div class="dropdown-container" id= 'alt-storage' >
+            <label for="final_semi_storage">Final Semi Storage Tool:</label>
+            <select id="final_semi_storage" onchange="handleFinalSemiChange(this)">
+                <option value="" disabled selected>Select a tool</option>
+                {% for tool in pipeline['Alternate Final Semi Storage Tools'] %}
+                    <option value="{{ tool }}">{{ tool }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+
+        
+
     </div>
 
 
@@ -251,6 +322,8 @@
     <input type="hidden" id="structured_tool_value" name="structured_tool" value="{{ pipeline['Structured'] if pipeline['Structured'] else '' }}">
     <input type="hidden" id="semi_structured_tool_value" name="semi_structured_tool" value="{{ pipeline['Semi'] if pipeline['Semi'] else '' }}">
     <input type="hidden" id="orchestration_tool_value" name="orchestration_tool" value="{{ pipeline['Orchestration'] if pipeline['Orchestration'] else '' }}">
+    <input type="hidden" id="structured_tool_final_value" name="final_structured_tool" value="{{ pipeline['Final Structured'] if pipeline['Final Structured'] else '' }}">
+    <input type="hidden" id="semi_structured_tool_final_value" name="final_semi_tool" value="{{ pipeline['Final Semi'] if pipeline['Semi'] else '' }}">
     
     <input type="hidden" id="ingestion_tool_value_temp" name="ingestion_tool" value="{{ pipeline.Ingestion if pipeline.Ingestion else '' }}">
     <input type="hidden" id="processing_tool_value_temp" name="processing_tool" value="{{ pipeline.Processing if pipeline.Processing else '' }}">
@@ -260,6 +333,8 @@
     <input type="hidden" id="structured_tool_value_temp" name="structured_tool" value="{{ pipeline['Structured'] if pipeline['Structured'] else '' }}">
     <input type="hidden" id="semi_structured_tool_value_temp" name="semi_structured_tool" value="{{ pipeline['Semi'] if pipeline['Semi'] else '' }}">
     <input type="hidden" id="orchestration_tool_value_temp" name="orchestration_tool" value="{{ pipeline['Orchestration'] if pipeline['Orchestration'] else '' }}">
+    <input type="hidden" id="structured_tool_final_value_temp" name="orchestration_tool" value="{{ pipeline['Final Structured'] if pipeline['Final Structured'] else '' }}">
+    <input type="hidden" id="semi_structured_tool_final_value_temp" name="orchestration_tool" value="{{ pipeline['Final Semi'] if pipeline['Semi'] else '' }}">
     
 
 

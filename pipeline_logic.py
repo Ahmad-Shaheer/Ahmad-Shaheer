@@ -178,7 +178,10 @@ def get_pipeline(data_type, nature, end_goal, transformation):
                     "yes": {'Ingestion': 'Apache Kafka',
                             'Processing': 'Apache Flink',  
                             'Structured' : 'Postgres', 
-                            'Semi': 'Mongo'},  # requires attention
+                            'Semi': 'Mongo',
+                            'Final Structured' :'Postgres',
+                            'Final Semi': 'Mongo'
+                            },  # requires attention
                     "no": {'Ingestion': 'Apache Kafka', 
                             'Structured' : 'Postgres', 
                             'Semi': 'Mongo'}
@@ -226,12 +229,23 @@ def get_pipeline(data_type, nature, end_goal, transformation):
          pipe.update({'Alternate Final Storage Tools': ["MySQL",  "Hadoop Standalone"]})
     if pipe.get("Storage") == "Mongo":
          pipe.update({'Alternate Final Storage Tools': ["Cassandra", "Hadoop Standalone"]})
-         
+    
+    if pipe.get("Final Structured") == "Postgres":
+        pipe.update({'Alternate Final Structured Storage Tools': ["MySQL",  "Hadoop Standalone"]})
+    if pipe.get("Final Semi") == "Mongo":
+        pipe.update({'Alternate Final Semi Storage Tools': ["Cassandra", "Hadoop Standalone"]})
+        
+        
+        
     if pipe.get('Intermediate Storage') == "Postgres":
         pipe.update({'Alternate Intermediate Storage Tools': ["MySQL", "Hadoop Standalone"]})
     elif pipe.get("Intermediate Storage") == "Mongo":
         pipe.update({'Alternate Intermediate Storage Tools': ["Cassandra", "Hadoop Standalone"]})
-    
+    if pipe.get('Processing') == "Apache Flink":
+        pipe.update({'Alternate Processing Tools': ["Apache Spark"]})
+    if pipe.get('Processing') == "Apache Spark":
+        pipe.update({'Alternate Processing Tools': ["Apache Flink"]})
+        
     pipe.update({'Orchestration': 'Airflow'})
     pipe.update({'Alternate Orchestration': ['Prefect']})
     return pipe

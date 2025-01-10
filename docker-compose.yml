@@ -1,64 +1,36 @@
 version: '3.9'
 services:
-  postgres:
-    image: postgres:14
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_service
+    command: --default-authentication-plugin=mysql_native_password
     environment:
-      POSTGRES_USER: ${POSTGRES_USER_PG}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PG}
-      POSTGRES_DB: ${POSTGRES_DB_PG}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-    - 5432:5432
+    - 3306:3306
     volumes:
-    - postgres_postgres_postgres_data:/var/lib/postgresql/data
+    - mysql_mysql_mysql_data:/var/lib/mysql
     networks:
     - data_pipeline_network
-  pgadmin:
-    image: dpage/pgadmin4:latest
+    restart: unless-stopped
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: mysql_gui
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PMA_HOST: ${PMA_HOST}
+      PMA_USER: ${PMA_USER}
+      PMA_PASSWORD: ${PMA_PASSWORD}
     ports:
-    - 5050:80
-    networks:
-    - data_pipeline_network
-    restart: always
-  mongo:
-    image: mongo:latest
-    container_name: mongo
-    hostname: mongo
-    volumes:
-    - mongo_mongo_mongodb-data:/data/db/
-    - mongo_mongo_mongodb-log:/var/log/mongodb/
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    ports:
-    - 27017:27017
-    networks:
-    - data_pipeline_network
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok'
-      interval: 10s
-      timeout: 5s
-      retries: 5
-  mongo-express:
-    image: mongo-express:latest
-    container_name: mongo-express
-    restart: always
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${ME_CONFIG_MONGODB_ADMINUSERNAME}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${ME_CONFIG_MONGODB_ADMINPASSWORD}
-      ME_CONFIG_MONGODB_PORT: ${ME_CONFIG_MONGODB_PORT}
-      ME_CONFIG_MONGODB_SERVER: ${ME_CONFIG_MONGODB_SERVER}
-      ME_CONFIG_BASICAUTH_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_CONFIG_BASICAUTH_PASSWORD}
-    ports:
-    - 8081:8081
-    networks:
-    - data_pipeline_network
+    - 8080:80
     depends_on:
-      mongo:
-        condition: service_healthy
+      mysql:
+        condition: service_started
+    networks:
+    - data_pipeline_network
+    restart: unless-stopped
   airflow-db:
     image: postgres:14
     container_name: airflow-db
@@ -69,7 +41,7 @@ services:
     volumes:
     - airflow_airflow-db_airflow_db_data:/var/lib/postgresql/data
     ports:
-    - 5433:5432
+    - 5432:5432
     networks:
     - data_pipeline_network
   airflow-init:
@@ -136,7 +108,7 @@ services:
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
       AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
     ports:
-    - 8080:8080
+    - 8081:8080
     volumes:
     - airflow_airflow-webserver_airflow_dags:/opt/airflow/dags
     - airflow_airflow-webserver_airflow_logs:/opt/airflow/logs
@@ -148,9 +120,7 @@ services:
 networks:
   data_pipeline_network: {}
 volumes:
-  postgres_postgres_postgres_data: {}
-  mongo_mongo_mongodb-data: {}
-  mongo_mongo_mongodb-log: {}
+  mysql_mysql_mysql_data: {}
   airflow_airflow-db_airflow_db_data: {}
   airflow_airflow-scheduler_airflow_dags: {}
   airflow_airflow-scheduler_airflow_logs: {}

@@ -24,6 +24,21 @@ function handleOrchestrationChange(selectElement) {
   updateScreenOrchestrationTool(selectElement);
 }
 
+function handleFinalStructuredChange(selectElement){
+  updateFinalStructuredTool(selectElement);
+  updateScreenFinalStructuredTool(selectElement);
+}
+
+function handleFinalSemiChange(selectElement){
+  updateFinalSemiTool(selectElement);
+  updateScreenFinalSemiTool(selectElement);
+}
+
+function handleProcessingChange(selectElement) {
+  updateProcessingTool(selectElement);
+  updateScreenProcessingTool(selectElement);
+
+}
 
 
 function updateOrchestrationTool(selectElement) {
@@ -52,6 +67,24 @@ function updateSemiTool(selectElement) {
     document.getElementById('semi_structured_tool_value_temp').value = document.getElementById('semi_structured_tool_value').value
     document.getElementById('semi_structured_tool_value').value = selectElement.value;
     console.log("Ingestion tool value successfully updated to:", selectElement.value);
+  }
+  
+function updateFinalSemiTool(selectElement) {
+    document.getElementById('semi_structured_tool_final_value_temp').value = document.getElementById('semi_structured_tool_final_value').value
+    document.getElementById('semi_structured_tool_final_value').value = selectElement.value;
+    console.log("final semi tool value successfully updated to:", selectElement.value);
+  }
+  
+function updateFinalStructuredTool(selectElement) {
+    document.getElementById('structured_tool_final_value_temp').value = document.getElementById('structured_tool_final_value').value
+    document.getElementById('structured_tool_final_value').value = selectElement.value;
+    console.log("final structured tool value successfully updated to:", selectElement.value);
+  }
+  
+function updateProcessingTool(selectElement) {
+    document.getElementById('processing_tool_value_temp').value = document.getElementById('processing_tool_value').value
+    document.getElementById('processing_tool_value').value = selectElement.value;
+    console.log("Processing tool value successfully updated to:", selectElement.value);
   }
   
 
@@ -147,6 +180,64 @@ function updateScreenSemiTool(selectElement) {
   selectElement.querySelector(`option[value="${selectedTool}"]`).remove();
   selectElement.selectedIndex = 0;
 }
+
+function updateScreenFinalSemiTool(selectElement) {
+  const selectedTool = selectElement.value;
+  const previousTool = document.getElementById('semi_structured_tool_final_value_temp').value;
+  currentSemiTool = selectedTool;
+  const semiToolElement = document.getElementById('final-semi-tool');
+  semiToolElement.innerHTML = `
+    <img src="/static/images/${currentSemiTool}.svg" alt="${currentSemiTool} Icon" style="width: 40px; height: 40px;"/>
+    ${currentSemiTool}
+    `;
+
+  const option = document.createElement('option');
+  option.value = previousTool;
+  option.textContent = previousTool;
+  selectElement.appendChild(option);
+  selectElement.querySelector(`option[value="${selectedTool}"]`).remove();
+  selectElement.selectedIndex = 0;
+}
+
+function updateScreenFinalStructuredTool(selectElement) {
+  const selectedTool = selectElement.value;
+  const previousTool = document.getElementById('structured_tool_final_value_temp').value;
+  currentSemiTool = selectedTool;
+  const semiToolElement = document.getElementById('final-structured-tool');
+  semiToolElement.innerHTML = `
+    <img src="/static/images/${currentSemiTool}.svg" alt="${currentSemiTool} Icon" style="width: 40px; height: 40px;"/>
+    ${currentSemiTool}
+    `;
+
+  const option = document.createElement('option');
+  option.value = previousTool;
+  option.textContent = previousTool;
+  selectElement.appendChild(option);
+  selectElement.querySelector(`option[value="${selectedTool}"]`).remove();
+  selectElement.selectedIndex = 0;
+}
+
+function updateScreenProcessingTool(selectElement) {
+  const selectedTool = selectElement.value;
+  const previousTool = document.getElementById('processing_tool_value_temp').value;
+  currentSemiTool = selectedTool;
+  const semiToolElement = document.getElementById('processing-tool');
+  semiToolElement.innerHTML = `
+    <img src="/static/images/${currentSemiTool}.svg" alt="${currentSemiTool} Icon" style="width: 40px; height: 40px;"/>
+    ${currentSemiTool}
+    `;
+
+  const option = document.createElement('option');
+  option.value = previousTool;
+  option.textContent = previousTool;
+  selectElement.appendChild(option);
+  selectElement.querySelector(`option[value="${selectedTool}"]`).remove();
+  selectElement.selectedIndex = 0;
+}
+
+
+
+
 
 async function sendMessage() {
 

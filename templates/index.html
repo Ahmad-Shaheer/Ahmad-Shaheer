@@ -10,35 +10,35 @@
   <link rel = "stylesheet"  href = "/static/style/index.css"> 
  
 </head>
-<h1> Pipeline Form </h1>
+<h1> Deployment Agent </h1>
 <body>
   <form action="/submit_form" method="POST">
 
-    <label for="question1">In what Format Have you Stored Your Data?</label>
+    <label for="question1">Source Data Format</label>
       <select id="question1" name="data_type" required>
         <option value="" selected disabled>-- Select an Option --</option>
         <option value="structured">Structured</option>
         <option value="semi-structured">Semi-Structured</option>
-        <option value="mixture">A mixture of Two or More</option>
+        <option value="mixture">Mixture of Both</option>
       </select>
     
-    <label for="question2">What do you intend to do with the data?</label>
+    <label for="question2">End Goal for Data</label>
       <select id="question2" name="end_goal" required>
         <option value="" selected disabled>-- Select an Option --</option>
-        <option value="storage">Eventually store data in a Database</option>
-        <option value="dashboard">Present information to a Dashboard for Analytics</option>
-        <option value="graph">Store Information in a Graph Based Database</option>
+        <option value="storage">Store in a Database</option>
+        <option value="dashboard"> Dashboard/Analytics </option>
+        <option value="graph">Represent as Graph</option>
 
       </select>
   
-    <label for="question3">What is the nature of incoming data?</label>
+    <label for="question3">Nature of Data?</label>
       <select id="question3" name="nature" required>
         <option value="" selected disabled>-- Select an Option --</option>
         <option value="batch">Batch Data</option>
         <option value="streaming">Streaming Data</option>
       </select>
   
-    <label for="question4" required>Do you need to implement data transformations?</label>
+    <label for="question4" required>Transformations Needed?</label>
       <select id="question4" name="transformation" required>
         <option value="" selected disabled>-- Select an Option --</option>
         <option value="yes">Yes</option>

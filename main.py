@@ -84,8 +84,8 @@ def deploy():
   
   generate_env_file(updated_config, output_file=".env")
 
-  thread = threading.Thread(target=run_docker_compose)
-  thread.start()
+  # thread = threading.Thread(target=run_docker_compose)
+  # thread.start()
     
   return redirect(url_for('final'))
 

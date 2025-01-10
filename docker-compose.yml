@@ -159,43 +159,19 @@ services:
     restart: always
     networks:
     - data_pipeline_network
-  mongo:
-    image: mongo:latest
-    container_name: mongo
-    hostname: mongo
+  neo4j:
+    image: neo4j:5.7
+    container_name: neo4j_service
+    environment:
+      NEO4J_AUTH: ${NEO4J_AUTH}
+    ports:
+    - 7474:7474
+    - 7687:7687
     volumes:
-    - mongo_mongo_mongodb-data:/data/db/
-    - mongo_mongo_mongodb-log:/var/log/mongodb/
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    ports:
-    - 27017:27017
+    - neo4j_neo4j_neo4j_data:/data
     networks:
     - data_pipeline_network
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok'
-      interval: 10s
-      timeout: 5s
-      retries: 5
-  mongo-express:
-    image: mongo-express:latest
-    container_name: mongo-express
-    restart: always
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${ME_CONFIG_MONGODB_ADMINUSERNAME}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${ME_CONFIG_MONGODB_ADMINPASSWORD}
-      ME_CONFIG_MONGODB_PORT: ${ME_CONFIG_MONGODB_PORT}
-      ME_CONFIG_MONGODB_SERVER: ${ME_CONFIG_MONGODB_SERVER}
-      ME_CONFIG_BASICAUTH_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_CONFIG_BASICAUTH_PASSWORD}
-    ports:
-    - 8084:8081
-    networks:
-    - data_pipeline_network
-    depends_on:
-      mongo:
-        condition: service_healthy
+    restart: unless-stopped
   jobmanager:
     image: apache/flink:1.16.0
     container_name: flink-jobmanager
@@ -208,7 +184,7 @@ services:
 
       '
     ports:
-    - 8085:8081
+    - 8084:8081
     networks:
     - data_pipeline_network
     volumes:
@@ -232,103 +208,72 @@ services:
     - data_pipeline_network
     volumes:
     - apacheflink_taskmanager_taskmanager-logs:/opt/flink/log
-  airflow-db:
+  postgres:
     image: postgres:14
-    container_name: airflow-db
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-    - airflow_airflow-db_airflow_db_data:/var/lib/postgresql/data
+      POSTGRES_USER: ${POSTGRES_USER_PG}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PG}
+      POSTGRES_DB: ${POSTGRES_DB_PG}
     ports:
     - 5433:5432
-    networks:
-    - data_pipeline_network
-  airflow-init:
-    image: apache/airflow:2.6.2
-    container_name: airflow-init
-    depends_on:
-      airflow-db:
-        condition: service_started
-    environment:
-      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
-      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
-      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
-    command: "bash -c \"\n  echo 'Initializing Airflow DB...' &&\n  airflow db init\
-      \ &&\n  echo 'Creating Airflow admin user...' &&\n  airflow users create --username\
-      \ ${AIRFLOW_ADMIN_USER} --password ${AIRFLOW_ADMIN_PASS} --firstname Airflow\
-      \ --lastname Admin --role Admin --email ${AIRFLOW_ADMIN_EMAIL} &&\n  echo 'Airflow\
-      \ initialization is complete! Container will stay alive for healthcheck...'\
-      \ &&\n  tail -f /dev/null\n\"\n"
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - airflow db check
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 5s
-    networks:
-    - data_pipeline_network
-  airflow-scheduler:
-    image: apache/airflow:2.6.2
-    container_name: airflow-scheduler
-    depends_on:
-      airflow-db:
-        condition: service_started
-      airflow-init:
-        condition: service_healthy
-    restart: always
-    environment:
-      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
-      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
-      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
     volumes:
-    - airflow_airflow-scheduler_airflow_dags:/opt/airflow/dags
-    - airflow_airflow-scheduler_airflow_logs:/opt/airflow/logs
-    command:
-    - airflow
-    - scheduler
+    - postgres_postgres_postgres_data:/var/lib/postgresql/data
     networks:
     - data_pipeline_network
-  airflow-webserver:
-    image: apache/airflow:2.6.2
-    container_name: airflow-webserver
-    depends_on:
-      airflow-scheduler:
-        condition: service_started
-      airflow-init:
-        condition: service_healthy
-    restart: always
+  pgadmin:
+    image: dpage/pgadmin4:latest
     environment:
-      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
-      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
-      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     ports:
-    - 8086:8080
-    volumes:
-    - airflow_airflow-webserver_airflow_dags:/opt/airflow/dags
-    - airflow_airflow-webserver_airflow_logs:/opt/airflow/logs
-    command:
-    - airflow
-    - webserver
+    - 5050:80
     networks:
     - data_pipeline_network
+    restart: always
+  cassandra:
+    image: cassandra:4.0
+    container_name: cassandra_service
+    environment:
+      CASSANDRA_CLUSTER_NAME: ${CASSANDRA_CLUSTER_NAME}
+      CASSANDRA_SEEDS: ${CASSANDRA_SEEDS}
+    ports:
+    - 9042:9042
+    volumes:
+    - cassandra_cassandra_cassandra_data:/var/lib/cassandra
+    networks:
+    - data_pipeline_network
+    restart: unless-stopped
+  prefect-orion:
+    image: prefecthq/prefect:2-latest
+    container_name: prefect-orion
+    command: "bash -c \"\n  prefect server start --host 0.0.0.0 --port 4200\n\"\n"
+    ports:
+    - 4200:4200
+    volumes:
+    - prefect_prefect-orion_prefect_data:/root/.prefect
+    networks:
+    - data_pipeline_network
+  prefect-worker:
+    image: prefecthq/prefect:2-latest
+    container_name: prefect-worker
+    depends_on:
+      prefect-orion:
+        condition: service_started
+    environment:
+      PREFECT_API_URL: http://prefect-orion:4200/api
+    command: "bash -c \"\n  echo 'Waiting 10 seconds for Orion...' &&\n  sleep 10\
+      \ &&\n  prefect worker start -p default\n\"\n"
+    networks:
+    - data_pipeline_network
+    restart: always
 networks:
   data_pipeline_network: {}
 volumes:
   apachekafka_conduktorDB_pg_data: {}
   apachekafka_conduktor-console_conduktor_data: {}
-  mongo_mongo_mongodb-data: {}
-  mongo_mongo_mongodb-log: {}
+  neo4j_neo4j_neo4j_data: {}
   apacheflink_jobmanager_jobmanager-logs: {}
   apacheflink_taskmanager_taskmanager-logs: {}
-  airflow_airflow-db_airflow_db_data: {}
-  airflow_airflow-scheduler_airflow_dags: {}
-  airflow_airflow-scheduler_airflow_logs: {}
-  airflow_airflow-webserver_airflow_dags: {}
-  airflow_airflow-webserver_airflow_logs: {}
+  postgres_postgres_postgres_data: {}
+  cassandra_cassandra_cassandra_data: {}
+  prefect_prefect-orion_prefect_data: {}

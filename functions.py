@@ -58,7 +58,7 @@ def refine_access_links(ports):
     services_w_ports  = ['airflow-webserver', \
         'jobmanager', 'conduktor-console', 'spark-master', \
         'superset', 'namenode', 'mongo-express', 'phpmyadmin',\
-        'neo4j', 'nifi', 'pgadmin']
+        'neo4j', 'nifi', 'pgadmin', 'prefect-orion']
     extracted_services = {}
     for service in services_w_ports:
         if service in ports.keys():

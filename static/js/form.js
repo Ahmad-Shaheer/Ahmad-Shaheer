@@ -81,7 +81,7 @@ function updateScreenIntermediateTool(selectElement) {
     const intermediateToolElement = document.getElementById('intermediate-storage-tool');
     intermediateToolElement.innerHTML = `
     <img src="/static/images/${currentIntermediateTool}.svg" alt="${currentIntermediateTool} Icon" style="width: 40px; height: 40px;"/>
-    <strong>Intermediate Storage:</strong> ${currentIntermediateTool}
+    <strong>Structured Storage:</strong> ${currentIntermediateTool}
     `;
 
     const option = document.createElement('option');
@@ -265,7 +265,6 @@ optionButtons.forEach(button => {
     }
   });
 });
-
 
 
 

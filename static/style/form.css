@@ -4,9 +4,9 @@
     --black: #1a1a1a;
 }
 body.chat-open {
-.chat-window {
-    display: flex;
-}
+    .chat-window {
+        display: flex;
+    }
 }
 
 .chat-button {
@@ -14,7 +14,7 @@ body.chat-open {
     bottom: 60px;
     right: 20px;
     z-index: 998;
-    background-color: var(--black);
+    background-color:  lightgray;
     color: white;
     height: 80px;
     width: 80px;
@@ -35,7 +35,9 @@ body.chat-open {
 
 .chat-window {
 
-   
+    * {
+        font-family: "Raleway", sans-serif;
+    }
 
     display: none;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
@@ -76,6 +78,8 @@ body.chat-open {
 
             p {
                 background-color: var(--grey);
+                color: black;
+                text-align: left;
             }
 
             
@@ -84,10 +88,12 @@ body.chat-open {
         div.user {
             display: flex;
             justify-content: flex-end;
+            
 
             p {
                 background-color: var(--blue);
                 color: white;
+                text-align: left;
             }
         }
 
@@ -154,6 +160,10 @@ body.chat-open {
     animation: l1 1.5s steps(4) infinite;
   }
   @keyframes l1 {to{clip-path: inset(0 -34% 0 0)}}
+
+
+
+
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
@@ -168,8 +178,7 @@ h1 {
     font-size: 1.5remrem;
     margin-top: 20px;
     margin-bottom: 40px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    text-transform: none;
     color: #f0f0f0;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
@@ -180,8 +189,8 @@ h1 {
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    gap: 30px;
-    padding: 40px;
+    gap: 15px;
+    padding: 20px;
     max-width: 90%;
     margin: 0 auto;
     border: 2px solid rgba(255, 255, 255, 0.2);
@@ -192,21 +201,34 @@ h1 {
 
 /* Individual tool styling */
 .tool {
-    padding: 20px 30px;
+    padding: 10px 15px;
     background: linear-gradient(145deg, #4CAF50, #6BCF75);
     color: #fff;
     font-size: 1.2rem;
     font-weight: bold;
     text-align: center;
     border-radius: 10px;
-    min-width: 200px;
+    min-width:  150px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     transition: transform 0.3s, box-shadow 0.3s;
+    position: relative; /* Makes dropdown position relative to the tool */
+    cursor: pointer;
 }
 
-.tool:hover {
-    transform: scale(1.1);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+.orchestration .tool {
+    display: block; /* Forces it to take up the entire width */
+    width: calc(100% - 40px); /* Slightly wider than other tools */
+    max-width:  350px; /* Optional: Limit its width */
+    margin: 20px auto; /* Centers the tool horizontally and adds spacing */
+    padding: 10px 15px; /* Adjust padding for a larger look */
+    background: linear-gradient(145deg, #6BCF75, #4CAF50); /* Reverse the gradient for variation */
+    color: #fff;
+    font-size: 1.2rem; /* Slightly larger text */
+    font-weight: bold;
+    text-align: center;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4); /* Stronger shadow for emphasis */
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
 /* Arrows between tools */
@@ -230,18 +252,102 @@ h1 {
 }
 
 /* Dropdown container */
-.dropdown-container {
-    margin-top: 20px;
-    color: #f0f0f0;
-    font-size: 1rem;
+.selection {
+    display: flex;
+    flex-direction: column; /* Stack dropdowns vertically */
+    gap: 20px; /* Add spacing between dropdowns */
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 600px; /* Limit the width for better readability */
+    border: 1px solid #ddd; /* Subtle border around the section */
+    border-radius: 8px; /* Rounded corners */
+    background-color: #160e0e; /* Light background for contrast */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
+.selection-heading {
+    text-align: center;
+    margin-bottom: 5px;
 }
 
-/* Dropdown styling */
+.selection-heading h2 {
+    font-size: 1.5rem;
+    color: #ffffff;
+    margin-bottom: 5px;
+}
+
+.selection-heading .subheading {
+    font-size: 1.2rem;
+    color: #ffffff;
+    margin: 0;
+}
+
+
+.dropdown-container {
+    display: flex;
+    flex-direction: column; /* Ensure label and dropdown are stacked */
+    align-items: flex-start; /* Align label and dropdown to the left */
+    gap: 8px; 
+    color:  rgba(255, 255, 255, 0.1);/* Add space between label and select */
+}
+
+.dropdown-container label {
+    font-size: 1rem;
+    color:  #ffffff; /* Darker text for labels */
+    font-weight: bold;
+}
+
+.dropdown-container select {
+    width: 100%; /* Full width for dropdowns */
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.1);    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Slight inner shadow for depth */
+    cursor: pointer;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.dropdown-container select:hover {
+    border-color: #007bff; /* Highlight border on hover */
+}
+
+
+.subheading {
+    font-size: 1.5rem;
+    color: #ffffff; /* Muted text color */
+    margin-top: 10px;
+    margin-bottom: 20px;
+    text-align: center; /* Aligns the text to the center */
+    font-style: italic; /* Optional: Makes it italic for emphasis */
+}
+
+.mega-container {
+    margin: 20px auto;
+    padding: 20px;
+    max-width: 95%;
+    border: 1px solid #ccc;
+    border-radius: 14px;
+    background-color: #160e0e;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mega-container h1 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.mega-container .description {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 20px;
+    text-align: center;
+}
 select {
     padding: 10px;
     border: none;
     border-radius: 5px;
-    background: #4CAF50;
+    background: #5a5656;
     color: white;
     font-size: 1rem;
     cursor: pointer;
@@ -249,7 +355,7 @@ select {
 
 select:focus {
     outline: none;
-    background: #6BCF75;
+    background: #48414d;
 }
 
 label {
@@ -262,12 +368,12 @@ label {
 button[type="submit"] {
     margin-top: 30px;
     padding: 15px 30px;
-    background: linear-gradient(145deg, #007BFF, #0056B3);
+    background: linear-gradient(145deg, #6BCF75, #4CAF50); /* Reverse the gradient for variation */
     color: white;
     font-size: 1.2rem;
     font-weight: bold;
     border: none;
-    border-radius: 50px;
+    border-radius: 20px;
     cursor: pointer;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     transition: transform 0.3s, box-shadow 0.3s;
@@ -284,7 +390,7 @@ button[type="submit"]:hover {
     }
 
     .tool {
-        min-width: 150px;
+        min-width: 125px;
         font-size: 1rem;
     }
 
@@ -319,7 +425,7 @@ button[type="submit"]:hover {
       font-size: 18px; 
       box-shadow: 0 2px 4px rgba(82, 201, 149, 0.1); 
       width: 100%;
-      max-width: 600px; /* Centered layout */
+      max-width: 43%; /* Centered layout */
       margin: 18px auto;
     }
   
@@ -331,14 +437,14 @@ button[type="submit"]:hover {
   
     .options {
       display: flex;
-      justify-content: space-between; 
+      justify-content: flex-start;
       flex-wrap: wrap; 
-      padding: 8px 16px; 
-      gap: 10px; 
+      padding: 8px 12px; 
+      gap: 7px; 
     }
   
     .option {
-  
+      margin-right: 30px;
       background-color: rgb(113, 92, 233); /* White background */
       border: 1px solid #1c74d3; /* Blue border */
       border-radius: 10px; /* Rounded corners */

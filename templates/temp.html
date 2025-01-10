@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipeline Visualization</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="form.css">
+    <style>
+        /* Additional CSS for updates */
+        .tooltip {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        .tool:hover .tooltip {
+            display: block;
+        }
+        .tool {
+            cursor: pointer;
+        }
+        .arrow {
+            color: #fff;
+            font-size: 2rem;
+            animation: bounce 1.5s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Pipeline Visualization</h1>
+        <p class="subtitle">Data Pipeline Architecture for Real-Time Processing</p>
+    </header>
+
+    <main>
+        <section class="pipeline">
+            <div class="tool orchestration" id="orchestration-tool">
+                <img src="/static/images/{{ pipeline.Orchestration }}.svg" alt="Orchestration Tool">
+                <strong>Orchestration:</strong> {{ pipeline.Orchestration }}
+                <div class="tooltip">Manage workflow scheduling and execution</div>
+            </div>
+
+            <div class="arrow">&#8595;</div>
+
+            <div class="tool" id="ingestion-tool" onclick="showDropdown('ingestion-dropdown')">
+                <img src="/static/images/{{ pipeline.Ingestion }}.svg" alt="Ingestion Tool">
+                <strong>Ingestion:</strong> {{ pipeline.Ingestion }}
+                <div class="tooltip">Handle data input from various sources</div>
+            </div>
+            <div class="dropdown" id="ingestion-dropdown" style="display: none;">
+                <select>
+                    {% for tool in pipeline['Alternate Ingestion Tools'] %}
+                        <option value="{{ tool }}">{{ tool }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="arrow">&#8595;</div>
+
+            <div class="tool" id="intermediate-storage-tool" onclick="showDropdown('intermediate-dropdown')">
+                <img src="/static/images/{{ pipeline['Intermediate Storage'] }}.svg" alt="Intermediate Storage Tool">
+                <strong>Intermediate Storage:</strong> {{ pipeline['Intermediate Storage'] }}
+                <div class="tooltip">Temporary storage for processing</div>
+            </div>
+            <div class="dropdown" id="intermediate-dropdown" style="display: none;">
+                <select>
+                    {% for tool in pipeline['Alternate Intermediate Storage Tools'] %}
+                        <option value="{{ tool }}">{{ tool }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="arrow">&#8595;</div>
+
+            <div class="tool" id="processing-tool" onclick="showDropdown('processing-dropdown')">
+                <img src="/static/images/{{ pipeline.Processing }}.svg" alt="Processing Tool">
+                <strong>Processing:</strong> {{ pipeline.Processing }}
+                <div class="tooltip">Transform and analyze data</div>
+            </div>
+            <div class="dropdown" id="processing-dropdown" style="display: none;">
+                <select>
+                    {% for tool in pipeline['Alternate Processing Tools'] %}
+                        <option value="{{ tool }}">{{ tool }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="arrow">&#8595;</div>
+
+            <div class="tool" id="storage-tool" onclick="showDropdown('storage-dropdown')">
+                <img src="/static/images/{{ pipeline.Storage }}.svg" alt="Storage Tool">
+                <strong>Storage:</strong> {{ pipeline.Storage }}
+                <div class="tooltip">Store processed data</div>
+            </div>
+            <div class="dropdown" id="storage-dropdown" style="display: none;">
+                <select>
+                    {% for tool in pipeline['Alternate Storage Tools'] %}
+                        <option value="{{ tool }}">{{ tool }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function showDropdown(id) {
+            const dropdown = document.getElementById(id);
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+    </script>
+</body>
+</html>

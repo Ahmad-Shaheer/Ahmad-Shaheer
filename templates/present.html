@@ -4,40 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Docker Service Ports</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            color: #333;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
-        }
-        td a {
-            color: #1e90ff;
-            text-decoration: none;
-        }
-        td a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link rel = "stylesheet"  href = "/static/style/deploy.css"> 
+
+           
 </head>
 <body>
 
@@ -91,6 +60,55 @@
             {% endfor %}
         </tbody>
     </table>
+    <div class="coach">
+        <div class='flowrence'>
+          Flowrence
+        </div>
+      
+        <div class='flowrence_prompt'>
+          Stuck? Ask Flowrence for help with your data pipeline questions!
+        </div>
+        <br>
+      
+        <div class="options">
+              <button class="option" id="q1" type="button" >What is an access port ?</button>
 
+              <button class="option" id="q2" type="button" >Can I change my credentials? </button>
+ 
+              <button class="option" id="q3" type="button" >Why don't all services have access links?</button>
+    
+          </div>
+          
+      </div>
+    
+    <section class="chat-window">
+        <button class="close" type = button>x close</button>
+        <div class="chat">
+            <div class="model">
+                <p>Hi, how can I help you?</p>
+            </div>
+            
+        </div>
+        <div class="input-area">
+            <input placeholder="Ask me anything..." type="text">
+            <button type = button>
+                <img src="/static/images/send.svg" style="width: 30px; height:30px;"/>
+            </button>
+        </div>
+      </section>
+      
+      <div class="chat-button" type = button>
+        <img src="/static/images/chat.svg" style="width: 30px; height: 30px;"/>
+      </div>
+      
+      <script type="importmap">
+        {
+          "imports": {
+            "@google/generative-ai": "https://esm.run/@google/generative-ai"
+          }
+        }
+      </script>
+    <script src = '/static/js/index.js' type = module> </script>
+    <script src = '/static/js/deploy.js' type = module> </script>
 </body>
 </html>

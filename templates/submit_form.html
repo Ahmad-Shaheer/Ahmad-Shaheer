@@ -10,10 +10,18 @@
 
 </head>
 <body>
-    <h1>Pipeline Visualization</h1>
+    <h1>Services/Tool Selection</h1>
+    <p class="subheading">
+        This is the pipeline we recommend, but you may feel free to change the options as needed.
+    </p>
+
+
     <form action="/config" method="POST">
 
-
+<div class="mega-container">
+    <!-- Title for the Mega Container -->
+    <h1>Pipeline Overview</h1>
+    
         <div class = 'orchestration'>
             {% if pipeline.Orchestration %}
                 <div class="tool" id="orchestration-tool">
@@ -52,7 +60,10 @@
             <div class="tool" id="intermediate-storage-tool" >
                 <img src="/static/images/{{ pipeline['Intermediate Storage'] }}.svg"  style="width: 40px; height: 40px;"/>
                 <strong>Intermediate Storage:</strong> {{ pipeline['Intermediate Storage'] }}
+               
             </div>
+
+            
             
         {% endif %}
 
@@ -117,9 +128,15 @@
         {% endif %}
         
     </div>    
-    
+</div>
     <div class = 'selection'>
-
+        <div class="selection-heading">
+            <h2>Customize Your Pipeline</h2>
+            <p class="subheading">
+                You can change some of these tools based on your preferences.
+            </p>
+        </div>
+        
         {% if pipeline['Orchestration'] %}
         <div class="dropdown-container">
             <label for="alternate_orchestration">Orchestration Tool:</label>
@@ -174,7 +191,7 @@
 
 
         {% if pipeline['Intermediate Storage'] %}
-        <div class="dropdown-container">
+        <div class="dropdown-container" id= 'alt-storage' >
             <label for="alternate_intermediate_storage">Intermediate Storage Tool:</label>
             <select id="alternate_intermediate_storage" onchange="handleIntermediateChange(this)">
                 <option value="" disabled selected>Select a tool</option>
@@ -184,6 +201,8 @@
             </select>
         </div>
         {% endif %}
+
+    </div>
 
 
 
@@ -225,19 +244,19 @@
   
     <div class="options">
         {% if pipeline.Ingestion %}
-          <button class="option" id="ingestionToolOption" type="button" data-tool="{{ pipeline.Ingestion }}">What is the benefit of using the {{ pipeline.Ingestion }} ingestion tool in my pipeline?</button>
+          <button class="option" id="ingestionToolOption" type="button" data-tool="{{ pipeline.Ingestion }}">What is the benefit of using {{ pipeline.Ingestion }}?</button>
         {% endif %}
       
         {% if pipeline.Processing %}
-          <button class="option" id="processingToolOption" type="button" data-tool="{{ pipeline.Processing }}">What is the use of the {{ pipeline.Processing }} processing tool in my pipeline?</button>
+          <button class="option" id="processingToolOption" type="button" data-tool="{{ pipeline.Processing }}">What role does {{ pipeline.Processing }} play? </button>
         {% endif %}
       
         {% if pipeline.Storage %}
-          <button class="option" id="storageToolOption" type="button" data-tool="{{ pipeline.Storage }}">What is the role of the {{ pipeline.Storage }} storage tool in my pipeline?</button>
+          <button class="option" id="storageToolOption" type="button" data-tool="{{ pipeline.Storage }}">Why is {{ pipeline.Storage }} recommended?</button>
         {% endif %}
       
         {% if pipeline['Orchestration'] %}
-          <button class="option" id="orchestrationToolOption" type="button" data-tool="{{ pipeline['Orchestration'] }}">What role does the {{ pipeline['Orchestration'] }} orchestration tool play in my pipeline?</button>
+          <button class="option" id="orchestrationToolOption" type="button" data-tool="{{ pipeline['Orchestration'] }}">Why do I need {{ pipeline['Orchestration'] }}?</button>
         {% endif %}
       </div>
       
@@ -254,13 +273,13 @@
     <div class="input-area">
         <input placeholder="Ask me anything..." type="text">
         <button type = button>
-            <img src="send-icon.png" alt="send">
+            <img src="/static/images/send.svg" style="width: 30px; height:30px;"/>
         </button>
     </div>
   </section>
   
   <div class="chat-button" type = button>
-    <img src="chat-icon.png" alt="start chat">
+    <img src="/static/images/chat.svg" style="width: 30px; height: 30px;"/>
   </div>
   
   <script type="importmap">

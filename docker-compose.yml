@@ -2,7 +2,7 @@ version: '3.9'
 services:
   nifi:
     build:
-      context: docker_templates/nifi
+      context: docker_templates\nifi
     container_name: nifi
     environment:
     - NIFI_WEB_HTTP_PORT=8080
@@ -34,61 +34,132 @@ services:
     networks:
     - data_pipeline_network
     restart: always
-  superset-metadata-db:
-    image: postgres:14
-    container_name: superset-metadata-db
+  spark-master:
+    image: apache/spark:3.4.1
+    container_name: spark-master
+    command:
+    - /bin/bash
+    - -c
+    - /opt/spark/sbin/start-master.sh && tail -f /dev/null
     environment:
-      POSTGRES_USER: ${POSTGRES_USER_SUPERSET}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_SUPERSET}
-      POSTGRES_DB: ${POSTGRES_DB_SUPERSET}
+    - SPARK_WORKLOAD=${SPARK_WORKLOAD_MASTER}
+    - SPARK_MASTER_PORT=${SPARK_MASTER_PORT}
+    - SPARK_MASTER_WEBUI_PORT=${SPARK_MASTER_WEBUI_PORT}
+    ports:
+    - 8081:8080
+    - 7077:7077
+    networks:
+    - data_pipeline_network
+  spark-worker:
+    image: apache/spark:3.4.1
+    command:
+    - /bin/bash
+    - -c
+    - /opt/spark/sbin/start-worker.sh spark://spark-master:7077 && tail -f /dev/null
+    environment:
+    - SPARK_WORKLOAD=${SPARK_WORKLOAD_WORKER}
+    - SPARK_MASTER_URL=${SPARK_MASTER_URL}
+    - SPARK_WORKER_MEMORY=${SPARK_WORKER_MEMORY}
+    - SPARK_WORKER_CORES=${SPARK_WORKER_CORES}
+    depends_on:
+      spark-master:
+        condition: service_started
+    ports:
+    - 8082:8081
+    networks:
+    - data_pipeline_network
+  airflow-db:
+    image: postgres:14
+    container_name: airflow-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-    - apachesuperset_superset-metadata-db_superset_db_data:/var/lib/postgresql/data
+    - airflow_airflow-db_airflow_db_data:/var/lib/postgresql/data
     ports:
     - 5433:5432
     networks:
     - data_pipeline_network
-  superset:
-    build:
-      context: docker_templates/apachesuperset
-    container_name: superset
-    environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_SUPERSET}
-      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
-      SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI_SUPERSET}
+  airflow-init:
+    image: apache/airflow:2.6.2
+    container_name: airflow-init
     depends_on:
-      superset-metadata-db:
+      airflow-db:
         condition: service_started
-    restart: always
-    ports:
-    - 8088:8088
+    environment:
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
+    command: "bash -c \"\n  echo 'Initializing Airflow DB...' &&\n  airflow db init\
+      \ &&\n  echo 'Creating Airflow admin user...' &&\n  airflow users create --username\
+      \ ${AIRFLOW_ADMIN_USER} --password ${AIRFLOW_ADMIN_PASS} --firstname Airflow\
+      \ --lastname Admin --role Admin --email ${AIRFLOW_ADMIN_EMAIL} &&\n  echo 'Airflow\
+      \ initialization is complete! Container will stay alive for healthcheck...'\
+      \ &&\n  tail -f /dev/null\n\"\n"
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - airflow db check
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
     networks:
     - data_pipeline_network
-  prefect-orion:
-    image: prefecthq/prefect:2-latest
-    container_name: prefect-orion
-    command: "bash -c \"\n  prefect server start --host 0.0.0.0 --port 4200\n\"\n"
-    ports:
-    - 4200:4200
+  airflow-scheduler:
+    image: apache/airflow:2.6.2
+    container_name: airflow-scheduler
+    depends_on:
+      airflow-db:
+        condition: service_started
+      airflow-init:
+        condition: service_healthy
+    restart: always
+    environment:
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
     volumes:
-    - prefect_prefect-orion_prefect_data:/root/.prefect
+    - airflow_airflow-scheduler_airflow_dags:/opt/airflow/dags
+    - airflow_airflow-scheduler_airflow_logs:/opt/airflow/logs
+    command:
+    - airflow
+    - scheduler
     networks:
     - data_pipeline_network
-  prefect-worker:
-    image: prefecthq/prefect:2-latest
-    container_name: prefect-worker
+  airflow-webserver:
+    image: apache/airflow:2.6.2
+    container_name: airflow-webserver
     depends_on:
-      prefect-orion:
+      airflow-scheduler:
         condition: service_started
+      airflow-init:
+        condition: service_healthy
+    restart: always
     environment:
-      PREFECT_API_URL: http://prefect-orion:4200/api
-    command: "bash -c \"\n  echo 'Waiting 10 seconds for Orion...' &&\n  sleep 10\
-      \ &&\n  prefect worker start -p default\n\"\n"
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
+    ports:
+    - 8083:8080
+    volumes:
+    - airflow_airflow-webserver_airflow_dags:/opt/airflow/dags
+    - airflow_airflow-webserver_airflow_logs:/opt/airflow/logs
+    command:
+    - airflow
+    - webserver
     networks:
     - data_pipeline_network
-    restart: always
 networks:
   data_pipeline_network: {}
 volumes:
   postgres_postgres_postgres_data: {}
-  apachesuperset_superset-metadata-db_superset_db_data: {}
-  prefect_prefect-orion_prefect_data: {}
+  airflow_airflow-db_airflow_db_data: {}
+  airflow_airflow-scheduler_airflow_dags: {}
+  airflow_airflow-scheduler_airflow_logs: {}
+  airflow_airflow-webserver_airflow_dags: {}
+  airflow_airflow-webserver_airflow_logs: {}

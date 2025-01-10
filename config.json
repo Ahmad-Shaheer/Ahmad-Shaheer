@@ -137,7 +137,7 @@
       }
     },
 "NiFi": {
-
+    "Read" : "No", 
     "EnvironmentVariables": {
       
     }
@@ -163,7 +163,7 @@
     }
 },
 "ApacheSpark": {
- "Read" :" Yes",
+ "Read" :" No",
   "EnvironmentVariables": {
     "SPARK_WORKER_MEMORY": "1G", 
     "SPARK_WORKER_CORES": "1" ,

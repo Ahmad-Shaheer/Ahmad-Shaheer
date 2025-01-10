@@ -199,6 +199,14 @@ h1 {
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
 }
 
+.tool-wrapper {
+    display: flex;
+    flex-direction: column; /* Stack the tool and label vertically */
+    align-items: center; /* Center-align both elements horizontally */
+    margin-bottom: 20px; /* Add spacing below each wrapper */
+    background: transparent; /* Ensure no background interference */
+    border: none; /* Remove any default borders */
+}
 /* Individual tool styling */
 .tool {
     padding: 10px 15px;
@@ -213,14 +221,22 @@ h1 {
     transition: transform 0.3s, box-shadow 0.3s;
     position: relative; /* Makes dropdown position relative to the tool */
     cursor: pointer;
+
+}
+.tool-type-label {
+    font-size: 1.3rem; /* Adjust the font size */
+    color: #ffffff; /* White text color */
+    text-align: center; /* Center align the text */
+    margin-top: 8px; /* Add some space above the label */
+    margin-bottom: 15px; /* Add some space below if needed */
 }
 
 .orchestration .tool {
     display: block; /* Forces it to take up the entire width */
     width: calc(100% - 40px); /* Slightly wider than other tools */
-    max-width:  350px; /* Optional: Limit its width */
-    margin: 20px auto; /* Centers the tool horizontally and adds spacing */
-    padding: 10px 15px; /* Adjust padding for a larger look */
+    max-width:  300px; /* Optional: Limit its width */
+    margin: 10px auto; /* Centers the tool horizontally and adds spacing */
+    padding: 10px 10px; /* Adjust padding for a larger look */
     background: linear-gradient(145deg, #6BCF75, #4CAF50); /* Reverse the gradient for variation */
     color: #fff;
     font-size: 1.2rem; /* Slightly larger text */
@@ -231,24 +247,17 @@ h1 {
     transition: transform 0.3s, box-shadow 0.3s;
 }
 
-/* Arrows between tools */
+.arrow-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 55px; /* Adjust this value to move the arrow higher */
+}
+
 .arrow {
     font-size: 2.5rem;
     color: #fff;
     animation: bounce 1.5s infinite;
-}
-
-/* Arrow animation */
-@keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-    }
-    40% {
-        transform: translateY(-10px);
-    }
-    60% {
-        transform: translateY(-5px);
-    }
+    margin-bottom: 10px; /* Additional margin for fine-tuning */
 }
 
 /* Dropdown container */
@@ -396,6 +405,7 @@ button[type="submit"]:hover {
 
     .arrow {
         font-size: 2rem;
+        margin-bottom: 20px;
     }
 
     button[type="submit"] {

@@ -21,48 +21,66 @@
 <div class="mega-container">
     <!-- Title for the Mega Container -->
     <h1>Pipeline Overview</h1>
-    
+    <div class="tool-wrapper">
         <div class = 'orchestration'>
-            {% if pipeline.Orchestration %}
-                <div class="tool" id="orchestration-tool">
-                    <img src="/static/images/{{ pipeline.Orchestration }}.svg" alt="Airflow" style="width: 40px; height: 40px;"/>
-                    <strong>Orchestration:</strong> {{ pipeline.Orchestration }}
-                </div>
+                    {% if pipeline.Orchestration %}
+            
+                    <div class="tool" id="orchestration-tool">
+                        <img src="/static/images/{{ pipeline.Orchestration }}.svg" alt="Airflow" style="width: 40px; height: 40px;"/>
+                        {{ pipeline.Orchestration }}
+                    </div>
+                    <div class="tool-type-label">Orchestration</div>
             {% endif %}
         </div>
+    </div>
 
     <div class="pipeline">
         
         {% if pipeline.Ingestion %}
             
-            <div class="tool" id="ingestion-tool">
-                <img src="/static/images/{{ pipeline.Ingestion }}.svg" style="width: 40px; height: 40px;"/>
-                <strong>Ingestion:</strong> {{ pipeline.Ingestion }}
-            </div>
-
-            {% if pipeline['Ingestion'] == 'Apache Kafka' %}
-                <div class="arrow-container">
-                    <span class="arrow">+</span>
+                <div class="tool-wrapper">
+                    <div class="tool" id="ingestion-tool">
+                        <img src="/static/images/{{ pipeline.Ingestion }}.svg" style="width: 40px; height: 40px;" />
+                        {{ pipeline.Ingestion }}
+                    </div>
+                    <div class="tool-type-label">Ingestion</div>
                 </div>
             
-                <div class = "tool" id = "connector">
-                    <strong>Connector:</strong> Kafka Connect
-                </div>
-            {% endif %}
+
+                {% if pipeline['Ingestion'] == 'Apache Kafka' %}
+            
+                    <div class="arrow-container">
+                            <span class="arrow">+</span>
+                        </div>
+                    <div class="tool-wrapper">
+                        <div class = "tool" id = "connector">
+                        <img src="/static/images/connector.svg" style="width: 40px; height: 40px;"/>
+                        Kafka Connect
+                        </div>
+                        <div class="tool-type-label">Connector</div>
+
+                    </div>
+
+                {% endif %}
 
         {% endif %}
+
+
 
         {% if pipeline['Intermediate Storage'] %}
             <div class="arrow-container">
                 <span class="arrow">→</span>
             </div>
-          
-            <div class="tool" id="intermediate-storage-tool" >
-                <img src="/static/images/{{ pipeline['Intermediate Storage'] }}.svg"  style="width: 40px; height: 40px;"/>
-                <strong>Intermediate Storage:</strong> {{ pipeline['Intermediate Storage'] }}
-               
-            </div>
+            
+            <div class="tool-wrapper">
 
+                <div class="tool" id="intermediate-storage-tool" >
+                    <img src="/static/images/{{ pipeline['Intermediate Storage'] }}.svg"  style="width: 40px; height: 40px;"/>
+                    <strong></strong> {{ pipeline['Intermediate Storage'] }}
+                    
+                </div>
+                <div class="tool-type-label">Intermediate Storage</div> 
+            </div>
             
             
         {% endif %}
@@ -71,10 +89,14 @@
             <div class="arrow-container">
                 <span class="arrow">→</span>
             </div>
-          
-            <div class="tool" id="structured-tool" >
-                <img src="/static/images/{{ pipeline['Structured'] }}.svg"  style="width: 40px; height: 40px;"/>
-                <strong>Structured Storage:</strong> {{ pipeline['Structured'] }}
+            <div class="tool-wrapper">
+
+                <div class="tool" id="structured-tool" >
+                    <img src="/static/images/{{ pipeline['Structured'] }}.svg"  style="width: 40px; height: 40px;"/>
+                     {{ pipeline['Structured'] }}
+                </div>
+                <div class="tool-type-label">Structured Storage</div> 
+
             </div>
             
         {% endif %}
@@ -83,22 +105,27 @@
             <div class="arrow-container">
                 <span class="arrow">+</span>
             </div>
-          
-            <div class="tool" id="semi-tool" >
-                <img src="/static/images/{{ pipeline['Semi'] }}.svg" style="width: 40px; height: 40px;"/>
-                <strong>Semi Storage:</strong> {{ pipeline['Semi'] }}
-            </div>
-            
+                <div class="tool-wrapper">
+                    <div class="tool" id="semi-tool" >
+                        <img src="/static/images/{{ pipeline['Semi'] }}.svg" style="width: 40px; height: 40px;"/>
+                         {{ pipeline['Semi'] }}
+                    </div>
+                    <div class="tool-type-label">Semi Storage</div>
+                </div>
+
         {% endif %}  
         
         {% if pipeline['Processing'] %}
-            <div class="arrow-container">
-                <span class="arrow">→</span>
-            </div>
-          
-            <div class="tool" id="processing-tool">
-                <img src="/static/images/{{ pipeline.Processing }}.svg"  style="width: 40px; height: 40px;"/>
-                <strong>Processing:</strong> {{ pipeline.Processing }}
+                <div class="arrow-container">
+                    <span class="arrow">→</span>
+                </div>
+            <div class="tool-wrapper">  
+                <div class="tool" id="processing-tool">
+                    <img src="/static/images/{{ pipeline.Processing }}.svg"  style="width: 40px; height: 40px;"/>
+                    {{ pipeline.Processing }}
+                </div>
+                <div class="tool-type-label">Processing</div>
+
             </div>
             
         {% endif %}
@@ -107,28 +134,36 @@
             <div class="arrow-container">
                 <span class="arrow">→</span>
             </div>
-          
-            <div class="tool" id="storage-tool">
-                <img src="/static/images/{{ pipeline['Storage'] }}.svg" style="width: 40px; height: 40px;"/>
-                <strong>Storage:</strong> {{ pipeline.Storage }}
+
+            <div class = "tool-wrapper">
+                <div class="tool" id="storage-tool">
+                    <img src="/static/images/{{ pipeline['Storage'] }}.svg" style="width: 40px; height: 40px;"/>
+                    {{ pipeline.Storage }}
+                </div>
+                <div class="tool-type-label">Storage</div>
             </div>
-            
+
         {% endif %}
         
         {% if pipeline.Visualization %}
-            <div class="arrow-container">
-                <span class="arrow">→</span>
-            </div>
-          
-            <div class="tool" id="visualization-tool" >
-                <img src="/static/images/{{ pipeline['Visualization'] }}.svg" style="width: 40px; height: 40px;"/>
-                <strong>Visualization:</strong> {{ pipeline.Visualization }}
+                <div class="arrow-container">
+                    <span class="arrow">→</span>
+                </div>
+
+            <div class="tool-wrapper">  
+                <div class="tool" id="visualization-tool" >
+                    <img src="/static/images/{{ pipeline['Visualization'] }}.svg" style="width: 40px; height: 40px;"/>
+                        {{ pipeline.Visualization }}
+                </div>
+                <div class="tool-type-label">Visualization</div>
             </div>
             
         {% endif %}
         
     </div>    
 </div>
+
+
     <div class = 'selection'>
         <div class="selection-heading">
             <h2>Customize Your Pipeline</h2>

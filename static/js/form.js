@@ -62,7 +62,7 @@ function updateSemiTool(selectElement) {
       const storageToolElement = document.getElementById('storage-tool');
       storageToolElement.innerHTML = `
       <img src="/static/images/${selectedTool}.svg" alt="${selectedTool} Icon" style="width: 40px; height: 40px;"/>
-      <strong>Storage:</strong> ${selectedTool}
+      ${selectedTool}
       `;
 
       const option = document.createElement('option');
@@ -81,7 +81,7 @@ function updateScreenIntermediateTool(selectElement) {
     const intermediateToolElement = document.getElementById('intermediate-storage-tool');
     intermediateToolElement.innerHTML = `
     <img src="/static/images/${currentIntermediateTool}.svg" alt="${currentIntermediateTool} Icon" style="width: 40px; height: 40px;"/>
-    <strong>Structured Storage:</strong> ${currentIntermediateTool}
+    ${currentIntermediateTool}
     `;
 
     const option = document.createElement('option');
@@ -99,7 +99,7 @@ function updateScreenOrchestrationTool(selectElement) {
     const OrchestrationToolElement = document.getElementById('orchestration-tool');
     OrchestrationToolElement.innerHTML = `
     <img src="/static/images/${currentOrchestrationTool}.svg" alt="${currentOrchestrationTool} Icon" style="width: 40px; height: 40px;"/>
-    <strong>Orchestration:</strong> ${currentOrchestrationTool}
+    ${currentOrchestrationTool}
     `;
 
     const option = document.createElement('option');
@@ -118,7 +118,7 @@ function updateScreenStructuredTool(selectElement) {
   const structuredToolElement = document.getElementById('structured-tool');
   structuredToolElement.innerHTML = `
     <img src="/static/images/${currentStructuredTool}.svg" alt="${currentStructuredTool} Icon" style="width: 40px; height: 40px;"/>
-    <strong>Structured Storage:</strong> ${currentStructuredTool}
+    ${currentStructuredTool}
     `;
 
   const option = document.createElement('option');
@@ -137,7 +137,7 @@ function updateScreenSemiTool(selectElement) {
   const semiToolElement = document.getElementById('semi-tool');
   semiToolElement.innerHTML = `
     <img src="/static/images/${currentSemiTool}.svg" alt="${currentSemiTool} Icon" style="width: 40px; height: 40px;"/>
-    <strong>Semi Storage:</strong> ${currentSemiTool}
+    ${currentSemiTool}
     `;
 
   const option = document.createElement('option');

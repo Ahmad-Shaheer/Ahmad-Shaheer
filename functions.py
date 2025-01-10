@@ -25,6 +25,7 @@ def generate_env_file(config, output_file=".env"):
                     file.write(f"{key}={value}\n")
                 file.write("\n")
                 
+
 def retrieve_config_details(form_data, docker_config ):
     tool_names = [tool_name for tool_name in form_data.getlist('tool_names')]
     updated_config = {}
@@ -51,7 +52,6 @@ def retrieve_config_details(form_data, docker_config ):
                 "EnvironmentVariables": updated_env_vars
             }
             ports = merge_docker_compose(tool_names)
-
     return updated_config, ports
 
 def refine_access_links(ports):

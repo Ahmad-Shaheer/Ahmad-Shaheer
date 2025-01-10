@@ -2,6 +2,7 @@ import subprocess
 import time
 import re
 from main2 import merge_docker_compose
+import requests
 
 def tool_definition(pipeline_dict, tools_config):
     selected_tools = {key: value for key, value in pipeline_dict.items() if value}
@@ -145,7 +146,38 @@ def extract_nifi_credentials():
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
         return None, None   
-        
+
+def infer(system, prompt):
+    data = {
+        "model": "qwen2.5:32b-instruct-q8_0",
+        "messages": [
+            {
+                "role": "system",
+                "content": system
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        "stream": False,
+        "options": {
+            "temperature": 0.1 # change it as per requirement
+        }
+    }
+ 
+    headers = {
+        "Content-Type": "application/json"
+    }
+    ollama_url = "http://172.16.101.171:11400/api/chat/"
+    # ollama_url = "http://172.16.19.80:11567/api/chat/"
+    model_response = requests.post(
+        url=ollama_url,
+        json=data,
+        headers=headers
+    ).json()
+ 
+    return model_response['message']['content']
 if __name__ == '__main__':
     pass
             

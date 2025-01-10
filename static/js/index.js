@@ -23,10 +23,10 @@ Example: "Thank you for reaching out! Please let us know if you need further ass
 
 `;
 
-const API_KEY = "AIzaSyAauJBD2r7UKp_gI7W6YSqYNoRQpyP2AvM";
+const API_KEY = "AIzaSyAPyT_TRvGDAE0otiFo4gbH-usDFMbdETc";
 const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({ 
-    model: "gemini-1.5-pro",
+    model: "gemini-1.5-flash",
     systemInstruction: businessInfo
 });
 

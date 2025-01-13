@@ -14,7 +14,12 @@ services:
     networks:
       - data_pipeline_net
     restart: unless-stopped
-
+    healthcheck:
+      test: ["CMD-SHELL", "[ $$(nodetool statusgossip) = running ]"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s    
 networks:
   data_pipeline_net:
     external: false

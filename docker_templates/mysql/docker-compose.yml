@@ -16,6 +16,11 @@ services:
       - mysql_data:/var/lib/mysql
     networks:
       - data_pipeline_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
     restart: unless-stopped
 
   phpmyadmin:
@@ -29,9 +34,14 @@ services:
       - "8080:80"
     depends_on:
       mysql:
-        condition: service_started
+        condition: service_healthy
     networks:
       - data_pipeline_net
+    healthcheck:
+      test: ["CMD", "curl", "-Ss", "http://localhost/robots.txt"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
     restart: unless-stopped
 
 networks:

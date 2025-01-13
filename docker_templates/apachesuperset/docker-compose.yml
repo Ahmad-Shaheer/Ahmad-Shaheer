@@ -1,5 +1,5 @@
 version: '3'
- 
+
 services:
   superset-metadata-db:
     image: postgres:14
@@ -14,7 +14,13 @@ services:
       - "5432:5432"
     networks:
       - superset_network
- 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER_SUPERSET} -d ${POSTGRES_DB_SUPERSET}"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
+
   superset:
     build:
       context: .
@@ -25,15 +31,21 @@ services:
       SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI_SUPERSET}
     depends_on:
       superset-metadata-db:
-        condition: service_started
+        condition: service_healthy
     restart: always
     ports:
       - "8088:8088"
     networks:
       - superset_network
- 
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import http.client; conn = http.client.HTTPConnection('localhost', 8088); conn.request('GET', '/health'); response = conn.getresponse(); exit(0) if response.status == 200 else exit(1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
+
 networks:
   superset_network:
- 
+
 volumes:
   superset_db_data:

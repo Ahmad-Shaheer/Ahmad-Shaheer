@@ -12,7 +12,13 @@ services:
       - "postgres_data:/var/lib/postgresql/data"
     networks:
       - data_pipeline_net
- 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER_PG} -d $${POSTGRES_DB_PG}"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
+
   pgadmin:
     image: dpage/pgadmin4:latest
     environment:
@@ -22,11 +28,19 @@ services:
       - "5050:80"
     networks:
       - data_pipeline_net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -q --spider http://localhost:80 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     restart: always
- 
+
 networks:
   data_pipeline_net:
     driver: bridge
- 
+
 volumes:
   postgres_data:

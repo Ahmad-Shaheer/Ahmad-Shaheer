@@ -14,21 +14,31 @@ services:
       - prefect_data:/root/.prefect
     networks:
       - prefect_network
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import http.client; conn = http.client.HTTPConnection('localhost', 4200); conn.request('GET', '/health'); exit(0) if conn.getresponse().status == 200 else exit(1)"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   prefect-worker:
     image: prefecthq/prefect:2-latest
     container_name: prefect-worker
     depends_on:
       prefect-orion:
-        condition: service_started  # Wait for Orion's healthcheck
+        condition: service_healthy
     environment:
       PREFECT_API_URL: "http://prefect-orion:4200/api"
     command: >
       bash -c "
-        echo 'Waiting 10 seconds for Orion...' &&
-        sleep 10 &&
         prefect worker start -p default
       "
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import http.client, json; conn = http.client.HTTPConnection('prefect-orion', 4200); conn.request('GET', '/api/health'); resp = conn.getresponse(); exit(0) if resp.status == 200 else exit(1)"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     networks:
       - prefect_network
     restart: always

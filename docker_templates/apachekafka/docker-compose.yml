@@ -1,5 +1,5 @@
 version: '3.8'
- 
+
 services:  
   zoo1:
     image: confluentinc/cp-zookeeper:7.3.2
@@ -11,7 +11,14 @@ services:
       ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_CLIENT_PORT}
       ZOOKEEPER_SERVER_ID: ${ZOOKEEPER_SERVER_ID}
       ZOOKEEPER_SERVERS: ${ZOOKEEPER_SERVERS}
- 
+    healthcheck:
+      test: nc -z localhost 2181 || exit -1
+      interval: 10s
+      timeout: 5s
+      retries: 8
+
+
+
   kafka1:
     image: confluentinc/cp-kafka:7.3.2
     hostname: kafka1
@@ -37,9 +44,15 @@ services:
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: ${KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND}
     depends_on:
       zoo1:
-        condition: service_started
+        condition: service_healthy
     restart: always
- 
+    healthcheck:
+      test: kafka-topics --bootstrap-server localhost:9092 --list
+      interval: 10s
+      timeout: 10s
+      retries: 8
+
+
   kafka-schema-registry:
     image: confluentinc/cp-schema-registry:7.3.2
     hostname: kafka-schema-registry
@@ -52,11 +65,17 @@ services:
       SCHEMA_REGISTRY_LISTENERS: ${SCHEMA_REGISTRY_LISTENERS}
     depends_on:
       zoo1:
-        condition: service_started
+        condition: service_healthy
       kafka1:
-        condition: service_started
+        condition: service_healthy
     restart: always
- 
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:8081/subjects"]
+      interval: 10s
+      timeout: 10s
+      retries: 8
+
+
   kafka-rest-proxy:
     image: confluentinc/cp-kafka-rest:7.3.2
     hostname: kafka-rest-proxy
@@ -70,13 +89,18 @@ services:
       KAFKA_REST_BOOTSTRAP_SERVERS: ${KAFKA_REST_BOOTSTRAP_SERVERS}
     depends_on:
       zoo1:
-        condition: service_started
+        condition: service_healthy
       kafka1:
-        condition: service_started
+        condition: service_healthy
       kafka-schema-registry:
-        condition: service_started
+        condition: service_healthy
     restart: always
- 
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8082"]
+      interval: 10s
+      timeout: 10s
+      retries: 8
+
   kafka-connect:
     image: confluentinc/cp-kafka-connect:7.3.2
     hostname: kafka-connect
@@ -107,15 +131,20 @@ services:
       - ./connectors:/etc/kafka-connect/jars/
     depends_on:
       zoo1:
-        condition: service_started
+        condition: service_healthy
       kafka1:
-        condition: service_started
+        condition: service_healthy
       kafka-schema-registry:
-        condition: service_started
+        condition: service_healthy
       kafka-rest-proxy:
-        condition: service_started
+        condition: service_healthy
     restart: always
- 
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:8083/connectors"]
+      interval: 10s
+      timeout: 10s
+      retries: 8
+
   conduktorDB:
     image: postgres:14
     hostname: conduktorDB
@@ -129,7 +158,13 @@ services:
       POSTGRES_USER: ${CONDUKTOR_POSTGRES_USER}
       POSTGRES_PASSWORD: ${CONDUKTOR_POSTGRES_PASSWORD}
       POSTGRES_HOST_AUTH_METHOD: ${CONDUKTOR_POSTGRES_HOST_AUTH_METHOD}
- 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${CONDUKTOR_POSTGRES_USER} -d $${CONDUKTOR_POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
+
   conduktor-console:
     image: conduktor/conduktor-console:1.26.0
     hostname: conduktor-console
@@ -149,11 +184,17 @@ services:
       CDK_CLUSTERS_0_KAFKACONNECTS_0_NAME: ${CDK_CLUSTERS_0_KAFKACONNECTS_0_NAME}
     depends_on:
       conduktorDB:
-        condition: service_started
+        condition: service_healthy
       kafka1:
-        condition: service_started
+        condition: service_healthy
     restart: always
- 
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
+
 volumes:
   pg_data: 
   conduktor_data:

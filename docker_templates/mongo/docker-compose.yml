@@ -1,5 +1,5 @@
 version: '3.9'
- 
+
 services:
   mongo:
     image: mongo:latest
@@ -19,8 +19,8 @@ services:
       test: echo 'db.runCommand("ping").ok' 
       interval: 10s
       timeout: 5s
-      retries: 5
- 
+      retries: 8
+
   mongo-express:
     image: mongo-express:latest
     container_name: mongo-express
@@ -39,8 +39,14 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
- 
- 
+    healthcheck:
+      test: ["CMD", "echo", "Mongo Express is up"]
+      interval: 10s
+      timeout: 10s
+      retries: 8
+      start_period: 15s
+
+
 volumes:
   mongodb-data:
     driver: local
@@ -48,7 +54,7 @@ volumes:
   mongodb-log:
     driver: local
     name: mongo-log
- 
+
 networks:
   mongodb_network:
     driver: bridge

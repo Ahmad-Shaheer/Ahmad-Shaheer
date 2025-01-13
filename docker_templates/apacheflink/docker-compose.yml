@@ -1,5 +1,5 @@
 version: '3.8'
- 
+
 services:
   jobmanager:
     image: apache/flink:1.16.0
@@ -16,7 +16,13 @@ services:
       - flink-network
     volumes:
       - jobmanager-logs:/opt/flink/log
- 
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8081/taskmanagers"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
   taskmanager:
     image: apache/flink:1.16.0
     container_name: flink-taskmanager
@@ -28,18 +34,26 @@ services:
         jobmanager.rpc.address: ${FLINK_JOB_MANAGER_RPC_ADDRESS}
     depends_on:
       jobmanager:
-        condition: service_started
+        condition: service_healthy
     restart: always
     networks:
       - flink-network
     volumes:
       - taskmanager-logs:/opt/flink/log
- 
- 
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -q 'taskmanager'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+
+
+
 networks:
   flink-network:
     driver: bridge
- 
+
 volumes:
   jobmanager-logs:
   taskmanager-logs:

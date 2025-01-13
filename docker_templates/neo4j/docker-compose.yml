@@ -17,7 +17,12 @@ services:
     networks:
       - data_pipeline_net
     restart: unless-stopped
-
+    healthcheck:
+      test: [ "CMD", "/var/lib/neo4j/bin/neo4j", "status" ]
+      timeout: 10s
+      retries: 3
+      interval: 5s
+      
 networks:
   data_pipeline_net:
     external: false

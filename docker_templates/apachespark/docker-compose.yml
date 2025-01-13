@@ -14,10 +14,15 @@ services:
       - "7077:7077"   # Spark Master Port
     networks:
       - spark-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   spark-worker:
     image: apache/spark:3.4.1
-    # container_name: spark-worker
     command: ["/bin/bash", "-c", "/opt/spark/sbin/start-worker.sh spark://spark-master:7077 && tail -f /dev/null"]
     environment:
       - SPARK_WORKLOAD=${SPARK_WORKLOAD_WORKER}
@@ -26,11 +31,18 @@ services:
       - SPARK_WORKER_CORES=${SPARK_WORKER_CORES}
     depends_on:
       spark-master:
-        condition: service_started
+        condition: service_healthy
+    restart: always
     ports:
       - "8081:8081"   # Spark Worker Web UI
     networks:
       - spark-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
 networks:
   spark-network:

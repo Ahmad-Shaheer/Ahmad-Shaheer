@@ -6,14 +6,25 @@ services:
       context: .
     container_name: nifi
     environment:
-      - NIFI_WEB_HTTP_PORT=8080
       - NIFI_WEB_HTTPS_PORT=8443
+      - SINGLE_USER_CREDENTIALS_USERNAME=admin
+      - SINGLE_USER_CREDENTIALS_PASSWORD=ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB
+      - NIFI_HOME=/opt/nifi/nifi-current
+      - NIFI_LOG_DIR=/opt/nifi/nifi-current/logs
+      - NIFI_TOOLKIT_HOME=/opt/nifi/nifi-toolkit-current
+      - NIFI_PID_DIR=/opt/nifi/nifi-current/run
+      - NIFI_BASE_DIR=/opt/nifi
     ports:
-      - "8080:8080"
       - "8443:8443"
+      - "52020:52020"
     networks:
       - nifi_net
-    # If needed, add volume mappings or custom configuration
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: '30s'
+      timeout: '10s'
+      retries: 3
+      start_period: '60s'  # Delay of 60 seconds before health checks start
 
 networks:
   nifi_net:

@@ -1,5 +1,5 @@
 version: "3.9"
- 
+
 services:
   airflow-db:
     image: postgres:14
@@ -14,13 +14,20 @@ services:
       - "5432:5432"
     networks:
       - airflow_network
- 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+
   airflow-init:
     image: apache/airflow:2.6.2
     container_name: airflow-init
     depends_on:
       airflow-db:
-        condition: service_started
+        condition: service_healthy
     environment:
       AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
@@ -43,35 +50,42 @@ services:
       start_period: 5s
     networks:
       - airflow_network
- 
+
   airflow-scheduler:
     image: apache/airflow:2.6.2
     container_name: airflow-scheduler
     depends_on:
       airflow-db:
-        condition: service_started
+        condition: service_healthy
       airflow-init:
         condition: service_healthy
     restart: always
- 
     environment:
       AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
       AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     volumes:
       - airflow_dags:/opt/airflow/dags
       - airflow_logs:/opt/airflow/logs
     command: ["airflow", "scheduler"]
     networks:
       - airflow_network
- 
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+
   airflow-webserver:
     image: apache/airflow:2.6.2
     container_name: airflow-webserver
     depends_on:
       airflow-scheduler:
-        condition: service_started
+        condition: service_healthy
       airflow-init:
         condition: service_healthy
     restart: always
@@ -88,10 +102,16 @@ services:
     command: ["airflow", "webserver"]
     networks:
       - airflow_network
- 
+    healthcheck:
+          test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+          interval: 30s
+          timeout: 10s
+          retries: 5
+          start_period: 30s
+
 networks:
   airflow_network:
- 
+
 volumes:
   airflow_db_data:
   airflow_dags:

@@ -109,10 +109,12 @@ def extract_signin_configs(services_dict, env_file_path='.env'):
 
             key, value = line.split('=', 1)
             env_dict[key.strip()] = value.strip()
-
+            
+    if not services_dict:
+        return  None
     for service, config_needed in services_dict.items():
+        
         if service == 'superset':
-            # Ensure USERNAME and PASSWORD are set to "admin"
             signin_configs[service] = {'USERNAME': 'admin', 'PASSWORD': 'admin'}
         elif service in env_params_dict:
             # Handle other services
@@ -191,7 +193,6 @@ def check_containers_health():
           This list can be empty if none are healthy.
     """
  
-    # 1. List all running containers (IDs)
     ps_cmd = ["sudo", "docker", "ps", "-q"]
     try:
         result = subprocess.run(ps_cmd, capture_output=True, text=True, check=True)

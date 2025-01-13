@@ -10,65 +10,12 @@
 </head>
 <body>
 
-    <h1>Docker Services and Their Ports</h1>
-    <form action="{{ url_for('create_pipeline') }}" method="POST" style="display: inline;">
-        <button type="submit" class="home-button">Home</button>
-    </form>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Service Name</th>
-                <th>Ports</th>
-                <th>Access Link</th>
-                <th>Sign-In Configurations</th>
-            </tr>
-        </thead>
-        <tbody>
-        
     
 
-            {% for service, port_list in ports.items() %}
-
-
-            <tr>
-                <td>{{ service }}</td>
-                <td>{{ ', '.join(port_list) }}</td>
-                <td>
-                    
-
-                {% if service in links %}
-                        {% if service == 'nifi' %}
-                                <a href="https://localhost:{{ links[service] }}" target="_blank">https://localhost:{{ links[service] }}</a><br>
-    
-                            {%else%}
-                        <a href="http://localhost:{{ links[service] }}" target="_blank">http://localhost:{{ links[service] }}</a><br>
-                    {% endif%}
-                {% endif%}
-                </td>
-                <td>
-                    {% if signin_conf.get(service) %}
-                        <ul>
-                            {% if service == 'nifi' %}
-                                <li>USERNAME: {{ signin_conf[service][0] }} PASSWORD: {{ signin_conf[service][1] }}</li>
-                            {% else %}
-                                {% for credential, value in signin_conf[service].items() %}
-                                    <li>{{ credential }}: {{ value }}</li>
-                                {% endfor %}
-                            {% endif %}
-                        </ul>
-                    {% else %}
-                        <!-- Leave blank if no sign-in configurations -->
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-
-            
-            </tbody>
-        </table>
-
-    <button id="create-pipeline-btn" type="submit" class="custom-submit-button">Create New Pipeline</button>
+    <p style="color: red; font-weight: bold;">
+        Error: No pipeline was created. Missing configuration data.
+    </p>
+      
 
     
 

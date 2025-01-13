@@ -1,3 +1,11 @@
+#services-list li {
+    display: block; /* Each service occupies its own line */
+    margin-bottom: 10px; /* Optional spacing between items */
+}
+
+#services-list label {
+    display: inline-block; /* Ensures the checkbox and text stay together */
+}
 
 body {
     background: linear-gradient(120deg, #0f2027, #203a43, #2c5364); /* Elegant gradient */
@@ -80,7 +88,7 @@ label {
     margin-right: 8px;
     /* visually center the check mark */
     font-size: 1rem;
-    color: green;
+    color: rgb(255,140,0);
     font-weight: bold;
     text-align: center;
     line-height: 1.5;

@@ -11,21 +11,26 @@ if (typeof window.healthyContainers !== 'undefined') {
 console.log('loading.js: Attempting to update spinners and checkboxes...');
 
 window.healthyContainers.forEach(function(containerName) {
-  var iconEl = document.getElementById('icon-' + containerName);
-  var checkboxEl = document.getElementById('checkbox-' + containerName);
+  var spinnerEl = document.getElementById('icon-' + containerName);
 
-  if (checkboxEl) {
-    // Ensure the checkbox is disabled initially
-    checkboxEl.disabled = true;
-}
-  if (iconEl) {
-    iconEl.classList.remove('spinner');
-  } 
+  if (spinnerEl) {
+      console.log(`Updating spinner for ${containerName}`);
+      
+      // Create checkbox and label
+      const checkboxEl = document.createElement('input');
+      checkboxEl.type = 'checkbox';
+      checkboxEl.id = 'checkbox-' + containerName;
+      checkboxEl.disabled = false; // Enable checkbox
+      checkboxEl.checked = true;  // Mark as checked
 
-  if (checkboxEl) {
-    checkboxEl.disabled = false;
-    checkboxEl.checked = true;
-  } 
+      const labelEl = document.createElement('label');
+      labelEl.htmlFor = 'checkbox-' + containerName;
+
+      // Replace spinner with checkbox and label
+      spinnerEl.replaceWith(checkboxEl, labelEl);
+  } else {
+      console.warn(`Spinner not found for ${containerName}`);
+  }
 });
 
 // Auto-reload every 5 seconds

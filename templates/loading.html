@@ -7,11 +7,9 @@
     {% for service, port in services.items() %}
     <li>
         <!-- We start with a spinner for every service -->
-        <span id="icon-{{ service }}" class="spinner"></span>
-        <label>
-            <input type="checkbox" id="checkbox-{{ service }}" disabled>
-            {{ service }} 
-        </label>
+        <span id="icon-{{ service }}" class="spinner" data-service="{{ service }}"></span>
+        <span>  {{ service }}
+        </span>  
     </li>
     {% endfor %}
 </ul>

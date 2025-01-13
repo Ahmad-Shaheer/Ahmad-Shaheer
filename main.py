@@ -86,10 +86,10 @@ def deploy():
   
   generate_env_file(updated_config, output_file=".env")
 
-  thread = threading.Thread(target=run_docker_compose)
-  thread.start()
+  # thread = threading.Thread(target=run_docker_compose)
+  # thread.start()
     
-  return redirect(url_for('loading'))
+  return redirect(url_for('final'))
 
 @app.route('/loading')
 def loading():
@@ -129,6 +129,8 @@ def final():
   
   ports = session.get('ports', None)
   signin_conf = extract_signin_configs(ports)
+  if not ports or not signin_conf:
+    return render_template('deploy_error.html')
   if 'nifi' in ports.keys():
     
     signin_conf.update({'nifi': ['admin', 'ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB']})

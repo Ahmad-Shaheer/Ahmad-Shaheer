@@ -1,9 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import threading
 from flask_session import Session
 from pipeline_logic import get_pipeline
 from functions import generate_env_file, retrieve_config_details, tool_definition,\
-run_docker_compose, extract_signin_configs, refine_access_links, check_containers_health
+run_docker_compose, extract_signin_configs, refine_access_links, check_containers_health, infer,SYSTEM_PROMPT
 import json
 
 
@@ -67,7 +67,6 @@ def config():
     
 
     shortlisted_tools = tool_definition(pipeline_dict, tools_config)
-    print(f'THESE ARE THE SHORTLISTED TOOLS ------------------------------{shortlisted_tools}')
     return render_template('config.html', pipeline_dict=pipeline_dict, tools=shortlisted_tools)
   
   
@@ -78,7 +77,6 @@ def deploy():
         docker_config = json.load(f)
         
   form_data = request.form
-  print(f"This is form data -------------------------{form_data}\n\n\n")
   updated_config, ports = retrieve_config_details(form_data=form_data, docker_config=docker_config)
   
   session['form_data'] = form_data
@@ -105,7 +103,16 @@ def loading():
                         services=services,
                         healthy_containers=result)
   
-  
+@app.route("/ollama_chat", methods=["POST"])
+def ollama_chat():
+    request_data = request.get_json(force=True)
+    user_prompt = request_data["prompt"]
+
+    try:
+        content = infer(SYSTEM_PROMPT, user_prompt)
+        return jsonify({"content": content}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
   
 @app.route('/final')
 def final():

@@ -52,7 +52,6 @@ def retrieve_config_details(form_data, docker_config ):
                 "EnvironmentVariables": updated_env_vars
             }
             ports = merge_docker_compose(tool_names)
-            print(f'These are the ports - -------------------------------------------------------------------------{ports}')
     return updated_config, ports
 
 def refine_access_links(ports):
@@ -157,6 +156,11 @@ def infer(system, prompt):
     ).json()
  
     return model_response['message']['content']
+
+SYSTEM_PROMPT = """
+You are a virtual assistant designed to guide users in planning and deploying their data pipelines...
+(Your original system content)
+"""
 
 
 def check_containers_health():

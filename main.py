@@ -84,8 +84,8 @@ def deploy():
   
   generate_env_file(updated_config, output_file=".env")
 
-  # thread = threading.Thread(target=run_docker_compose)
-  # thread.start()
+  thread = threading.Thread(target=run_docker_compose)
+  thread.start()
     
   return redirect(url_for('loading'))
 
@@ -94,26 +94,13 @@ def loading():
   services = session.get('ports', {})
   
   result = check_containers_health()
-   
-  if result == "no_containers":
-
-    return render_template("loading.html",
-                            services=services,
-                            healthy_containers=[],
-                            no_containers=True,
-                            some_healthy=False,
-                            all_healthy=False)
-
+  
   if result is True:
-    return redirect(url_for("final"))
-
-
-  return render_template("loading.html",
+    return redirect(url_for("final")) 
+  else:
+    return render_template("loading.html",
                         services=services,
-                        healthy_containers=result,
-                        no_containers=False,
-                        some_healthy=True,
-                        all_healthy=False)
+                        healthy_containers=result)
   
   
   

@@ -194,17 +194,14 @@ def check_containers_health():
     try:
         result = subprocess.run(ps_cmd, capture_output=True, text=True, check=True)
     except subprocess.CalledProcessError as e:
-        # If 'docker ps' fails, handle the error (e.g., raise an exception or return something else)
         print("Error running docker ps:", e.stderr)
         return []
  
     container_ids = result.stdout.strip().split()
     if not container_ids:
-        # No running containers
-        return "no_containers"
+        return []
  
     healthy_containers = []
-    # 2. For each container, run docker inspect to check its health
     for container_id in container_ids:
         inspect_cmd = ["sudo", "docker", "inspect", container_id]
         try:
@@ -238,7 +235,7 @@ def check_containers_health():
  
 if __name__ == "__main__":
     result = check_containers_health()
-    if result == "no_containers":
+    if result == []:
         print("No containers are running.")
     elif result is True:
         print("All running containers are healthy.")

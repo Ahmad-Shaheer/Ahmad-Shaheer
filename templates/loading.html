@@ -1,14 +1,7 @@
-<!-- loading.html -->
-<h1>Loading Services...</h1>
-<p>Waiting for services to start...</p>
- 
 <link rel = "stylesheet"  href = "/static/style/loading.css"> 
  
 <h2>Loading Services...</h2>
 
-{% if no_containers %}
-<p>No containers are running.</p>
-{% endif %}
 
 <ul id="services-list">
     {% for service, port in services.items() %}
@@ -23,15 +16,10 @@
     {% endfor %}
 </ul>
 
-<!-- Some logic if none or some are healthy -->
-{% if some_healthy and not no_containers %}
-<p>Some containers are not healthy yet...</p>
-{% endif %}
-<script>
+
+
     <script>
         var healthyContainers = {{ healthy_containers|tojson }};
-        var totalServices = {{ services|length }};
-
       </script>
 <script src = '/static/js/loading.js' type = module> </script>
 

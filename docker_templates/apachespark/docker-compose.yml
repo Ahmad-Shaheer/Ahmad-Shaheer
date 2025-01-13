@@ -18,7 +18,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
       interval: 30s
       timeout: 10s
-      retries: 5
+      retries: 8
       start_period: 30s
 
   spark-worker:
@@ -41,7 +41,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8081"]
       interval: 30s
       timeout: 10s
-      retries: 5
+      retries: 8
       start_period: 30s
 
 networks:

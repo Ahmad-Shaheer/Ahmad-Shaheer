@@ -14,7 +14,10 @@ window.healthyContainers.forEach(function(containerName) {
   var iconEl = document.getElementById('icon-' + containerName);
   var checkboxEl = document.getElementById('checkbox-' + containerName);
 
-
+  if (checkboxEl) {
+    // Ensure the checkbox is disabled initially
+    checkboxEl.disabled = true;
+}
   if (iconEl) {
     iconEl.classList.remove('spinner');
   } 

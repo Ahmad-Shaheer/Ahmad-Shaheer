@@ -18,7 +18,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 8
       start_period: 30s
 
 
@@ -46,7 +46,7 @@ services:
       test: ["CMD-SHELL", "airflow db check"]
       interval: 10s
       timeout: 10s
-      retries: 5
+      retries: 8
       start_period: 5s
     networks:
       - airflow_network
@@ -106,7 +106,7 @@ services:
           test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
           interval: 30s
           timeout: 10s
-          retries: 5
+          retries: 8
           start_period: 30s
 
 networks:

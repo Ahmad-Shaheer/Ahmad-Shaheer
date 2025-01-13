@@ -90,7 +90,6 @@ def extract_signin_configs(services_dict, env_file_path='.env'):
     env_params_dict = {
         'airflow-db': ['POSTGRES_USER', 'POSTGRES_PASSWORD'],
         'superset-metadata-db': ['POSTGRES_USER_SUPERSET', 'POSTGRES_PASSWORD_SUPERSET'],
-        'superset': ['USERNAME', 'PASSWORD'],
         'mongo': ['MONGO_INITDB_ROOT_USERNAME', 'MONGO_INITDB_ROOT_PASSWORD'],
         'mongo-express': ['ME_CONFIG_BASICAUTH_USERNAME', 'ME_CONFIG_BASICAUTH_PASSWORD'],
         'mysql': ['MYSQL_USER', 'MYSQL_PASSWORD'],
@@ -113,15 +112,19 @@ def extract_signin_configs(services_dict, env_file_path='.env'):
             env_dict[key.strip()] = value.strip()
 
     for service, config_needed in services_dict.items():
-        if service in env_params_dict:
+        if service == 'superset':
+            # Ensure USERNAME and PASSWORD are set to "admin"
+            signin_configs[service] = {'USERNAME': 'admin', 'PASSWORD': 'admin'}
+        elif service in env_params_dict:
+            # Handle other services
             service_configs = {}
             for param in env_params_dict[service]:
                 if param in env_dict:
                     service_configs[param] = env_dict[param]
                 else:
-                    service_configs[param] = None 
+                    service_configs[param] = None
             signin_configs[service] = service_configs
-
+    
     return signin_configs
 
 

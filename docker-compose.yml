@@ -26,48 +26,27 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-  postgres:
-    image: postgres:14
+  neo4j:
+    image: neo4j:5.7
+    container_name: neo4j_service
     environment:
-      POSTGRES_USER: ${POSTGRES_USER_PG}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PG}
-      POSTGRES_DB: ${POSTGRES_DB_PG}
+      NEO4J_AUTH: ${NEO4J_AUTH}
     ports:
-    - 5432:5432
+    - 7474:7474
+    - 7687:7687
     volumes:
-    - postgres_postgres_postgres_data:/var/lib/postgresql/data
+    - neo4j_neo4j_neo4j_data:/data
     networks:
     - data_pipeline_network
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - pg_isready -U $${POSTGRES_USER_PG} -d $${POSTGRES_DB_PG}
-      interval: 10s
-      timeout: 5s
-      retries: 8
-      start_period: 30s
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    ports:
-    - 5050:80
-    networks:
-    - data_pipeline_network
-    depends_on:
-      postgres:
-        condition: service_healthy
+    restart: unless-stopped
     healthcheck:
       test:
       - CMD
-      - sh
-      - -c
-      - wget -q --spider http://localhost:80 || exit 1
-      interval: 30s
+      - /var/lib/neo4j/bin/neo4j
+      - status
       timeout: 10s
-      retries: 5
-    restart: always
+      retries: 3
+      interval: 5s
   spark-master:
     image: apache/spark:3.4.1
     container_name: spark-master
@@ -123,55 +102,52 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-  superset-metadata-db:
-    image: postgres:14
-    container_name: superset-metadata-db
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER_SUPERSET}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_SUPERSET}
-      POSTGRES_DB: ${POSTGRES_DB_SUPERSET}
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    hostname: mongo
     volumes:
-    - apachesuperset_superset-metadata-db_superset_db_data:/var/lib/postgresql/data
+    - mongo_mongo_mongodb-data:/data/db/
+    - mongo_mongo_mongodb-log:/var/log/mongodb/
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     ports:
-    - 5433:5432
+    - 27017:27017
     networks:
     - data_pipeline_network
     healthcheck:
-      test:
-      - CMD-SHELL
-      - pg_isready -U ${POSTGRES_USER_SUPERSET} -d ${POSTGRES_DB_SUPERSET}
-      interval: 15s
+      test: echo 'db.runCommand("ping").ok'
+      interval: 10s
       timeout: 5s
       retries: 8
-      start_period: 30s
-  superset:
-    build:
-      context: docker_templates/apachesuperset
-    container_name: superset
-    environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_SUPERSET}
-      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
-      SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI_SUPERSET}
-    depends_on:
-      superset-metadata-db:
-        condition: service_healthy
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
     restart: always
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${ME_CONFIG_MONGODB_ADMINUSERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${ME_CONFIG_MONGODB_ADMINPASSWORD}
+      ME_CONFIG_MONGODB_PORT: ${ME_CONFIG_MONGODB_PORT}
+      ME_CONFIG_MONGODB_SERVER: ${ME_CONFIG_MONGODB_SERVER}
+      ME_CONFIG_BASICAUTH_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_CONFIG_BASICAUTH_PASSWORD}
     ports:
-    - 8088:8088
+    - 8082:8081
     networks:
     - data_pipeline_network
+    depends_on:
+      mongo:
+        condition: service_healthy
     healthcheck:
       test:
       - CMD
-      - python3
-      - -c
-      - import http.client; conn = http.client.HTTPConnection('localhost', 8088);
-        conn.request('GET', '/health'); response = conn.getresponse(); exit(0) if
-        response.status == 200 else exit(1)
-      interval: 30s
+      - echo
+      - Mongo Express is up
+      interval: 10s
       timeout: 10s
       retries: 8
-      start_period: 30s
+      start_period: 15s
   airflow-db:
     image: postgres:14
     container_name: airflow-db
@@ -182,7 +158,7 @@ services:
     volumes:
     - airflow_airflow-db_airflow_db_data:/var/lib/postgresql/data
     ports:
-    - 5434:5432
+    - 5432:5432
     networks:
     - data_pipeline_network
     healthcheck:
@@ -268,7 +244,7 @@ services:
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
       AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
     ports:
-    - 8082:8080
+    - 8083:8080
     volumes:
     - airflow_airflow-webserver_airflow_dags:/opt/airflow/dags
     - airflow_airflow-webserver_airflow_logs:/opt/airflow/logs
@@ -290,8 +266,9 @@ services:
 networks:
   data_pipeline_network: {}
 volumes:
-  postgres_postgres_postgres_data: {}
-  apachesuperset_superset-metadata-db_superset_db_data: {}
+  neo4j_neo4j_neo4j_data: {}
+  mongo_mongo_mongodb-data: {}
+  mongo_mongo_mongodb-log: {}
   airflow_airflow-db_airflow_db_data: {}
   airflow_airflow-scheduler_airflow_dags: {}
   airflow_airflow-scheduler_airflow_logs: {}

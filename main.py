@@ -129,7 +129,9 @@ def final():
   
   ports = session.get('ports', None)
   signin_conf = extract_signin_configs(ports)
-  signin_conf.update({'nifi': ['admin', 'ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB']})
+  if 'nifi' in ports.keys():
+    
+    signin_conf.update({'nifi': ['admin', 'ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB']})
   links = refine_access_links(ports=ports)   
   
 

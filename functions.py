@@ -1,8 +1,7 @@
 import subprocess
-import time
-import re
 from main2 import merge_docker_compose
 import requests
+import json
 
 def tool_definition(pipeline_dict, tools_config):
     selected_tools = {key: value for key, value in pipeline_dict.items() if value}
@@ -178,6 +177,79 @@ def infer(system, prompt):
     ).json()
  
     return model_response['message']['content']
+
+
+def check_containers_health():
+    """
+    Checks the health status of all running Docker containers using subprocess.
+    Returns:
+        - "no_containers" if no containers are running.
+        - True, if all running containers are healthy.
+        - A list of healthy container names, if not all containers are healthy.
+          This list can be empty if none are healthy.
+    """
+ 
+    # 1. List all running containers (IDs)
+    ps_cmd = ["sudo", "docker", "ps", "-q"]
+    try:
+        result = subprocess.run(ps_cmd, capture_output=True, text=True, check=True)
+    except subprocess.CalledProcessError as e:
+        # If 'docker ps' fails, handle the error (e.g., raise an exception or return something else)
+        print("Error running docker ps:", e.stderr)
+        return []
+ 
+    container_ids = result.stdout.strip().split()
+    if not container_ids:
+        # No running containers
+        return "no_containers"
+ 
+    healthy_containers = []
+    # 2. For each container, run docker inspect to check its health
+    for container_id in container_ids:
+        inspect_cmd = ["sudo", "docker", "inspect", container_id]
+        try:
+            inspect_result = subprocess.run(inspect_cmd, capture_output=True, text=True, check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"Error inspecting container {container_id}:", e.stderr)
+            continue  # skip this container
+ 
+        try:
+            # Parse the JSON output of 'docker inspect'
+            data = json.loads(inspect_result.stdout)
+            # Usually 'docker inspect' returns a list of container data, so take the first item
+            container_info = data[0] if data else {}
+            # Container name and health status
+            container_name = container_info.get("Name", "").lstrip("/")
+            state = container_info.get("State", {})
+            health = state.get("Health", {})
+            health_status = health.get("Status")
+            # If health_status is "healthy", record the container name
+            if health_status == "healthy":
+                healthy_containers.append(container_name)
+        except (json.JSONDecodeError, IndexError, KeyError) as e:
+            print(f"Error parsing JSON for container {container_id}:", e)
+            continue
+ 
+    # 3. Compare the number of healthy containers to the total
+    if len(healthy_containers) == len(container_ids):
+        return True
+    else:
+        return healthy_containers
+ 
+if __name__ == "__main__":
+    result = check_containers_health()
+    if result == "no_containers":
+        print("No containers are running.")
+    elif result is True:
+        print("All running containers are healthy.")
+    else:
+        # result is a list of healthy containers
+        if result:
+            print("Some containers are not healthy.")
+            print("Healthy containers:", result)
+        else:
+            print("No healthy containers found.")
+
 if __name__ == '__main__':
     pass
             

@@ -3,7 +3,7 @@ import threading
 from flask_session import Session
 from pipeline_logic import get_pipeline
 from functions import generate_env_file, retrieve_config_details, tool_definition,\
-run_docker_compose, extract_signin_configs, extract_nifi_credentials, refine_access_links
+run_docker_compose, extract_signin_configs, extract_nifi_credentials, refine_access_links, check_containers_health
 import json
 
 
@@ -87,14 +87,34 @@ def deploy():
   # thread = threading.Thread(target=run_docker_compose)
   # thread.start()
     
-  return redirect(url_for('final'))
+  return redirect(url_for('loading'))
 
 @app.route('/loading')
 def loading():
-    ports = session.get('ports', None)
-    services = refine_access_links(ports)    
+  services = session.get('ports', {})
+  
+  result = check_containers_health()
+   
+  if result == "no_containers":
 
-    return render_template('loading.html', services = services)
+    return render_template("loading.html",
+                            services=services,
+                            healthy_containers=[],
+                            no_containers=True,
+                            some_healthy=False,
+                            all_healthy=False)
+
+  if result is True:
+    return redirect(url_for("final"))
+
+
+  return render_template("loading.html",
+                        services=services,
+                        healthy_containers=result,
+                        no_containers=False,
+                        some_healthy=True,
+                        all_healthy=False)
+  
   
   
 @app.route('/final')

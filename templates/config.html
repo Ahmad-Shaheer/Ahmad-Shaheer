@@ -15,6 +15,8 @@
 
   <form action="/deploy" method="POST">
     {% for tool_name, tool_details in tools.items() %}
+    <input type="hidden" name="tool_names" value="{{ tool_name }}">
+
     {% if tool_details['Read']|trim != "No" %}
         <div class="tool-form">
             <div class="tool-header">
@@ -26,7 +28,6 @@
                     {{ tool_name }}
                 {% endif %}
             </div>
-            <input type="hidden" name="tool_names" value="{{ tool_name }}">
 
             {% for var_name, default_value in tool_details.EnvironmentVariables.items() %}
                 {% if loop.index <= 2 %}

@@ -64,8 +64,10 @@ def config():
         "Orchestration Tool" : orchestration_tool
 
     }
+    
 
     shortlisted_tools = tool_definition(pipeline_dict, tools_config)
+    print(f'THESE ARE THE SHORTLISTED TOOLS ------------------------------{shortlisted_tools}')
     return render_template('config.html', pipeline_dict=pipeline_dict, tools=shortlisted_tools)
   
   
@@ -76,6 +78,8 @@ def deploy():
         docker_config = json.load(f)
         
   form_data = request.form
+  print(f"This is form data -------------------------{form_data}\n\n\n")
+  print(f'These ar ehte tool names ------------------------------------{form_data.getlist('tool_names')}\n\n\n')
   updated_config, ports = retrieve_config_details(form_data=form_data, docker_config=docker_config)
   
   session['form_data'] = form_data
@@ -87,20 +91,21 @@ def deploy():
   # thread = threading.Thread(target=run_docker_compose)
   # thread.start()
     
-  return redirect(url_for('final'))
+  return redirect(url_for('loading'))
 
 @app.route('/loading')
 def loading():
   services = session.get('ports', {})
   
-  result = check_containers_health()
+  # result = check_containers_health()
   
-  if result is True:
-    return redirect(url_for("final")) 
-  else:
-    return render_template("loading.html",
-                        services=services,
-                        healthy_containers=result)
+  # if result is True:
+  #   return redirect(url_for("final")) 
+  # else:
+  #   return render_template("loading.html",
+  #                       services=services,
+  #                       healthy_containers=result)
+  return render_template('loading.html' ,services=services)
   
   
   
@@ -109,7 +114,7 @@ def final():
   
   ports = session.get('ports', None)
   signin_conf = extract_signin_configs(ports)
-  signin_conf.update({'nifi': ['admin', 'pass']})
+  signin_conf.update({'nifi': ['admin', 'ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB']})
   links = refine_access_links(ports=ports)   
   
 

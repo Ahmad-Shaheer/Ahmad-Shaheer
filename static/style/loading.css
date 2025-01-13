@@ -1,3 +1,63 @@
+/* style/loading.css */
+
+/* Global body styling */
+body {
+    background: linear-gradient(120deg, #0f2027, #203a43, #2c5364); /* Elegant gradient */
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    justify-content: flex-start;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Main heading (if you use <h1> anywhere) */
+h1 {
+    font-family: "Raleway", sans-serif;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    color: #f0f0f0;
+}
+
+/* Secondary heading for "Loading Services..." */
+h2 {
+    font-family: "Raleway", sans-serif;
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    font-size: 1.6rem;
+    color: #f0f0f0;
+}
+
+/* Label styling */
+label {
+    font-size: 1.7rem;
+    font-weight: bold;
+    color: #ffffff;  /* Adjust if needed for better visibility on dark background */
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* Unordered list for services */
+#services-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+    width: 300px; /* Adjust width to your preference */
+}
+
+#services-list li {
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+    color: #f0f0f0; /* Contrast with dark background */
+}
+
+/* Spinner (loading animation) */
 .spinner {
     display: inline-block;
     width: 16px;
@@ -8,11 +68,30 @@
     animation: spin 1s linear infinite;
     margin-right: 8px;
 }
+
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
+
 .check {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    /* visually center the check mark */
+    font-size: 1rem;
     color: green;
     font-weight: bold;
-    margin-right: 8px;
-}
+    text-align: center;
+    line-height: 1.5;
+    position: relative;
+  }
+  
+  .check::before {
+    content: "✓"; 
+    position: absolute;
+    top: 0; 
+    left: 0;
+  }

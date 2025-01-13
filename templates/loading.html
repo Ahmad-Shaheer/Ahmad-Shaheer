@@ -9,7 +9,6 @@
         <!-- We start with a spinner for every service -->
         <span id="icon-{{ service }}" class="spinner"></span>
         <label>
-            <input type="checkbox" id="checkbox-{{ service }}" disabled>
             {{ service }} 
         </label>
     </li>
@@ -19,7 +18,6 @@
 
 
     <script>
-        var healthyContainers = {{ healthy_containers|tojson }};
       </script>
 <script src = '/static/js/loading.js' type = module> </script>
 

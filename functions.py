@@ -91,7 +91,7 @@ def extract_signin_configs(services_dict, env_file_path='.env'):
     env_params_dict = {
         'airflow-db': ['POSTGRES_USER', 'POSTGRES_PASSWORD'],
         'superset-metadata-db': ['POSTGRES_USER_SUPERSET', 'POSTGRES_PASSWORD_SUPERSET'],
-        'superset': ['POSTGRES_PASSWORD_SUPERSET', 'SUPERSET_SECRET_KEY'],
+        'superset': ['USERNAME', 'PASSWORD'],
         'mongo': ['MONGO_INITDB_ROOT_USERNAME', 'MONGO_INITDB_ROOT_PASSWORD'],
         'mongo-express': ['ME_CONFIG_BASICAUTH_USERNAME', 'ME_CONFIG_BASICAUTH_PASSWORD'],
         'mysql': ['MYSQL_USER', 'MYSQL_PASSWORD'],

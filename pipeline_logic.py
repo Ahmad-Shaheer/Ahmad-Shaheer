@@ -123,7 +123,7 @@ def get_pipeline(data_type, nature, end_goal, transformation):
                 },
                 "dashboard": {
                     "yes": {'Ingestion' :'Apache Kafka',
-                            'Processing':' Apache Flink',
+                            'Processing':'Apache Flink',
                             'Storage': 'Postgres',
                             'Visualization': 'Apache Superset'},
                     
@@ -145,7 +145,7 @@ def get_pipeline(data_type, nature, end_goal, transformation):
             "semi-structured": {
                 "storage": {
                     "yes":{'Ingestion' :'Apache Kafka',
-                            'Processing':' Apache Flink',
+                            'Processing':'Apache Flink',
                             'Storage': 'Mongo'},
                     
                     "no": {'Ingestion' :'Apache Kafka',
@@ -153,12 +153,12 @@ def get_pipeline(data_type, nature, end_goal, transformation):
                 },
                 "dashboard": {
                     "yes": {'Ingestion' :'Apache Kafka',
-                            'Processing':' Apache Flink',
+                            'Processing':'Apache Flink',
                             'Storage': 'Postgres',
                             'Visualization': 'Apache Superset'},
                     
                     "no": {'Ingestion' :'Apache Kafka',
-                            'Processing':' Apache Flink',  
+                            'Processing':'Apache Flink',  
                             'Storage': 'Postgres',
                             'Visualization': 'Apache Superset'}
                 },

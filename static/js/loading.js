@@ -11,21 +11,14 @@ if (typeof window.healthyContainers !== 'undefined') {
 console.log('loading.js: Attempting to update spinners and checkboxes...');
 window.healthyContainers.forEach(function(containerName) {
   var iconEl = document.getElementById('icon-' + containerName);
-  var checkboxEl = document.getElementById('checkbox-' + containerName);
-
-  console.log(`loading.js: containerName='${containerName}', iconEl=`, iconEl, ', checkboxEl=', checkboxEl);
 
   if (iconEl) {
+    // Remove spinner animation
     iconEl.classList.remove('spinner');
+    // Add a check style
+    iconEl.classList.add('check');
   } else {
-    console.warn(`loading.js: Could not find icon for ${containerName}`);
-  }
-
-  if (checkboxEl) {
-    checkboxEl.disabled = false;
-    checkboxEl.checked = true;
-  } else {
-    console.warn(`loading.js: Could not find checkbox for ${containerName}`);
+    console.warn(`Could not find icon for ${containerName}`);
   }
 });
 

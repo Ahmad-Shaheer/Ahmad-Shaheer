@@ -135,7 +135,7 @@ services:
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: ${CONNECT_STATUS_STORAGE_REPLICATION_FACTOR}
       CONNECT_PLUGIN_PATH: ${CONNECT_PLUGIN_PATH}
     volumes:
-    - C:\Users\AHMAD.SHAHEER\Desktop\Capstone\temp_merged_volumes\apachekafka_kafka-connect_connectors:/etc/kafka-connect/jars/
+    - /home/cmdadmin/Desktop/CAP/Ahmad-Shaheer/temp_merged_volumes/apachekafka_kafka-connect_connectors:/etc/kafka-connect/jars/
     depends_on:
       zoo1:
         condition: service_healthy

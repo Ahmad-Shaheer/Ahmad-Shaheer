@@ -9,17 +9,20 @@ if (typeof window.healthyContainers !== 'undefined') {
 
 // Attempt to update spinners and checkboxes
 console.log('loading.js: Attempting to update spinners and checkboxes...');
+
 window.healthyContainers.forEach(function(containerName) {
   var iconEl = document.getElementById('icon-' + containerName);
+  var checkboxEl = document.getElementById('checkbox-' + containerName);
+
 
   if (iconEl) {
-    // Remove spinner animation
     iconEl.classList.remove('spinner');
-    // Add a check style
-    iconEl.classList.add('check');
-  } else {
-    console.warn(`Could not find icon for ${containerName}`);
-  }
+  } 
+
+  if (checkboxEl) {
+    checkboxEl.disabled = false;
+    checkboxEl.checked = true;
+  } 
 });
 
 // Auto-reload every 5 seconds

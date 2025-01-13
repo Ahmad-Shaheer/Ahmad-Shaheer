@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import threading
+import subprocess
 from flask_session import Session
 from pipeline_logic import get_pipeline
 from functions import generate_env_file, retrieve_config_details, tool_definition,\
@@ -113,6 +114,15 @@ def ollama_chat():
         return jsonify({"content": content}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+      
+@app.route('/create_pipeline', methods=['POST'])
+def create_pipeline():
+    try:
+        session.clear()
+        subprocess.run(["sudo", "docker", "compose", "down", "-v"], check=True)
+        return render_template('index.html')
+    except subprocess.CalledProcessError as e:
+        return f"Error occurred: {e}", 500
   
 @app.route('/final')
 def final():

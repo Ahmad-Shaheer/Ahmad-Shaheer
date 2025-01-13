@@ -119,7 +119,18 @@ td a:hover {
       gap: 6px; 
   
     }
-  
+    .home-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+  }
     body {
       
       background: linear-gradient(120deg, #0f2027, #203a43, #2c5364); /* Elegant gradient */

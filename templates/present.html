@@ -11,6 +11,9 @@
 <body>
 
     <h1>Docker Services and Their Ports</h1>
+    <form action="{{ url_for('create_pipeline') }}" method="POST" style="display: inline;">
+        <button type="submit" class="home-button">Home</button>
+    </form>
 
     <table>
         <thead>
@@ -60,6 +63,10 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <form action="{{ url_for('create_pipeline') }}" method="POST">
+        <button type="submit">Create New Pipeline</button>
+        
     <div class="coach">
         <div class='flowrence'>
           Flowrence

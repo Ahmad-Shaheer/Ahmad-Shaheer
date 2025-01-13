@@ -52,6 +52,7 @@ def retrieve_config_details(form_data, docker_config ):
                 "EnvironmentVariables": updated_env_vars
             }
             ports = merge_docker_compose(tool_names)
+            print(f'These are the ports - -------------------------------------------------------------------------{ports}')
     return updated_config, ports
 
 def refine_access_links(ports):
@@ -124,27 +125,6 @@ def extract_signin_configs(services_dict, env_file_path='.env'):
 
     return signin_configs
 
-def extract_nifi_credentials():
-    try:
-        command = "sudo docker logs nifi | grep -E 'Generated Username|Generated Password' | grep -v 'tail:'"
-        logs = subprocess.check_output(command, shell=True, text=True)
-        
-        lines = logs.splitlines()
-        
-        username = None
-        password = None
-        
-        for line in lines:
-            if "Generated Username" in line:
-                username = line.replace("Generated Username:", '').strip()
-            elif "Generated Password" in line:
-                password = line.replace("Generated Password:", '').strip()
-        
-        return username, password
-
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-        return None, None   
 
 def infer(system, prompt):
     data = {

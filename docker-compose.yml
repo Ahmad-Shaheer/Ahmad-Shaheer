@@ -12,6 +12,14 @@ services:
     - postgres_postgres_postgres_data:/var/lib/postgresql/data
     networks:
     - data_pipeline_network
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U $${POSTGRES_USER_PG} -d $${POSTGRES_DB_PG}
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
   pgadmin:
     image: dpage/pgadmin4:latest
     environment:
@@ -21,6 +29,18 @@ services:
     - 5050:80
     networks:
     - data_pipeline_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD
+      - sh
+      - -c
+      - wget -q --spider http://localhost:80 || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
     restart: always
   airflow-db:
     image: postgres:14
@@ -35,12 +55,20 @@ services:
     - 5433:5432
     networks:
     - data_pipeline_network
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
   airflow-init:
     image: apache/airflow:2.6.2
     container_name: airflow-init
     depends_on:
       airflow-db:
-        condition: service_started
+        condition: service_healthy
     environment:
       AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
@@ -67,7 +95,7 @@ services:
     container_name: airflow-scheduler
     depends_on:
       airflow-db:
-        condition: service_started
+        condition: service_healthy
       airflow-init:
         condition: service_healthy
     restart: always
@@ -76,6 +104,7 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
       AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     volumes:
     - airflow_airflow-scheduler_airflow_dags:/opt/airflow/dags
     - airflow_airflow-scheduler_airflow_logs:/opt/airflow/logs
@@ -84,12 +113,22 @@ services:
     - scheduler
     networks:
     - data_pipeline_network
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - --fail
+      - http://localhost:8974/health
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
   airflow-webserver:
     image: apache/airflow:2.6.2
     container_name: airflow-webserver
     depends_on:
       airflow-scheduler:
-        condition: service_started
+        condition: service_healthy
       airflow-init:
         condition: service_healthy
     restart: always
@@ -108,6 +147,16 @@ services:
     - webserver
     networks:
     - data_pipeline_network
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - --fail
+      - http://localhost:8080/health
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 networks:
   data_pipeline_network: {}
 volumes:

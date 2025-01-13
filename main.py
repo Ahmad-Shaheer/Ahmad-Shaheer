@@ -3,7 +3,7 @@ import threading
 from flask_session import Session
 from pipeline_logic import get_pipeline
 from functions import generate_env_file, retrieve_config_details, tool_definition,\
-run_docker_compose, extract_signin_configs, extract_nifi_credentials, refine_access_links, check_containers_health
+run_docker_compose, extract_signin_configs, refine_access_links, check_containers_health
 import json
 
 
@@ -84,10 +84,10 @@ def deploy():
   
   generate_env_file(updated_config, output_file=".env")
 
-  thread = threading.Thread(target=run_docker_compose)
-  thread.start()
+  # thread = threading.Thread(target=run_docker_compose)
+  # thread.start()
     
-  return redirect(url_for('loading'))
+  return redirect(url_for('final'))
 
 @app.route('/loading')
 def loading():
@@ -109,8 +109,7 @@ def final():
   
   ports = session.get('ports', None)
   signin_conf = extract_signin_configs(ports)
-  nifi_name, nifi_pass = extract_nifi_credentials()
-  signin_conf.update({'nifi': [nifi_name, nifi_pass]})
+  signin_conf.update({'nifi': ['admin', 'pass']})
   links = refine_access_links(ports=ports)   
   
 

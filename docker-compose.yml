@@ -1,276 +1,376 @@
 version: '3.9'
 services:
-  nifi:
-    build:
-      context: docker_templates/nifi
-    container_name: nifi
-    environment:
-    - NIFI_WEB_HTTPS_PORT=8443
-    - SINGLE_USER_CREDENTIALS_USERNAME=admin
-    - SINGLE_USER_CREDENTIALS_PASSWORD=ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB
-    - NIFI_HOME=/opt/nifi/nifi-current
-    - NIFI_LOG_DIR=/opt/nifi/nifi-current/logs
-    - NIFI_TOOLKIT_HOME=/opt/nifi/nifi-toolkit-current
-    - NIFI_PID_DIR=/opt/nifi/nifi-current/run
-    - NIFI_BASE_DIR=/opt/nifi
+  zoo1:
+    image: confluentinc/cp-zookeeper:7.3.2
+    hostname: zoo1
+    container_name: zoo1
     ports:
-    - 8443:8443
-    - 52020:52020
+    - 2181:2181
+    environment:
+      ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_CLIENT_PORT}
+      ZOOKEEPER_SERVER_ID: ${ZOOKEEPER_SERVER_ID}
+      ZOOKEEPER_SERVERS: ${ZOOKEEPER_SERVERS}
+    healthcheck:
+      test: nc -z localhost 2181 || exit -1
+      interval: 10s
+      timeout: 5s
+      retries: 8
     networks:
     - data_pipeline_network
-    healthcheck:
-      test:
-      - CMD
-      - 'true'
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-  neo4j:
-    image: neo4j:5.7
-    container_name: neo4j_service
-    environment:
-      NEO4J_AUTH: ${NEO4J_AUTH}
+  kafka1:
+    image: confluentinc/cp-kafka:7.3.2
+    hostname: kafka1
+    container_name: kafka1
     ports:
-    - 7474:7474
-    - 7687:7687
-    volumes:
-    - neo4j_neo4j_neo4j_data:/data
-    networks:
-    - data_pipeline_network
-    restart: unless-stopped
-    healthcheck:
-      test:
-      - CMD
-      - /var/lib/neo4j/bin/neo4j
-      - status
-      timeout: 10s
-      retries: 3
-      interval: 5s
-  spark-master:
-    image: apache/spark:3.4.1
-    container_name: spark-master
-    command:
-    - /bin/bash
-    - -c
-    - /opt/spark/sbin/start-master.sh && tail -f /dev/null
+    - 9092:9092
+    - 29092:29092
+    - 9999:9999
     environment:
-    - SPARK_WORKLOAD=${SPARK_WORKLOAD_MASTER}
-    - SPARK_MASTER_PORT=${SPARK_MASTER_PORT}
-    - SPARK_MASTER_WEBUI_PORT=${SPARK_MASTER_WEBUI_PORT}
-    ports:
-    - 8080:8080
-    - 7077:7077
-    networks:
-    - data_pipeline_network
-    healthcheck:
-      test:
-      - CMD
-      - curl
-      - -f
-      - http://localhost:8080
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-  spark-worker:
-    image: apache/spark:3.4.1
-    command:
-    - /bin/bash
-    - -c
-    - /opt/spark/sbin/start-worker.sh spark://spark-master:7077 && tail -f /dev/null
-    environment:
-    - SPARK_WORKLOAD=${SPARK_WORKLOAD_WORKER}
-    - SPARK_MASTER_URL=${SPARK_MASTER_URL}
-    - SPARK_WORKER_MEMORY=${SPARK_WORKER_MEMORY}
-    - SPARK_WORKER_CORES=${SPARK_WORKER_CORES}
+      KAFKA_ADVERTISED_LISTENERS: ${KAFKA_ADVERTISED_LISTENERS}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: ${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP}
+      KAFKA_INTER_BROKER_LISTENER_NAME: ${KAFKA_INTER_BROKER_LISTENER_NAME}
+      KAFKA_ZOOKEEPER_CONNECT: ${KAFKA_ZOOKEEPER_CONNECT}
+      KAFKA_BROKER_ID: ${KAFKA_BROKER_ID}
+      KAFKA_LOG4J_LOGGERS: ${KAFKA_LOG4J_LOGGERS}
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: ${KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR}
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: ${KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR}
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: ${KAFKA_TRANSACTION_STATE_LOG_MIN_ISR}
+      KAFKA_JMX_PORT: ${KAFKA_JMX_PORT}
+      KAFKA_JMX_HOSTNAME: ${DOCKER_HOST_IP:-127.0.0.1}
+      KAFKA_AUTHORIZER_CLASS_NAME: ${KAFKA_AUTHORIZER_CLASS_NAME}
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: ${KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND}
     depends_on:
-      spark-master:
+      zoo1:
         condition: service_healthy
     restart: always
+    healthcheck:
+      test: kafka-topics --bootstrap-server localhost:9092 --list
+      interval: 10s
+      timeout: 10s
+      retries: 8
+    networks:
+    - data_pipeline_network
+  kafka-schema-registry:
+    image: confluentinc/cp-schema-registry:7.3.2
+    hostname: kafka-schema-registry
+    container_name: kafka-schema-registry
     ports:
     - 8081:8081
-    networks:
-    - data_pipeline_network
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: ${SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS}
+      SCHEMA_REGISTRY_HOST_NAME: ${SCHEMA_REGISTRY_HOST_NAME}
+      SCHEMA_REGISTRY_LISTENERS: ${SCHEMA_REGISTRY_LISTENERS}
+    depends_on:
+      zoo1:
+        condition: service_healthy
+      kafka1:
+        condition: service_healthy
+    restart: always
     healthcheck:
       test:
       - CMD
       - curl
-      - -f
-      - http://localhost:8081
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-  mongo:
-    image: mongo:latest
-    container_name: mongo
-    hostname: mongo
-    volumes:
-    - mongo_mongo_mongodb-data:/data/db/
-    - mongo_mongo_mongodb-log:/var/log/mongodb/
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    ports:
-    - 27017:27017
-    networks:
-    - data_pipeline_network
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok'
-      interval: 10s
-      timeout: 5s
-      retries: 8
-  mongo-express:
-    image: mongo-express:latest
-    container_name: mongo-express
-    restart: always
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${ME_CONFIG_MONGODB_ADMINUSERNAME}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${ME_CONFIG_MONGODB_ADMINPASSWORD}
-      ME_CONFIG_MONGODB_PORT: ${ME_CONFIG_MONGODB_PORT}
-      ME_CONFIG_MONGODB_SERVER: ${ME_CONFIG_MONGODB_SERVER}
-      ME_CONFIG_BASICAUTH_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_CONFIG_BASICAUTH_PASSWORD}
-    ports:
-    - 8082:8081
-    networks:
-    - data_pipeline_network
-    depends_on:
-      mongo:
-        condition: service_healthy
-    healthcheck:
-      test:
-      - CMD
-      - echo
-      - Mongo Express is up
+      - --silent
+      - --fail
+      - http://localhost:8081/subjects
       interval: 10s
       timeout: 10s
       retries: 8
-      start_period: 15s
-  airflow-db:
-    image: postgres:14
-    container_name: airflow-db
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-    - airflow_airflow-db_airflow_db_data:/var/lib/postgresql/data
+    networks:
+    - data_pipeline_network
+  kafka-rest-proxy:
+    image: confluentinc/cp-kafka-rest:7.3.2
+    hostname: kafka-rest-proxy
+    container_name: kafka-rest-proxy
     ports:
-    - 5432:5432
-    networks:
-    - data_pipeline_network
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-  airflow-init:
-    image: apache/airflow:2.6.2
-    container_name: airflow-init
-    depends_on:
-      airflow-db:
-        condition: service_healthy
+    - 8082:8082
     environment:
-      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
-      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
-      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
-    command: "bash -c \"\n  echo 'Initializing Airflow DB...' &&\n  airflow db init\
-      \ &&\n  echo 'Creating Airflow admin user...' &&\n  airflow users create --username\
-      \ ${AIRFLOW_ADMIN_USER} --password ${AIRFLOW_ADMIN_PASS} --firstname Airflow\
-      \ --lastname Admin --role Admin --email ${AIRFLOW_ADMIN_EMAIL} &&\n  echo 'Airflow\
-      \ initialization is complete! Container will stay alive for healthcheck...'\
-      \ &&\n  tail -f /dev/null\n\"\n"
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - airflow db check
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 5s
-    networks:
-    - data_pipeline_network
-  airflow-scheduler:
-    image: apache/airflow:2.6.2
-    container_name: airflow-scheduler
+      KAFKA_REST_LISTENERS: ${KAFKA_REST_LISTENERS}
+      KAFKA_REST_SCHEMA_REGISTRY_URL: ${KAFKA_REST_SCHEMA_REGISTRY_URL}
+      KAFKA_REST_HOST_NAME: ${KAFKA_REST_HOST_NAME}
+      KAFKA_REST_BOOTSTRAP_SERVERS: ${KAFKA_REST_BOOTSTRAP_SERVERS}
     depends_on:
-      airflow-db:
+      zoo1:
         condition: service_healthy
-      airflow-init:
+      kafka1:
+        condition: service_healthy
+      kafka-schema-registry:
         condition: service_healthy
     restart: always
-    environment:
-      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
-      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
-      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
-      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
-    volumes:
-    - airflow_airflow-scheduler_airflow_dags:/opt/airflow/dags
-    - airflow_airflow-scheduler_airflow_logs:/opt/airflow/logs
-    command:
-    - airflow
-    - scheduler
-    networks:
-    - data_pipeline_network
     healthcheck:
       test:
       - CMD
       - curl
       - --fail
-      - http://localhost:8974/health
-      interval: 30s
+      - http://localhost:8082
+      interval: 10s
       timeout: 10s
       retries: 8
-      start_period: 30s
-  airflow-webserver:
-    image: apache/airflow:2.6.2
-    container_name: airflow-webserver
-    depends_on:
-      airflow-scheduler:
-        condition: service_healthy
-      airflow-init:
-        condition: service_healthy
-    restart: always
-    environment:
-      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
-      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
-      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
-    ports:
-    - 8083:8080
-    volumes:
-    - airflow_airflow-webserver_airflow_dags:/opt/airflow/dags
-    - airflow_airflow-webserver_airflow_logs:/opt/airflow/logs
-    command:
-    - airflow
-    - webserver
     networks:
     - data_pipeline_network
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:7.3.2
+    hostname: kafka-connect
+    container_name: kafka-connect
+    ports:
+    - 8083:8083
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: ${CONNECT_BOOTSTRAP_SERVERS}
+      CONNECT_REST_PORT: ${CONNECT_REST_PORT}
+      CONNECT_GROUP_ID: ${CONNECT_GROUP_ID}
+      CONNECT_CONFIG_STORAGE_TOPIC: ${CONNECT_CONFIG_STORAGE_TOPIC}
+      CONNECT_OFFSET_STORAGE_TOPIC: ${CONNECT_OFFSET_STORAGE_TOPIC}
+      CONNECT_STATUS_STORAGE_TOPIC: ${CONNECT_STATUS_STORAGE_TOPIC}
+      CONNECT_KEY_CONVERTER: ${CONNECT_KEY_CONVERTER}
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: ${CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL}
+      CONNECT_VALUE_CONVERTER: ${CONNECT_VALUE_CONVERTER}
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: ${CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL}
+      CONNECT_INTERNAL_KEY_CONVERTER: ${CONNECT_INTERNAL_KEY_CONVERTER}
+      CONNECT_INTERNAL_VALUE_CONVERTER: ${CONNECT_INTERNAL_VALUE_CONVERTER}
+      CONNECT_REST_ADVERTISED_HOST_NAME: ${CONNECT_REST_ADVERTISED_HOST_NAME}
+      CONNECT_LOG4J_ROOT_LOGLEVEL: ${CONNECT_LOG4J_ROOT_LOGLEVEL}
+      CONNECT_LOG4J_LOGGERS: ${CONNECT_LOG4J_LOGGERS}
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: ${CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR}
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: ${CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR}
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: ${CONNECT_STATUS_STORAGE_REPLICATION_FACTOR}
+      CONNECT_PLUGIN_PATH: ${CONNECT_PLUGIN_PATH}
+    volumes:
+    - /home/cmdadmin/Desktop/CAP/Ahmad-Shaheer/temp_merged_volumes/apachekafka_kafka-connect_connectors:/etc/kafka-connect/jars/
+    depends_on:
+      zoo1:
+        condition: service_healthy
+      kafka1:
+        condition: service_healthy
+      kafka-schema-registry:
+        condition: service_healthy
+      kafka-rest-proxy:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - --silent
+      - --fail
+      - http://localhost:8083/connectors
+      interval: 10s
+      timeout: 10s
+      retries: 8
+    networks:
+    - data_pipeline_network
+  conduktorDB:
+    image: postgres:14
+    hostname: conduktorDB
+    container_name: conduktorDB
+    volumes:
+    - apachekafka_conduktorDB_pg_data:/var/lib/postgresql/data
+    ports:
+    - 5432:5432
+    environment:
+      POSTGRES_DB: ${CONDUKTOR_POSTGRES_DB}
+      POSTGRES_USER: ${CONDUKTOR_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${CONDUKTOR_POSTGRES_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: ${CONDUKTOR_POSTGRES_HOST_AUTH_METHOD}
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U $${CONDUKTOR_POSTGRES_USER} -d $${CONDUKTOR_POSTGRES_DB}
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
+    networks:
+    - data_pipeline_network
+  conduktor-console:
+    image: conduktor/conduktor-console:1.26.0
+    hostname: conduktor-console
+    container_name: conduktor-console
+    ports:
+    - 8080:8080
+    volumes:
+    - apachekafka_conduktor-console_conduktor_data:/var/conduktor
+    environment:
+      CDK_DATABASE_URL: ${CDK_DATABASE_URL}
+      CDK_CLUSTERS_0_ID: ${CDK_CLUSTERS_0_ID}
+      CDK_CLUSTERS_0_NAME: ${CDK_CLUSTERS_0_NAME}
+      CDK_CLUSTERS_0_COLOR: ${CDK_CLUSTERS_0_COLOR}
+      CDK_CLUSTERS_0_BOOTSTRAPSERVERS: ${CDK_CLUSTERS_0_BOOTSTRAPSERVERS}
+      CDK_CLUSTERS_0_SCHEMAREGISTRY_URL: ${CDK_CLUSTERS_0_SCHEMAREGISTRY_URL}
+      CDK_CLUSTERS_0_KAFKACONNECTS_0_URL: ${CDK_CLUSTERS_0_KAFKACONNECTS_0_URL}
+      CDK_CLUSTERS_0_KAFKACONNECTS_0_NAME: ${CDK_CLUSTERS_0_KAFKACONNECTS_0_NAME}
+    depends_on:
+      conduktorDB:
+        condition: service_healthy
+      kafka1:
+        condition: service_healthy
+    restart: always
     healthcheck:
       test:
       - CMD
       - curl
       - --fail
       - http://localhost:8080/health
+      interval: 10s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
+    networks:
+    - data_pipeline_network
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_service
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+    - 3306:3306
+    volumes:
+    - mysql_mysql_mysql_data:/var/lib/mysql
+    networks:
+    - data_pipeline_network
+    healthcheck:
+      test:
+      - CMD
+      - mysqladmin
+      - ping
+      - --silent
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    restart: unless-stopped
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: mysql_gui
+    environment:
+      PMA_HOST: ${PMA_HOST}
+      PMA_USER: ${PMA_USER}
+      PMA_PASSWORD: ${PMA_PASSWORD}
+    ports:
+    - 8084:80
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+    - data_pipeline_network
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -Ss
+      - http://localhost/robots.txt
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    restart: unless-stopped
+  jobmanager:
+    image: apache/flink:1.16.0
+    container_name: flink-jobmanager
+    command: jobmanager
+    environment:
+    - JOB_MANAGER_RPC_ADDRESS=${FLINK_JOB_MANAGER_RPC_ADDRESS}
+    - 'FLINK_PROPERTIES=
+
+      jobmanager.rpc.address: ${FLINK_JOB_MANAGER_RPC_ADDRESS}
+
+      '
+    ports:
+    - 8085:8081
+    networks:
+    - data_pipeline_network
+    volumes:
+    - apacheflink_jobmanager_jobmanager-logs:/opt/flink/log
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - --fail
+      - http://localhost:8081/taskmanagers
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 30s
+  taskmanager:
+    image: apache/flink:1.16.0
+    container_name: flink-taskmanager
+    command: taskmanager
+    environment:
+    - JOB_MANAGER_RPC_ADDRESS=${FLINK_JOB_MANAGER_RPC_ADDRESS}
+    - 'FLINK_PROPERTIES=
+
+      jobmanager.rpc.address: ${FLINK_JOB_MANAGER_RPC_ADDRESS}
+
+      '
+    depends_on:
+      jobmanager:
+        condition: service_healthy
+    restart: always
+    networks:
+    - data_pipeline_network
+    volumes:
+    - apacheflink_taskmanager_taskmanager-logs:/opt/flink/log
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - ps aux | grep -q 'taskmanager'
+      interval: 30s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
+  prefect-orion:
+    image: prefecthq/prefect:2-latest
+    container_name: prefect-orion
+    command: "bash -c \"\n  prefect server start --host 0.0.0.0 --port 4200\n\"\n"
+    ports:
+    - 4200:4200
+    volumes:
+    - prefect_prefect-orion_prefect_data:/root/.prefect
+    networks:
+    - data_pipeline_network
+    healthcheck:
+      test:
+      - CMD
+      - python3
+      - -c
+      - import http.client; conn = http.client.HTTPConnection('localhost', 4200);
+        conn.request('GET', '/health'); exit(0) if conn.getresponse().status == 200
+        else exit(1)
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+  prefect-worker:
+    image: prefecthq/prefect:2-latest
+    container_name: prefect-worker
+    depends_on:
+      prefect-orion:
+        condition: service_healthy
+    environment:
+      PREFECT_API_URL: http://prefect-orion:4200/api
+    command: "bash -c \"\n  prefect worker start -p default\n\"\n"
+    healthcheck:
+      test:
+      - CMD
+      - python3
+      - -c
+      - import http.client, json; conn = http.client.HTTPConnection('prefect-orion',
+        4200); conn.request('GET', '/api/health'); resp = conn.getresponse(); exit(0)
+        if resp.status == 200 else exit(1)
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+    - data_pipeline_network
+    restart: always
 networks:
   data_pipeline_network: {}
 volumes:
-  neo4j_neo4j_neo4j_data: {}
-  mongo_mongo_mongodb-data: {}
-  mongo_mongo_mongodb-log: {}
-  airflow_airflow-db_airflow_db_data: {}
-  airflow_airflow-scheduler_airflow_dags: {}
-  airflow_airflow-scheduler_airflow_logs: {}
-  airflow_airflow-webserver_airflow_dags: {}
-  airflow_airflow-webserver_airflow_logs: {}
+  apachekafka_conduktorDB_pg_data: {}
+  apachekafka_conduktor-console_conduktor_data: {}
+  mysql_mysql_mysql_data: {}
+  apacheflink_jobmanager_jobmanager-logs: {}
+  apacheflink_taskmanager_taskmanager-logs: {}
+  prefect_prefect-orion_prefect_data: {}

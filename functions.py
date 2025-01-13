@@ -74,8 +74,7 @@ def refine_access_links(ports):
 def run_docker_compose():
     try:
         command = "docker compose up --build"
-        password = "CureMD786"
-        result = subprocess.run(f"echo {password} | sudo {command}", shell=True, check=True)     
+        result = subprocess.run(f"sudo {command}", shell=True, check=True)     
     
         if result.stderr:
             print("Error:\n", result.stderr)
@@ -214,41 +213,23 @@ def check_containers_health():
             continue  # skip this container
  
         try:
-            # Parse the JSON output of 'docker inspect'
             data = json.loads(inspect_result.stdout)
-            # Usually 'docker inspect' returns a list of container data, so take the first item
             container_info = data[0] if data else {}
-            # Container name and health status
             container_name = container_info.get("Name", "").lstrip("/")
             state = container_info.get("State", {})
             health = state.get("Health", {})
             health_status = health.get("Status")
-            # If health_status is "healthy", record the container name
             if health_status == "healthy":
                 healthy_containers.append(container_name)
         except (json.JSONDecodeError, IndexError, KeyError) as e:
             print(f"Error parsing JSON for container {container_id}:", e)
             continue
  
-    # 3. Compare the number of healthy containers to the total
     if len(healthy_containers) == len(container_ids):
         return True
     else:
         return healthy_containers
  
-if __name__ == "__main__":
-    result = check_containers_health()
-    if result == []:
-        print("No containers are running.")
-    elif result is True:
-        print("All running containers are healthy.")
-    else:
-        # result is a list of healthy containers
-        if result:
-            print("Some containers are not healthy.")
-            print("Healthy containers:", result)
-        else:
-            print("No healthy containers found.")
 
 if __name__ == '__main__':
     pass

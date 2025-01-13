@@ -46,7 +46,6 @@ label {
     padding: 0;
     margin: 10px 0;
     width: 300px; /* Adjust width to your preference */
-    white-space: nowrap;
 }
 
 #services-list li {

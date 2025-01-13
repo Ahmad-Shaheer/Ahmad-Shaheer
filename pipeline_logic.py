@@ -115,7 +115,7 @@ def get_pipeline(data_type, nature, end_goal, transformation):
             "structured": {
                 "storage": {
                     "yes": {'Ingestion' :'Apache Kafka',
-                            'Processing':' Apache Flink',
+                            'Processing':'Apache Flink',
                             'Storage': 'Postgres'},
                     
                     "no": {'Ingestion' :'Apache Kafka',

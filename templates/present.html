@@ -39,7 +39,7 @@
 
                 {% if service in links %}
                         {% if service == 'nifi' %}
-                                <a href="https://localhost:{{ links[service] }}" target="_blank">https://localhost:{{ links[service] }}</a><br>
+                                <a href="https://localhost:8443" target="_blank">https://localhost:8443</a><br>
     
                             {%else%}
                         <a href="http://localhost:{{ links[service] }}" target="_blank">http://localhost:{{ links[service] }}</a><br>

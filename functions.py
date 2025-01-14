@@ -117,7 +117,6 @@ def extract_signin_configs(services_dict, env_file_path='.env'):
         if service == 'superset':
             signin_configs[service] = {'USERNAME': 'admin', 'PASSWORD': 'admin'}
         elif service in env_params_dict:
-            # Handle other services
             service_configs = {}
             for param in env_params_dict[service]:
                 if param in env_dict:

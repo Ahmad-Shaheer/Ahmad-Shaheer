@@ -86,10 +86,10 @@ def deploy():
   
   generate_env_file(updated_config, output_file=".env")
 
-  # thread = threading.Thread(target=run_docker_compose)
-  # thread.start()
+  thread = threading.Thread(target=run_docker_compose)
+  thread.start()
     
-  return redirect(url_for('final'))
+  return redirect(url_for('loading'))
 
 @app.route('/loading')
 def loading():
@@ -108,7 +108,6 @@ def loading():
 def ollama_chat():
     request_data = request.get_json(force=True)
     user_prompt = request_data["prompt"]
-
     try:
         content = infer(SYSTEM_PROMPT, user_prompt)
         return jsonify({"content": content}), 200
@@ -125,14 +124,12 @@ def create_pipeline():
         return f"Error occurred: {e}", 500
   
 @app.route('/final')
-def final():
-  
+def final():  
   ports = session.get('ports', None)
   signin_conf = extract_signin_configs(ports)
   if not ports or not signin_conf:
     return render_template('deploy_error.html')
-  if 'nifi' in ports.keys():
-    
+  if 'nifi' in ports.keys():  
     signin_conf.update({'nifi': ['admin', 'ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB']})
   links = refine_access_links(ports=ports)   
   

@@ -22,7 +22,7 @@ services:
       start_period: 30s
 
 
-  airflow-init:
+    airflow-init:
     image: apache/airflow:2.6.2
     container_name: airflow-init
     depends_on:
@@ -39,17 +39,21 @@ services:
         airflow db init &&
         echo 'Creating Airflow admin user...' &&
         airflow users create --username ${AIRFLOW_ADMIN_USER} --password ${AIRFLOW_ADMIN_PASS} --firstname Airflow --lastname Admin --role Admin --email ${AIRFLOW_ADMIN_EMAIL} &&
+        echo 'Marking initialization as complete...' &&
+        touch /tmp/airflow-init-complete &&
         echo 'Airflow initialization is complete! Container will stay alive for healthcheck...' &&
         tail -f /dev/null
       "
     healthcheck:
-      test: ["CMD-SHELL", "airflow db check"]
+      # Make sure both the DB is healthy and the flag file is present.
+      test: ["CMD-SHELL", "airflow db check && [ -f /tmp/airflow-init-complete ]"]
       interval: 10s
       timeout: 10s
       retries: 8
       start_period: 5s
     networks:
       - airflow_network
+
 
   airflow-scheduler:
     image: apache/airflow:2.6.2

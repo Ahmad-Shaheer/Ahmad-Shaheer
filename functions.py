@@ -129,8 +129,15 @@ def extract_signin_configs(services_dict, env_file_path='.env'):
 
 
 def infer(system, prompt):
+    ollama_config = {
+        "model": "llama3.1:8b-instruct-fp16",
+        "max_tokens": 8192,
+        "host": "172.16.19.80:11300"
+    }
+
     data = {
-        "model": "qwen2.5:32b-instruct-q8_0",
+        "model": ollama_config["model"],
+        "max_tokens": ollama_config["max_tokens"],
         "messages": [
             {
                 "role": "system",
@@ -143,22 +150,23 @@ def infer(system, prompt):
         ],
         "stream": False,
         "options": {
-            "temperature": 0.1 # change it as per requirement
+            "temperature": 0.1  # change it as per requirement
         }
     }
- 
+
     headers = {
         "Content-Type": "application/json"
     }
-    ollama_url = "http://172.16.101.171:11400/api/chat/"
-    # ollama_url = "http://172.16.19.80:11567/api/chat/"
+    ollama_url = f"http://{ollama_config['host']}/api/chat/"
+
     model_response = requests.post(
         url=ollama_url,
         json=data,
         headers=headers
     ).json()
- 
+
     return model_response['message']['content']
+
 
 SYSTEM_PROMPT = """
 "You are a virtual assistant designed to guide users in planning and deploying their data pipelines. Your role is to help users make informed decisions based on their data type, processing needs, and end goals.
@@ -174,10 +182,9 @@ Adapt recommendations based on user inputs, such as the nature of their data (st
 Offer suggestions for both beginner-friendly and advanced tools depending on the user's expertise.
 Maintain a concise, professional, and helpful tone throughout the conversation.
 Tone Instructions:
-Conciseness: Respond in short, informative sentences. YOU ARE NOT VERBOSE
+YOU ARE NOT VERBOSE
 Formality: Use polite language with slight formality (e.g., "Please let us know," "We are happy to assist").
 Clarity: Avoid technical jargon unless necessary.
-Consistency: Ensure responses are aligned in tone and style across all queries.
 Example: "Thank you for reaching out! Please let us know if you need further assistance."
 """
 

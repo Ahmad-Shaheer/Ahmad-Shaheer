@@ -39,9 +39,9 @@ services:
       - superset_network
     healthcheck:
       test: ["CMD", "python3", "-c", "import http.client; conn = http.client.HTTPConnection('localhost', 8088); conn.request('GET', '/health'); response = conn.getresponse(); exit(0) if response.status == 200 else exit(1)"]
-      interval: 30s
+      interval: 10s
       timeout: 10s
-      retries: 8
+      retries: 25
       start_period: 30s
 
 networks:

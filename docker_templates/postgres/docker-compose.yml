@@ -2,6 +2,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:14
+    container_name: postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER_PG}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PG}
@@ -21,6 +22,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:latest
+    container_name: pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}

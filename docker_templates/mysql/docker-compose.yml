@@ -17,7 +17,7 @@ services:
     networks:
       - data_pipeline_net
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      test: ["CMD-SHELL", "mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} -e 'SHOW DATABASES;' || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 30

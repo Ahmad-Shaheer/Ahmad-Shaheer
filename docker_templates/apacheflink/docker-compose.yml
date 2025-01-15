@@ -3,7 +3,7 @@ version: '3.8'
 services:
   jobmanager:
     image: apache/flink:1.16.0
-    container_name: flink-jobmanager
+    container_name: jobmanager
     command: jobmanager
     environment:
       - JOB_MANAGER_RPC_ADDRESS=${FLINK_JOB_MANAGER_RPC_ADDRESS}
@@ -25,7 +25,7 @@ services:
 
   taskmanager:
     image: apache/flink:1.16.0
-    container_name: flink-taskmanager
+    container_name: taskmanager
     command: taskmanager
     environment:
       - JOB_MANAGER_RPC_ADDRESS=${FLINK_JOB_MANAGER_RPC_ADDRESS}

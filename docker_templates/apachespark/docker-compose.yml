@@ -23,6 +23,7 @@ services:
 
   spark-worker:
     image: apache/spark:3.4.1
+    container_name: spark-worker
     command: ["/bin/bash", "-c", "/opt/spark/sbin/start-worker.sh spark://spark-master:7077 && tail -f /dev/null"]
     environment:
       - SPARK_WORKLOAD=${SPARK_WORKLOAD_WORKER}

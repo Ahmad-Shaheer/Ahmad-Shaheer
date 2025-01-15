@@ -1,11 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import threading
 import subprocess
-from flask_session import Session
-from pipeline_logic import get_pipeline
-from functions import generate_env_file, retrieve_config_details, tool_definition,\
-run_docker_compose, extract_signin_configs, refine_access_links, check_containers_health, infer,SYSTEM_PROMPT
 import json
+from flask_session import Session
+from functions import generate_env_file, retrieve_config_details, tool_definition, get_pipeline, down_docker_compose,\
+run_docker_compose, extract_signin_configs, refine_access_links, check_containers_health, infer,SYSTEM_PROMPT
 
 
 
@@ -118,7 +117,8 @@ def ollama_chat():
 def create_pipeline():
     try:
         session.clear()
-        subprocess.run(["sudo", "docker", "compose", "down", "-v"], check=True)
+        thread2 = threading.Thread(target=down_docker_compose)
+        thread2.start()
         return render_template('index.html')
     except subprocess.CalledProcessError as e:
         return f"Error occurred: {e}", 500

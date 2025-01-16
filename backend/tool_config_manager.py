@@ -175,6 +175,8 @@ class ToolConfigManager:
         for service, config_needed in services_dict.items():
             if service == 'superset':
                 signin_configs[service] = {'USERNAME': 'admin', 'PASSWORD': 'admin'}
+            elif service == 'airflow-webserver':
+                signin_configs[service] = {'USERNAME': 'admin', 'PASSWORD': 'admin'}
             elif service in env_params_dict:
                 service_configs = {}
                 for param in env_params_dict[service]:

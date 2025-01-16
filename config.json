@@ -35,7 +35,7 @@
   },
 
   "HadoopStandalone": {
-      "Read" :" Yes",
+      "Read" :" No",
       "EnvironmentVariables": {
         "HADOOP_CLUSTER_NAME":"docker-hadoop-cluster"  
     }
@@ -157,6 +157,7 @@
 
 
 "Prefect": {
+    "Read" : "No",
 
     "EnvironmentVariables": {
       

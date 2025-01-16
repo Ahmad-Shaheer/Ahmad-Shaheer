@@ -6,7 +6,33 @@
 #services-list label {
     display: inline-block; /* Ensures the checkbox and text stay together */
 }
+/* Style for the rocket container */
+#rocket-container {
+    position: fixed; /* Keeps it fixed at the bottom */
+    bottom: 20px; /* Adjusts distance from the bottom */
+    left: 50%; /* Centers horizontally */
+    transform: translateX(-50%); /* Centers the rocket container */
+    text-align: center; /* Centers content inside */
+}
 
+/* Style for the rocket image */
+#rocket {
+    width: 50px; /* Adjust the size as needed */
+    animation: rocket-animation 3s infinite ease-in-out; /* Add animation */
+}
+
+/* Rocket launch animation */
+@keyframes rocket-animation {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
 body {
     background: linear-gradient(120deg, #0f2027, #203a43, #2c5364); /* Elegant gradient */
     color: #333;

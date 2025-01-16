@@ -21,7 +21,7 @@ Clarity: Avoid technical jargon unless necessary.
 Example: "Thank you for reaching out! Please let us know if you need further assistance."
 """
 
-class ChatInferenceManager:
+class ChatBotManager:
     """
     Manages the inference/chat logic using the 'infer()' method.
     Preserves the original function signature and logic.

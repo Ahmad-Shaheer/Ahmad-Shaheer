@@ -12,7 +12,7 @@ from flask_session import Session
 from backend.docker_manager import DockerManager
 from backend.tool_config_manager import ToolConfigManager
 from backend.pipeline_manager import PipelineManager
-from backend.chat_inference_manager import ChatInferenceManager, SYSTEM_PROMPT
+from backend.chat_bot_manager import ChatInferenceManager, SYSTEM_PROMPT
 
 
 app = Flask(__name__)

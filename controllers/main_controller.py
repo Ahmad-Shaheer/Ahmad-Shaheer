@@ -4,7 +4,7 @@ import json
 import threading
 import subprocess
 from flask import request, render_template, redirect, url_for, session, jsonify
-from backend.chat_inference_manager import SYSTEM_PROMPT
+from backend.chat_bot_manager import SYSTEM_PROMPT
 
 
 class MainController:

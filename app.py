@@ -5,7 +5,7 @@ from controllers.main_controller import MainController
 from backend.docker_manager import DockerManager
 from backend.tool_config_manager import ToolConfigManager
 from backend.pipeline_manager import PipelineManager
-from backend.chat_inference_manager import ChatInferenceManager
+from backend.chat_bot_manager import ChatBotManager
 
 
 class MyFlaskApp(Flask):
@@ -23,7 +23,7 @@ class MyFlaskApp(Flask):
         self.docker_manager = DockerManager()
         self.tool_config_manager = ToolConfigManager(self.docker_manager)
         self.pipeline_manager = PipelineManager()
-        self.chat_inference_manager = ChatInferenceManager()
+        self.chat_bot = ChatBotManager()
 
         # Setup the session
         Session(self)

@@ -26,6 +26,62 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+  spark-master:
+    image: apache/spark:3.4.1
+    container_name: spark-master
+    command:
+    - /bin/bash
+    - -c
+    - /opt/spark/sbin/start-master.sh && tail -f /dev/null
+    environment:
+    - SPARK_WORKLOAD=${SPARK_WORKLOAD_MASTER}
+    - SPARK_MASTER_PORT=${SPARK_MASTER_PORT}
+    - SPARK_MASTER_WEBUI_PORT=${SPARK_MASTER_WEBUI_PORT}
+    ports:
+    - 8080:8080
+    - 7077:7077
+    networks:
+    - data_pipeline_network
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8080
+      interval: 30s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
+  spark-worker:
+    image: apache/spark:3.4.1
+    container_name: spark-worker
+    command:
+    - /bin/bash
+    - -c
+    - /opt/spark/sbin/start-worker.sh spark://spark-master:7077 && tail -f /dev/null
+    environment:
+    - SPARK_WORKLOAD=${SPARK_WORKLOAD_WORKER}
+    - SPARK_MASTER_URL=${SPARK_MASTER_URL}
+    - SPARK_WORKER_MEMORY=${SPARK_WORKER_MEMORY}
+    - SPARK_WORKER_CORES=${SPARK_WORKER_CORES}
+    depends_on:
+      spark-master:
+        condition: service_healthy
+    restart: always
+    ports:
+    - 8081:8081
+    networks:
+    - data_pipeline_network
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8081
+      interval: 30s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
   postgres:
     image: postgres:14
     container_name: postgres
@@ -70,6 +126,52 @@ services:
       timeout: 10s
       retries: 5
     restart: always
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    hostname: mongo
+    volumes:
+    - mongo_mongo_mongodb-data:/data/db/
+    - mongo_mongo_mongodb-log:/var/log/mongodb/
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    ports:
+    - 27017:27017
+    networks:
+    - data_pipeline_network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok'
+      interval: 10s
+      timeout: 5s
+      retries: 8
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${ME_CONFIG_MONGODB_ADMINUSERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${ME_CONFIG_MONGODB_ADMINPASSWORD}
+      ME_CONFIG_MONGODB_PORT: ${ME_CONFIG_MONGODB_PORT}
+      ME_CONFIG_MONGODB_SERVER: ${ME_CONFIG_MONGODB_SERVER}
+      ME_CONFIG_BASICAUTH_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_CONFIG_BASICAUTH_PASSWORD}
+    ports:
+    - 8082:8081
+    networks:
+    - data_pipeline_network
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD
+      - echo
+      - Mongo Express is up
+      interval: 10s
+      timeout: 10s
+      retries: 8
+      start_period: 15s
   airflow-db:
     image: postgres:14
     container_name: airflow-db
@@ -167,7 +269,7 @@ services:
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
       AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
     ports:
-    - 8080:8080
+    - 8083:8080
     volumes:
     - airflow_airflow-webserver_airflow_dags:/opt/airflow/dags
     - airflow_airflow-webserver_airflow_logs:/opt/airflow/logs
@@ -190,6 +292,8 @@ networks:
   data_pipeline_network: {}
 volumes:
   postgres_postgres_postgres_data: {}
+  mongo_mongo_mongodb-data: {}
+  mongo_mongo_mongodb-log: {}
   airflow_airflow-db_airflow_db_data: {}
   airflow_airflow-scheduler_airflow_dags: {}
   airflow_airflow-scheduler_airflow_logs: {}

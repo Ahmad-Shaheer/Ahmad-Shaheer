@@ -1,25 +1,30 @@
-# controllers/main_controller.py
-
 import json
 import threading
 import subprocess
-from flask import request, render_template, redirect, url_for, session, jsonify
+from typing import Dict, Tuple, Union
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 from backend.chat_bot_manager import SYSTEM_PROMPT
 
 
 class MainController:
     """
     A controller class to organize Flask routes. 
-    Holds references to the parent Flask app's managers.
+    Holds references to the parent Flask app's managers and config data.
     """
 
-    def __init__(self, app):
-        self.app = app
-        # We can load tools_config once here, or inside a route
-        with open("config.json", "r", encoding="utf-8") as f:
-            self.tools_config = json.load(f)
+    def __init__(self, app: Flask) -> None:
+        """
+        Initializes the MainController with a Flask app instance.
 
-    def register_routes(self):
+        Args:
+            app (Flask): The parent Flask app instance, which holds references to the managers.
+        """
+        self.app = app
+        # Load the tools configuration from a JSON file
+        with open("config.json", "r", encoding="utf-8") as f:
+            self.tools_config: Dict[str, Dict] = json.load(f)
+
+    def register_routes(self) -> None:
         """
         Registers all routes to the Flask app instance.
         """
@@ -35,10 +40,22 @@ class MainController:
     # --------------------
     # ROUTE HANDLERS
     # --------------------
-    def index(self):
+    def index(self) -> str:
+        """
+        Renders the index page.
+
+        Returns:
+            str: Rendered HTML for the index page.
+        """
         return render_template("index.html")
 
-    def submit_form(self):
+    def submit_form(self) -> str:
+        """
+        Handles form submission for pipeline configuration.
+
+        Returns:
+            str: Rendered HTML displaying the selected pipeline configuration.
+        """
         data_type = request.form.get("data_type")
         end_goal = request.form.get("end_goal")
         nature = request.form.get("nature")
@@ -52,7 +69,13 @@ class MainController:
         )
         return render_template("submit_form.html", pipeline=pipeline)
 
-    def config_route(self):
+    def config_route(self) -> str:
+        """
+        Handles tool configuration selection based on the pipeline.
+
+        Returns:
+            str: Rendered HTML with the pipeline tools configuration.
+        """
         ingestion_tool = request.form.get('ingestion_tool')
         storage_tool = request.form.get('storage_tool')
         processing_tool = request.form.get('processing_tool')
@@ -81,7 +104,14 @@ class MainController:
                                pipeline_dict=pipeline_dict,
                                tools=shortlisted_tools)
 
-    def deploy(self):
+    def deploy(self) -> str:
+        """
+        Deploys the pipeline by generating environment files, merging Docker Compose configurations,
+        and running the Docker Compose commands.
+
+        Returns:
+            str: Redirects to the loading page.
+        """
         with open("config.json", "r", encoding="utf-8") as f:
             docker_config = json.load(f)
 
@@ -102,9 +132,14 @@ class MainController:
 
         return redirect(url_for("loading"))
 
-    def loading(self):
+    def loading(self) -> str:
+        """
+        Displays the loading page while the pipeline is being deployed.
+
+        Returns:
+            str: Rendered HTML for the loading page.
+        """
         services = session.get("ports", {})
-        # The original check_containers_health() might return a (bool, list)
         result, healthy_containers = self.app.docker_manager.check_containers_health()
 
         if result is True:
@@ -120,7 +155,14 @@ class MainController:
                                services=services,
                                healthy_containers=healthy_containers)
 
-    def ollama_chat(self):
+    def ollama_chat(self) -> Tuple[Dict[str, Union[str, Dict]], int]:
+        """
+        Handles chat requests for the AI assistant.
+
+        Returns:
+            Tuple[Dict[str, Union[str, Dict]], int]: A JSON response with the assistant's reply or an error message,
+            along with the HTTP status code.
+        """
         request_data = request.get_json(force=True)
         user_prompt = request_data["prompt"]
         try:
@@ -129,7 +171,13 @@ class MainController:
         except Exception as exc:
             return jsonify({"error": str(exc)}), 500
 
-    def create_pipeline(self):
+    def create_pipeline(self) -> Union[str, Tuple[str, int]]:
+        """
+        Resets the pipeline by clearing the session and stopping running containers.
+
+        Returns:
+            Union[str, Tuple[str, int]]: Redirects to the index page or returns an error message.
+        """
         try:
             session.clear()
             self.app.docker_manager.down_docker_compose()
@@ -137,7 +185,13 @@ class MainController:
         except subprocess.CalledProcessError as exc:
             return f"Error occurred: {exc}", 500
 
-    def final(self):
+    def final(self) -> str:
+        """
+        Displays the final deployment page with access links and sign-in configurations.
+
+        Returns:
+            str: Rendered HTML for the final deployment page or an error page.
+        """
         ports = session.get("ports", None)
         signin_conf = self.app.tool_config_manager.extract_signin_configs(ports)
 

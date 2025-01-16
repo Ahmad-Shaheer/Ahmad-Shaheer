@@ -3,7 +3,6 @@ import threading
 import subprocess
 from typing import Dict, Tuple, Union
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
-from backend.chat_bot_manager import SYSTEM_PROMPT
 
 
 class MainController:
@@ -37,9 +36,7 @@ class MainController:
         self.app.add_url_rule("/create_pipeline", view_func=self.create_pipeline, methods=["POST"])
         self.app.add_url_rule("/final", view_func=self.final, methods=["GET"])
 
-    # --------------------
     # ROUTE HANDLERS
-    # --------------------
     def index(self) -> str:
         """
         Renders the index page.
@@ -166,7 +163,7 @@ class MainController:
         request_data = request.get_json(force=True)
         user_prompt = request_data["prompt"]
         try:
-            content = self.app.chat_inference_manager.infer(SYSTEM_PROMPT, user_prompt)
+            content = self.app.chat_bot.infer(user_prompt)
             return jsonify({"content": content}), 200
         except Exception as exc:
             return jsonify({"error": str(exc)}), 500

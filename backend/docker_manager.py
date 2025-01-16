@@ -3,6 +3,7 @@ import json
 import os
 import shutil
 import yaml
+from typing import List, Dict, Tuple, Union
 
 
 class DockerManager:
@@ -11,9 +12,15 @@ class DockerManager:
     Preserves the exact logic from the original procedural functions.
     """
 
-    def run_docker_compose(self):
+    def run_docker_compose(self) -> None:
         """
-        Equivalent to the original run_docker_compose().
+        Runs the `docker compose up` command to build and start all services.
+        
+        Executes the Docker Compose file to build and bring up containers.
+        Handles any errors during execution.
+
+        Raises:
+            subprocess.CalledProcessError: If the command fails.
         """
         try:
             command = "docker compose up --build"
@@ -26,9 +33,12 @@ class DockerManager:
             print(f"Error occurred: {e}")
             print("Error Output:", e.stderr)
 
-    def down_docker_compose(self):
+    def down_docker_compose(self) -> None:
         """
-        Equivalent to the original down_docker_compose().
+        Runs the `docker compose down` command to stop and remove containers, networks, and volumes.
+
+        Raises:
+            subprocess.CalledProcessError: If the command fails.
         """
         try:
             command = "docker compose down -v"
@@ -41,16 +51,16 @@ class DockerManager:
             print(f"Error occurred: {e}")
             print("Error Output:", e.stderr)
 
-    def check_containers_health(self):
+    def check_containers_health(self) -> Tuple[Union[bool, str], List[str]]:
         """
-        Equivalent to the original check_containers_health().
-        
         Checks the health status of all running Docker containers.
+
         Returns:
-            - "no_containers" if no containers are running.
-            - True, if all running containers are healthy.
-            - A list of healthy container names, if not all containers are healthy.
-              This list can be empty if none are healthy.
+            Tuple[Union[bool, str], List[str]]:
+                - "no_containers": If no containers are running.
+                - (True, [healthy_container_names]): If all running containers are healthy.
+                - (False, [healthy_container_names]): If not all containers are healthy.
+                  The list contains names of healthy containers, which may be empty if none are healthy.
         """
         ps_cmd = ["sudo", "docker", "ps", "-q"]
         try:
@@ -92,13 +102,31 @@ class DockerManager:
         else:
             return False, healthy_containers
 
-    def merge_docker_compose(self, tool_names, base_directory="docker_templates"):
+    def merge_docker_compose(self, tool_names: List[str], base_directory: str = "docker_templates") -> Dict[str, List[str]]:
         """
-        Equivalent to the original merge_docker_compose().
-        Merges docker-compose.yml files from multiple tools into a single Compose file.
-        Handles port conflicts, merges volumes, and detects environment variable conflicts.
-        """
+        Merges Docker Compose files from multiple tools into a single Compose file.
 
+        Args:
+            tool_names (List[str]): List of tool names whose Docker Compose files need to be merged.
+            base_directory (str): Directory containing Docker Compose files for each tool.
+                                  Defaults to "docker_templates".
+
+        Returns:
+            Dict[str, List[str]]: A dictionary of port assignments for each service.
+                                  Keys are service names, values are lists of assigned ports.
+
+        Process:
+            - Reads `docker-compose.yml` files from the specified tools.
+            - Handles service name conflicts by renaming services.
+            - Resolves port conflicts by assigning available ports.
+            - Merges volume mounts, network configurations, and environment variables.
+            - Detects conflicts in environment variable assignments across services.
+            - Writes the merged Compose file as `docker-compose.yml`.
+
+        Raises:
+            yaml.YAMLError: If a YAML parsing error occurs.
+            OSError: If file/directory operations fail during volume handling.
+        """
         # Initialize the merged Compose structure
         merged_compose = {
             'version': '3.9',

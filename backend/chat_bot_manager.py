@@ -1,5 +1,7 @@
 import requests
 import json
+from typing import Dict
+
 
 SYSTEM_PROMPT = """
 "You are a virtual assistant designed to guide users in planning and deploying their data pipelines. Your role is to help users make informed decisions based on their data type, processing needs, and end goals.
@@ -21,23 +23,51 @@ Clarity: Avoid technical jargon unless necessary.
 Example: "Thank you for reaching out! Please let us know if you need further assistance."
 """
 
+
 class ChatBotManager:
     """
-    Manages the inference/chat logic using the 'infer()' method.
-    Preserves the original function signature and logic.
+    Manages the inference/chat logic for interacting with a language model.
+
+    This class allows users to send prompts and receive responses from a virtual assistant 
+    tailored to guide users in planning and deploying data pipelines.
+
+    Attributes:
+        ollama_config (Dict[str, Union[str, int]]): A configuration dictionary specifying
+            model details, maximum tokens, and the host address for the language model.
     """
 
-    def infer(self, system, prompt):
+    def infer(self, system: str, prompt: str) -> str:
         """
-        Equivalent to the original infer() function.
+        Sends a prompt to the language model and retrieves the response.
+
+        Args:
+            system (str): The system role definition or guidelines for the assistant.
+                          This defines the behavior and tone of the assistant.
+            prompt (str): The user's prompt or query that will be sent to the model.
+
+        Returns:
+            str: The content of the model's response to the user's query.
+
+        Example:
+            >>> manager = ChatBotManager()
+            >>> system_prompt = "You are an assistant helping users with data pipelines."
+            >>> user_prompt = "What is the best way to process JSON files?"
+            >>> response = manager.infer(system_prompt, user_prompt)
+            >>> print(response)
+            "The best way to process JSON files is to use tools like Apache Spark for scalability 
+            or Python's pandas for smaller datasets."
+
+        Raises:
+            requests.exceptions.RequestException: If there is an issue with the HTTP request.
+            KeyError: If the response JSON does not contain the expected 'message' key.
         """
-        ollama_config = {
+        ollama_config: Dict[str, str | int] = {
             "model": "llama3.1:8b-instruct-fp16",
             "max_tokens": 8192,
             "host": "172.16.19.80:11300"
         }
 
-        data = {
+        data: Dict = {
             "model": ollama_config["model"],
             "max_tokens": ollama_config["max_tokens"],
             "messages": [
@@ -56,10 +86,10 @@ class ChatBotManager:
             }
         }
 
-        headers = {
+        headers: Dict[str, str] = {
             "Content-Type": "application/json"
         }
-        ollama_url = f"http://{ollama_config['host']}/api/chat/"
+        ollama_url: str = f"http://{ollama_config['host']}/api/chat/"
 
         model_response = requests.post(
             url=ollama_url,

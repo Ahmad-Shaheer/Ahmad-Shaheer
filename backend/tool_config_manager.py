@@ -1,22 +1,36 @@
 import os
+from typing import Dict, List, Tuple, Union
 
 
 class ToolConfigManager:
     """
     Manages tool definitions, environment files, and other configurations.
-    Preserves the original function signatures and logic.
+
+    This class provides methods to define tools, generate environment files,
+    retrieve configuration details, refine access links for services, and extract
+    sign-in configurations from environment files.
     """
 
-    def __init__(self, docker_manager):
+    def __init__(self, docker_manager) -> None:
         """
-        docker_manager: An instance of DockerManager, so we can call
-                        docker_manager.merge_docker_compose() inside retrieve_config_details().
+        Initializes the ToolConfigManager with a DockerManager instance.
+
+        Args:
+            docker_manager (DockerManager): An instance of DockerManager, allowing
+                                            interaction with Docker-related functionality.
         """
         self.docker_manager = docker_manager
 
-    def tool_definition(self, pipeline_dict, tools_config):
+    def tool_definition(self, pipeline_dict: Dict[str, Union[str, List[str]]], tools_config: Dict[str, Dict]) -> Dict[str, Dict]:
         """
-        Equivalent to the original tool_definition().
+        Filters and formats tools based on a pipeline dictionary.
+
+        Args:
+            pipeline_dict (Dict[str, Union[str, List[str]]]): A dictionary containing tool types and their selections.
+            tools_config (Dict[str, Dict]): A dictionary containing configurations for all available tools.
+
+        Returns:
+            Dict[str, Dict]: A dictionary of shortlisted tools with their configurations.
         """
         selected_tools = {key: value for key, value in pipeline_dict.items() if value}
         shortlisted_tools = {}
@@ -28,9 +42,16 @@ class ToolConfigManager:
                 shortlisted_tools.update({tool: tools_config[tool]})
         return shortlisted_tools
 
-    def generate_env_file(self, config, output_file=".env"):
+    def generate_env_file(self, config: Dict[str, Dict], output_file: str = ".env") -> None:
         """
-        Equivalent to the original generate_env_file().
+        Generates an environment file (.env) from the given configuration.
+
+        Args:
+            config (Dict[str, Dict]): A dictionary containing service configurations, including environment variables.
+            output_file (str): The name of the output .env file. Defaults to ".env".
+
+        Returns:
+            None
         """
         with open(output_file, "w") as file:
             for service, details in config.items():
@@ -40,10 +61,18 @@ class ToolConfigManager:
                         file.write(f"{key}={value}\n")
                     file.write("\n")
 
-    def retrieve_config_details(self, form_data, docker_config):
+    def retrieve_config_details(self, form_data, docker_config: Dict[str, Dict]) -> Tuple[Dict[str, Dict], Dict[str, List[str]]]:
         """
-        Equivalent to the original retrieve_config_details().
-        Invokes merge_docker_compose() from DockerManager.
+        Retrieves updated configuration details and merges Docker Compose files.
+
+        Args:
+            form_data (FormData): A form-like object containing submitted tool names and configurations.
+            docker_config (Dict[str, Dict]): A dictionary of tool configurations, including environment variables.
+
+        Returns:
+            Tuple[Dict[str, Dict], Dict[str, List[str]]]:
+                - A dictionary of updated configurations.
+                - A dictionary of port mappings for the merged Docker Compose file.
         """
         tool_names = [tool_name for tool_name in form_data.getlist('tool_names')]
         updated_config = {}
@@ -77,9 +106,15 @@ class ToolConfigManager:
 
         return updated_config, ports
 
-    def refine_access_links(self, ports):
+    def refine_access_links(self, ports: Dict[str, List[str]]) -> Dict[str, str]:
         """
-        Equivalent to the original refine_access_links().
+        Refines access links for services with mapped ports.
+
+        Args:
+            ports (Dict[str, List[str]]): A dictionary of services and their assigned ports.
+
+        Returns:
+            Dict[str, str]: A dictionary mapping service names to their access links.
         """
         services_w_ports = [
             'airflow-webserver', 'jobmanager', 'conduktor-console', 'spark-master',
@@ -95,9 +130,17 @@ class ToolConfigManager:
                     extracted_services[service] = ports[service][0].split(':')[0]
         return extracted_services
 
-    def extract_signin_configs(self, services_dict, env_file_path='.env'):
+    def extract_signin_configs(self, services_dict: Dict[str, Dict], env_file_path: str = '.env') -> Union[Dict[str, Dict], None]:
         """
-        Equivalent to the original extract_signin_configs().
+        Extracts sign-in configurations for services from the environment file.
+
+        Args:
+            services_dict (Dict[str, Dict]): A dictionary of services and the parameters needed for sign-in.
+            env_file_path (str): Path to the .env file. Defaults to '.env'.
+
+        Returns:
+            Union[Dict[str, Dict], None]: A dictionary of sign-in configurations for each service,
+                                          or None if the .env file is missing or empty.
         """
         env_params_dict = {
             'airflow-db': ['POSTGRES_USER', 'POSTGRES_PASSWORD'],

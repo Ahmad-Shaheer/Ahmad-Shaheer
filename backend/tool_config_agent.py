@@ -1,14 +1,21 @@
-import os
+from typing_extensions import TypedDict
+from langgraph.graph import StateGraph, START, END
 from typing import Dict, List, Tuple, Union
+import os
 
+class ToolConfigState(TypedDict):
+    pipeline_dict: Dict[str, Union[str, List[str]]]
+    tools_config: Dict[str, Dict]
+    config: Dict[str, Dict]
+    tool_names: List[str]
+    ports: Dict[str, List[str]]
+    services_dict: Dict[str, Dict]
+    env_file_path: str
+    updated_config: Dict[str, Dict]
 
 class ToolConfigAgent:
     """
     Manages tool definitions, environment files, and other configurations.
-
-    This class provides methods to define tools, generate environment files,
-    retrieve configuration details, refine access links for services, and extract
-    sign-in configurations from environment files.
     """
 
     def __init__(self, docker_agent) -> None:
@@ -16,174 +23,159 @@ class ToolConfigAgent:
         Initializes the ToolConfigAgent with a DockerAgent instance.
 
         Args:
-            docker_agent (DockerAgent): An instance of DockerAgent, allowing
-                                            interaction with Docker-related functionality.
+            docker_agent (DockerAgent): An instance of DockerAgent.
         """
         self.docker_agent = docker_agent
 
-    def tool_definition(self, pipeline_dict: Dict[str, Union[str, List[str]]], tools_config: Dict[str, Dict]) -> Dict[str, Dict]:
-        """
-        Filters and formats tools based on a pipeline dictionary.
+        # Graph for tool definition
+        self.tool_def_graph = StateGraph(ToolConfigState)
+        self.tool_def_graph.add_node("DefineTools", self._tool_definition)
+        self.tool_def_graph.add_edge(START, "DefineTools")
+        self.tool_def_graph.add_edge("DefineTools", END)
+        self.compiled_tool_def_graph = self.tool_def_graph.compile()
 
-        Args:
-            pipeline_dict (Dict[str, Union[str, List[str]]]): A dictionary containing tool types and their selections.
-            tools_config (Dict[str, Dict]): A dictionary containing configurations for all available tools.
+        # Graph for generating environment files
+        self.env_file_graph = StateGraph(ToolConfigState)
+        self.env_file_graph.add_node("GenerateEnv", self._generate_env_file)
+        self.env_file_graph.add_edge(START, "GenerateEnv")
+        self.env_file_graph.add_edge("GenerateEnv", END)
+        self.compiled_env_file_graph = self.env_file_graph.compile()
 
-        Returns:
-            Dict[str, Dict]: A dictionary of shortlisted tools with their configurations.
-        """
-        selected_tools = {key: value for key, value in pipeline_dict.items() if value}
+        # Graph for retrieving configuration details
+        self.config_details_graph = StateGraph(ToolConfigState)
+        self.config_details_graph.add_node("RetrieveConfig", self._retrieve_config_details)
+        self.config_details_graph.add_edge(START, "RetrieveConfig")
+        self.config_details_graph.add_edge("RetrieveConfig", END)
+        self.compiled_config_details_graph = self.config_details_graph.compile()
+
+        # Graph for refining access links
+        self.refine_links_graph = StateGraph(ToolConfigState)
+        self.refine_links_graph.add_node("RefineLinks", self._refine_access_links)
+        self.refine_links_graph.add_edge(START, "RefineLinks")
+        self.refine_links_graph.add_edge("RefineLinks", END)
+        self.compiled_refine_links_graph = self.refine_links_graph.compile()
+
+        # Graph for extracting sign-in configurations
+        self.signin_config_graph = StateGraph(ToolConfigState)
+        self.signin_config_graph.add_node("ExtractSigninConfigs", self._extract_signin_configs)
+        self.signin_config_graph.add_edge(START, "ExtractSigninConfigs")
+        self.signin_config_graph.add_edge("ExtractSigninConfigs", END)
+        self.compiled_signin_config_graph = self.signin_config_graph.compile()
+
+    # NODE IMPLEMENTATIONS
+    def _tool_definition(self, state: ToolConfigState) -> ToolConfigState:
+        selected_tools = {key: value for key, value in state["pipeline_dict"].items() if value}
         shortlisted_tools = {}
         for type_object, tool in selected_tools.items():
             if isinstance(tool, list):
                 pass
             else:
-                tool = tool.replace(' ', '')
-                shortlisted_tools.update({tool: tools_config[tool]})
-        return shortlisted_tools
+                tool = tool.replace(" ", "")
+                shortlisted_tools.update({tool: state["tools_config"][tool]})
+        state["updated_config"] = shortlisted_tools
+        return state
 
-    def generate_env_file(self, config: Dict[str, Dict], output_file: str = ".env") -> None:
-        """
-        Generates an environment file (.env) from the given configuration.
-
-        Args:
-            config (Dict[str, Dict]): A dictionary containing service configurations, including environment variables.
-            output_file (str): The name of the output .env file. Defaults to ".env".
-
-        Returns:
-            None
-        """
-        with open(output_file, "w") as file:
-            for service, details in config.items():
+    def _generate_env_file(self, state: ToolConfigState) -> ToolConfigState:
+        with open(state["env_file_path"], "w") as file:
+            for service, details in state["updated_config"].items():
                 if "EnvironmentVariables" in details:
                     file.write(f"# {service} Environment Variables\n")
                     for key, value in details["EnvironmentVariables"].items():
                         file.write(f"{key}={value}\n")
                     file.write("\n")
+        return state
 
-    def retrieve_config_details(self, form_data, docker_config: Dict[str, Dict]) -> Tuple[Dict[str, Dict], Dict[str, List[str]]]:
-        """
-        Retrieves updated configuration details and merges Docker Compose files.
-
-        Args:
-            form_data (FormData): A form-like object containing submitted tool names and configurations.
-            docker_config (Dict[str, Dict]): A dictionary of tool configurations, including environment variables.
-
-        Returns:
-            Tuple[Dict[str, Dict], Dict[str, List[str]]]:
-                - A dictionary of updated configurations.
-                - A dictionary of port mappings for the merged Docker Compose file.
-        """
-        tool_names = [tool_name for tool_name in form_data.getlist('tool_names')]
+    def _retrieve_config_details(self, state: ToolConfigState) -> ToolConfigState:
+        tool_names = state["tool_names"]
         updated_config = {}
-        ports = {}
 
         for tool_name in tool_names:
-            if tool_name in docker_config:
-                tool_config = docker_config[tool_name]
+            if tool_name in state["tools_config"]:
+                tool_config = state["tools_config"][tool_name]
                 updated_env_vars = {}
 
                 for var_name, default_value in tool_config["EnvironmentVariables"].items():
-                    input_value = form_data.get(f"{tool_name}['EnvironmentVariables']'[{var_name}]")
+                    input_value = None  # Placeholder for form data
+                    updated_env_vars[var_name] = input_value or default_value
 
-                    if input_value is not None:
-                        updated_env_vars[var_name] = input_value
-                    else:
-                        updated_env_vars[var_name] = default_value
+                updated_config[tool_name] = {"EnvironmentVariables": updated_env_vars}
 
-                    if not updated_env_vars:
-                        updated_config[tool_name] = {
-                            "EnvironmentVariables": "No config required"
-                        }
+        docker_state = {
+            "command": "",
+            "tool_names": tool_names,
+            "base_directory": "docker_templates",
+            "ports": {},
+            "compose_file_path": "docker-compose.yml",
+            "success": False,
+            "error": "",
+        }
 
-                    updated_config[tool_name] = {
-                        "EnvironmentVariables": updated_env_vars
-                    }
+        docker_state = self.docker_agent.invoke_merge(docker_state)
 
-        # Call merge_docker_compose using the DockerAgent
-        if tool_names:
-            ports = self.docker_agent.merge_docker_compose(tool_names)
+        if not docker_state["success"]:
+            state["updated_config"] = {}
+            state["ports"] = {}
+            raise RuntimeError(f"Error merging Docker Compose files: {docker_state['error']}")
 
-        return updated_config, ports
+        state["updated_config"] = updated_config
+        state["ports"] = docker_state["ports"]
+        return state
 
-    def refine_access_links(self, ports: Dict[str, List[str]]) -> Dict[str, str]:
-        """
-        Refines access links for services with mapped ports.
-
-        Args:
-            ports (Dict[str, List[str]]): A dictionary of services and their assigned ports.
-
-        Returns:
-            Dict[str, str]: A dictionary mapping service names to their access links.
-        """
-        services_w_ports = [
-            'airflow-webserver', 'jobmanager', 'conduktor-console', 'spark-master',
-            'superset', 'namenode', 'mongo-express', 'phpmyadmin',
-            'neo4j', 'nifi', 'pgadmin', 'prefect-orion'
+    def _refine_access_links(self, state: ToolConfigState) -> ToolConfigState:
+        services_with_ports = [
+            "airflow-webserver", "jobmanager", "conduktor-console", "spark-master",
+            "superset", "namenode", "mongo-express", "phpmyadmin",
+            "neo4j", "nifi", "pgadmin", "prefect-orion",
         ]
         extracted_services = {}
-        for service in services_w_ports:
-            if service in ports.keys():
-                if service == 'nifi':
-                    extracted_services[service] = ports[service][1].split(':')[0]
+        for service in services_with_ports:
+            if service in state["ports"]:
+                if service == "nifi":
+                    extracted_services[service] = state["ports"][service][1].split(":")[0]
                 else:
-                    extracted_services[service] = ports[service][0].split(':')[0]
-        return extracted_services
+                    extracted_services[service] = state["ports"][service][0].split(":")[0]
+        state["updated_config"]["access_links"] = extracted_services
+        return state
 
-    def extract_signin_configs(self, services_dict: Dict[str, Dict], env_file_path: str = '.env') -> Union[Dict[str, Dict], None]:
-        """
-        Extracts sign-in configurations for services from the environment file.
-
-        Args:
-            services_dict (Dict[str, Dict]): A dictionary of services and the parameters needed for sign-in.
-            env_file_path (str): Path to the .env file. Defaults to '.env'.
-
-        Returns:
-            Union[Dict[str, Dict], None]: A dictionary of sign-in configurations for each service,
-                                          or None if the .env file is missing or empty.
-        """
+    def _extract_signin_configs(self, state: ToolConfigState) -> ToolConfigState:
         env_params_dict = {
-            'airflow-db': ['POSTGRES_USER', 'POSTGRES_PASSWORD'],
-            'superset-metadata-db': ['POSTGRES_USER_SUPERSET', 'POSTGRES_PASSWORD_SUPERSET'],
-            'mongo': ['MONGO_INITDB_ROOT_USERNAME', 'MONGO_INITDB_ROOT_PASSWORD'],
-            'mongo-express': ['ME_CONFIG_BASICAUTH_USERNAME', 'ME_CONFIG_BASICAUTH_PASSWORD'],
-            'mysql': ['MYSQL_USER', 'MYSQL_PASSWORD'],
-            'phpmyadmin': ['PMA_USER', 'PMA_PASSWORD'],
-            'neo4j': ['NEO4J_AUTH'],
-            'postgres': ['POSTGRES_USER_PG', 'POSTGRES_PASSWORD_PG'],
-            'pgadmin': ['PGADMIN_DEFAULT_EMAIL', 'PGADMIN_DEFAULT_PASSWORD']
+            "airflow-db": ["POSTGRES_USER", "POSTGRES_PASSWORD"],
+            "superset-metadata-db": ["POSTGRES_USER_SUPERSET", "POSTGRES_PASSWORD_SUPERSET"],
+            "mongo": ["MONGO_INITDB_ROOT_USERNAME", "MONGO_INITDB_ROOT_PASSWORD"],
         }
 
         signin_configs = {}
+        if not os.path.exists(state["env_file_path"]):
+            return state
+
         env_dict = {}
-
-        if not os.path.exists(env_file_path):
-            # If .env doesn't exist, we can return None or handle accordingly
-            return None
-
-        with open(env_file_path, 'r') as file:
+        with open(state["env_file_path"], "r") as file:
             for line in file:
                 line = line.strip()
-                if not line or line.startswith('#'):
+                if not line or line.startswith("#"):
                     continue
-                key, value = line.split('=', 1)
+                key, value = line.split("=", 1)
                 env_dict[key.strip()] = value.strip()
 
-        if not services_dict:
-            return None
+        for service, config_needed in state["services_dict"].items():
+            service_configs = {param: env_dict.get(param, None) for param in env_params_dict.get(service, [])}
+            signin_configs[service] = service_configs
 
-        for service, config_needed in services_dict.items():
-            if service == 'superset':
-                signin_configs[service] = {'USERNAME': 'admin', 'PASSWORD': 'admin'}
-            elif service == 'airflow-webserver':
-                signin_configs[service] = {'USERNAME': 'admin', 'PASSWORD': 'admin'}
-            elif service in env_params_dict:
-                service_configs = {}
-                for param in env_params_dict[service]:
-                    if param in env_dict:
-                        service_configs[param] = env_dict[param]
-                    else:
-                        service_configs[param] = None
-                signin_configs[service] = service_configs
+        state["updated_config"]["signin_configs"] = signin_configs
+        return state
 
-        return signin_configs
+    # PUBLIC METHODS TO INVOKE GRAPHS
+    def invoke_tool_definition(self, state: ToolConfigState) -> ToolConfigState:
+        return self.compiled_tool_def_graph.invoke(state)
+
+    def invoke_env_file_generation(self, state: ToolConfigState) -> ToolConfigState:
+        return self.compiled_env_file_graph.invoke(state)
+
+    def invoke_config_details_retrieval(self, state: ToolConfigState) -> ToolConfigState:
+        return self.compiled_config_details_graph.invoke(state)
+
+    def invoke_refine_access_links(self, state: ToolConfigState) -> ToolConfigState:
+        return self.compiled_refine_links_graph.invoke(state)
+
+    def invoke_signin_configs_extraction(self, state: ToolConfigState) -> ToolConfigState:
+        return self.compiled_signin_config_graph.invoke(state)

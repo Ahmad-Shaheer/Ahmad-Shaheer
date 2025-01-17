@@ -93,9 +93,19 @@ class SupervisorAgent:
             "Orchestration Tool": orchestration_tool
         }
 
-        shortlisted_tools = self.app.tool_config_agent.tool_definition(
-            pipeline_dict, self.tools_config
-        )
+        tool_config_state = {
+            "pipeline_dict": pipeline_dict,
+            "tools_config": self.tools_config,
+            "config": {},
+            "tool_names": [],
+            "ports": {},
+            "services_dict": {},
+            "env_file_path": ".env",
+            "updated_config": {},
+        }
+
+        tool_config_state = self.app.tool_config_agent.invoke_tool_definition(tool_config_state)
+        shortlisted_tools = tool_config_state["updated_config"]
 
         return render_template("config.html",
                                pipeline_dict=pipeline_dict,
@@ -113,18 +123,40 @@ class SupervisorAgent:
             docker_config = json.load(f)
 
         form_data = request.form
-        updated_config, ports = self.app.tool_config_agent.retrieve_config_details(
-            form_data=form_data, docker_config=docker_config
-        )
+
+        tool_config_state = {
+            "pipeline_dict": {},
+            "tools_config": self.tools_config,
+            "config": {},
+            "tool_names": form_data.getlist('tool_names'),
+            "ports": {},
+            "services_dict": {},
+            "env_file_path": ".env",
+            "updated_config": {},
+        }
+
+        tool_config_state = self.app.tool_config_agent.invoke_config_details_retrieval(tool_config_state)
+        updated_config = tool_config_state["updated_config"]
+        ports = tool_config_state["ports"]
 
         session["form_data"] = form_data
         session["updated_config"] = updated_config
         session["ports"] = ports
         session["flag"] = 0
+        
+        tool_config_state = self.app.tool_config_agent.invoke_env_file_generation(tool_config_state)
 
-        self.app.tool_config_agent.generate_env_file(updated_config, output_file=".env")
-
-        thread = threading.Thread(target=self.app.docker_agent.run_docker_compose)
+        # Prepare DockerState for merging Docker Compose files
+        docker_state = {
+            "command": "",
+            "tool_names": form_data.getlist('tool_names'),
+            "base_directory": "docker_templates",
+            "ports": {},
+            "compose_file_path": "docker-compose.yml",
+            "success": False,
+            "error": "",
+        }
+        thread = threading.Thread(target=lambda: self.app.docker_agent.invoke_up(docker_state))
         thread.start()
 
         return redirect(url_for("loading"))
@@ -137,9 +169,18 @@ class SupervisorAgent:
             str: Rendered HTML for the loading page.
         """
         services = session.get("ports", {})
-        result, healthy_containers = self.app.docker_agent.check_containers_health()
+        docker_state = {
+            "command": "",
+            "tool_names": [],
+            "base_directory": "",
+            "ports": services,
+            "compose_file_path": "",
+            "success": False,
+            "error": "",
+        }
 
-        if result is True:
+        docker_state = self.app.docker_agent.invoke_health(docker_state)
+        if docker_state["success"]:
             flag = session.get("flag", 0)
             if flag == 2:
                 session["flag"] = 0
@@ -147,10 +188,10 @@ class SupervisorAgent:
             session["flag"] = flag + 1
             return render_template("loading.html",
                                    services=services,
-                                   healthy_containers=healthy_containers)
+                                   healthy_containers=docker_state.get("ports", []))
         return render_template("loading.html",
                                services=services,
-                               healthy_containers=healthy_containers)
+                               healthy_containers=docker_state.get("ports", []))
 
     def ollama_chat(self) -> Tuple[Dict[str, Union[str, Dict]], int]:
         """
@@ -163,7 +204,7 @@ class SupervisorAgent:
         request_data = request.get_json(force=True)
         user_prompt = request_data["prompt"]
         try:
-            content = self.app.chat_bot.infer(user_prompt)
+            content = self.app.chat_bot.get_response(user_prompt)
             return jsonify({"content": content}), 200
         except Exception as exc:
             return jsonify({"error": str(exc)}), 500
@@ -176,8 +217,18 @@ class SupervisorAgent:
             Union[str, Tuple[str, int]]: Redirects to the index page or returns an error message.
         """
         try:
+            docker_state = {
+                "command": "",
+                "tool_names": [],
+                "base_directory": "",
+                "ports": {},
+                "compose_file_path": "",
+                "success": False,
+                "error": "",
+            }
+
+            self.app.docker_agent.invoke_down(docker_state)
             session.clear()
-            self.app.docker_agent.down_docker_compose()
             return redirect(url_for("index"))
         except subprocess.CalledProcessError as exc:
             return f"Error occurred: {exc}", 500
@@ -190,7 +241,20 @@ class SupervisorAgent:
             str: Rendered HTML for the final deployment page or an error page.
         """
         ports = session.get("ports", None)
-        signin_conf = self.app.tool_config_agent.extract_signin_configs(ports)
+
+        tool_config_state = {
+            "pipeline_dict": {},
+            "tools_config": self.tools_config,
+            "config": {},
+            "tool_names": [],
+            "ports": ports,
+            "services_dict": ports,
+            "env_file_path": ".env",
+            "updated_config": {},
+        }
+
+        tool_config_state = self.app.tool_config_agent.invoke_signin_configs_extraction(tool_config_state)
+        signin_conf = tool_config_state["updated_config"].get("signin_configs", {})
 
         if not ports or not signin_conf:
             return render_template("deploy_error.html")
@@ -198,7 +262,9 @@ class SupervisorAgent:
         if "nifi" in ports.keys():
             signin_conf.update({"nifi": ["admin", "ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB"]})
 
-        links = self.app.tool_config_agent.refine_access_links(ports=ports)
+        tool_config_state = self.app.tool_config_agent.invoke_refine_access_links(tool_config_state)
+        links = tool_config_state["updated_config"].get("access_links", {})
+
         return render_template("present.html",
                                ports=ports,
                                signin_conf=signin_conf,

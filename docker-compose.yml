@@ -26,172 +26,179 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-  postgres:
-    image: postgres:14
-    container_name: postgres
+  jobmanager:
+    image: apache/flink:1.16.0
+    container_name: jobmanager
+    command: jobmanager
     environment:
-      POSTGRES_USER: ${POSTGRES_USER_PG}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PG}
-      POSTGRES_DB: ${POSTGRES_DB_PG}
+    - JOB_MANAGER_RPC_ADDRESS=${FLINK_JOB_MANAGER_RPC_ADDRESS}
+    - 'FLINK_PROPERTIES=
+
+      jobmanager.rpc.address: ${FLINK_JOB_MANAGER_RPC_ADDRESS}
+
+      '
     ports:
-    - 5432:5432
+    - 8081:8081
+    networks:
+    - data_pipeline_network
     volumes:
-    - postgres_postgres_postgres_data:/var/lib/postgresql/data
-    networks:
-    - data_pipeline_network
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - pg_isready -U $${POSTGRES_USER_PG} -d $${POSTGRES_DB_PG}
-      interval: 10s
-      timeout: 5s
-      retries: 8
-      start_period: 30s
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    ports:
-    - 5050:80
-    networks:
-    - data_pipeline_network
-    depends_on:
-      postgres:
-        condition: service_healthy
+    - apacheflink_jobmanager_jobmanager-logs:/opt/flink/log
     healthcheck:
       test:
       - CMD
-      - sh
-      - -c
-      - wget -q --spider http://localhost:80 || exit 1
+      - curl
+      - --fail
+      - http://localhost:8081/taskmanagers
       interval: 30s
       timeout: 10s
       retries: 5
-    restart: always
-  airflow-db:
-    image: postgres:14
-    container_name: airflow-db
+      start_period: 30s
+  taskmanager:
+    image: apache/flink:1.16.0
+    container_name: taskmanager
+    command: taskmanager
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-    - airflow_airflow-db_airflow_db_data:/var/lib/postgresql/data
-    ports:
-    - 5433:5432
+    - JOB_MANAGER_RPC_ADDRESS=${FLINK_JOB_MANAGER_RPC_ADDRESS}
+    - 'FLINK_PROPERTIES=
+
+      jobmanager.rpc.address: ${FLINK_JOB_MANAGER_RPC_ADDRESS}
+
+      '
+    depends_on:
+      jobmanager:
+        condition: service_healthy
+    restart: always
     networks:
     - data_pipeline_network
+    volumes:
+    - apacheflink_taskmanager_taskmanager-logs:/opt/flink/log
     healthcheck:
       test:
       - CMD-SHELL
-      - pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}
-      interval: 10s
-      timeout: 5s
-      retries: 8
-      start_period: 30s
-  airflow-init:
-    image: apache/airflow:2.6.2
-    container_name: airflow-init
-    depends_on:
-      airflow-db:
-        condition: service_healthy
-    environment:
-      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
-      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
-      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
-    command: "bash -c \"\n  echo 'Initializing Airflow DB...' &&\n  airflow db init\
-      \ &&\n  echo 'Creating Airflow admin user...' &&\n  airflow users create --username\
-      \ ${AIRFLOW_ADMIN_USER} --password ${AIRFLOW_ADMIN_PASS} --firstname Airflow\
-      \ --lastname Admin --role Admin --email ${AIRFLOW_ADMIN_EMAIL} &&\n  echo 'Marking\
-      \ initialization as complete...' &&\n  touch /tmp/airflow-init-complete &&\n\
-      \  echo 'Airflow initialization is complete! Container will stay alive for healthcheck...'\
-      \ &&\n  tail -f /dev/null\n\"\n"
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - airflow db check && [ -f /tmp/airflow-init-complete ]
-      interval: 10s
+      - ps aux | grep -q 'taskmanager'
+      interval: 30s
       timeout: 10s
       retries: 8
-      start_period: 5s
+      start_period: 30s
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+    - 3306:3306
+    volumes:
+    - mysql_mysql_mysql_data:/var/lib/mysql
     networks:
     - data_pipeline_network
-  airflow-scheduler:
-    image: apache/airflow:2.6.2
-    container_name: airflow-scheduler
-    depends_on:
-      airflow-db:
-        condition: service_healthy
-      airflow-init:
-        condition: service_healthy
-    restart: always
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} -e 'SHOW DATABASES;' || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 30
+    restart: unless-stopped
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
     environment:
-      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
-      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
-      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
-      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
-    volumes:
-    - airflow_airflow-scheduler_airflow_dags:/opt/airflow/dags
-    - airflow_airflow-scheduler_airflow_logs:/opt/airflow/logs
-    command:
-    - airflow
-    - scheduler
+      PMA_HOST: ${PMA_HOST}
+      PMA_USER: ${PMA_USER}
+      PMA_PASSWORD: ${PMA_PASSWORD}
+    ports:
+    - 8080:80
+    depends_on:
+      mysql:
+        condition: service_healthy
     networks:
     - data_pipeline_network
     healthcheck:
       test:
       - CMD
       - curl
-      - --fail
-      - http://localhost:8974/health
+      - -Ss
+      - http://localhost/robots.txt
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    restart: unless-stopped
+  cassandra:
+    image: cassandra:4.0
+    container_name: cassandra_service
+    environment:
+      CASSANDRA_CLUSTER_NAME: ${CASSANDRA_CLUSTER_NAME}
+      CASSANDRA_SEEDS: ${CASSANDRA_SEEDS}
+    ports:
+    - 9042:9042
+    volumes:
+    - cassandra_cassandra_cassandra_data:/var/lib/cassandra
+    networks:
+    - data_pipeline_network
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - '[ $$(nodetool statusgossip) = running ]'
       interval: 30s
       timeout: 10s
-      retries: 8
+      retries: 5
       start_period: 30s
-  airflow-webserver:
-    image: apache/airflow:2.6.2
-    container_name: airflow-webserver
-    depends_on:
-      airflow-scheduler:
-        condition: service_healthy
-      airflow-init:
-        condition: service_healthy
-    restart: always
-    environment:
-      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
-      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
-      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
+  prefect-orion:
+    image: prefecthq/prefect:2-latest
+    container_name: prefect-orion
+    command: "bash -c \"\n  prefect server start --host 0.0.0.0 --port 4200\n\"\n"
     ports:
-    - 8080:8080
+    - 4200:4200
     volumes:
-    - airflow_airflow-webserver_airflow_dags:/opt/airflow/dags
-    - airflow_airflow-webserver_airflow_logs:/opt/airflow/logs
-    command:
-    - airflow
-    - webserver
+    - prefect_prefect-orion_prefect_data:/root/.prefect
     networks:
     - data_pipeline_network
     healthcheck:
       test:
       - CMD
-      - curl
-      - --fail
-      - http://localhost:8080/health
-      interval: 30s
+      - python3
+      - -c
+      - import http.client; conn = http.client.HTTPConnection('localhost', 4200);
+        conn.request('GET', '/health'); exit(0) if conn.getresponse().status == 200
+        else exit(1)
+      interval: 10s
       timeout: 10s
-      retries: 8
+      retries: 5
       start_period: 30s
+  prefect-worker:
+    image: prefecthq/prefect:2-latest
+    container_name: prefect-worker
+    depends_on:
+      prefect-orion:
+        condition: service_healthy
+    environment:
+      PREFECT_API_URL: http://prefect-orion:4200/api
+    command: "bash -c \"\n  prefect worker start -p default\n\"\n"
+    healthcheck:
+      test:
+      - CMD
+      - python3
+      - -c
+      - import http.client, json; conn = http.client.HTTPConnection('prefect-orion',
+        4200); conn.request('GET', '/api/health'); resp = conn.getresponse(); exit(0)
+        if resp.status == 200 else exit(1)
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+    - data_pipeline_network
+    restart: always
 networks:
   data_pipeline_network: {}
 volumes:
-  postgres_postgres_postgres_data: {}
-  airflow_airflow-db_airflow_db_data: {}
-  airflow_airflow-scheduler_airflow_dags: {}
-  airflow_airflow-scheduler_airflow_logs: {}
-  airflow_airflow-webserver_airflow_dags: {}
-  airflow_airflow-webserver_airflow_logs: {}
+  apacheflink_jobmanager_jobmanager-logs: {}
+  apacheflink_taskmanager_taskmanager-logs: {}
+  mysql_mysql_mysql_data: {}
+  cassandra_cassandra_cassandra_data: {}
+  prefect_prefect-orion_prefect_data: {}

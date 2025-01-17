@@ -7,7 +7,7 @@ from flask import Flask, request, render_template, redirect, url_for, session, j
 
 class SupervisorAgent:
     """
-    A controller class to organize Flask routes. 
+    A supervisor agent to organize Flask routes. 
     Holds references to the parent Flask app's agents and config data.
     """
 

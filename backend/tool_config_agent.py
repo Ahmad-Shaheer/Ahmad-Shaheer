@@ -2,7 +2,7 @@ import os
 from typing import Dict, List, Tuple, Union
 
 
-class ToolConfigManager:
+class ToolConfigAgent:
     """
     Manages tool definitions, environment files, and other configurations.
 
@@ -11,15 +11,15 @@ class ToolConfigManager:
     sign-in configurations from environment files.
     """
 
-    def __init__(self, docker_manager) -> None:
+    def __init__(self, docker_agent) -> None:
         """
-        Initializes the ToolConfigManager with a DockerManager instance.
+        Initializes the ToolConfigAgent with a DockerAgent instance.
 
         Args:
-            docker_manager (DockerManager): An instance of DockerManager, allowing
+            docker_agent (DockerAgent): An instance of DockerAgent, allowing
                                             interaction with Docker-related functionality.
         """
-        self.docker_manager = docker_manager
+        self.docker_agent = docker_agent
 
     def tool_definition(self, pipeline_dict: Dict[str, Union[str, List[str]]], tools_config: Dict[str, Dict]) -> Dict[str, Dict]:
         """
@@ -100,9 +100,9 @@ class ToolConfigManager:
                         "EnvironmentVariables": updated_env_vars
                     }
 
-        # Call merge_docker_compose using the DockerManager
+        # Call merge_docker_compose using the DockerAgent
         if tool_names:
-            ports = self.docker_manager.merge_docker_compose(tool_names)
+            ports = self.docker_agent.merge_docker_compose(tool_names)
 
         return updated_config, ports
 

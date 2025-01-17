@@ -1,6 +1,6 @@
 from typing import Dict, Union
 
-class PipelineManager:
+class PipelineAgent:
     """
     Manages pipeline selection and configuration.
 
@@ -40,7 +40,7 @@ class PipelineManager:
             as well as alternate tools for flexibility.
 
         Example:
-            >>> pm = PipelineManager()
+            >>> pm = PipelineAgent()
             >>> pipeline = pm.get_pipeline("structured", "batch", "dashboard", "yes")
             >>> print(pipeline)
             {

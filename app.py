@@ -1,23 +1,23 @@
 from flask import Flask, session
 from flask_session import Session
-from controllers.main_controller import MainController
-from backend.docker_manager import DockerManager
-from backend.tool_config_manager import ToolConfigManager
-from backend.pipeline_manager import PipelineManager
-from backend.chat_bot_manager import ChatBotManager
+from controllers.supervisor_agent import SupervisorAgent
+from backend.docker_agent import DockerAgent
+from backend.tool_config_agent import ToolConfigAgent
+from backend.pipeline_agent import PipelineAgent
+from backend.chat_bot_agent import ChatBotAgent
 
 
 class MyFlaskApp(Flask):
     """
-    Extends the Flask application to include global references to managers and 
+    Extends the Flask application to include global references to Agents and 
     register routes through controller classes.
 
     Attributes:
-        docker_manager (DockerManager): Manages Docker-related operations like running and stopping containers.
-        tool_config_manager (ToolConfigManager): Handles tool definitions and configuration management.
-        pipeline_manager (PipelineManager): Manages pipeline selection and configuration.
-        chat_bot (ChatBotManager): Handles chatbot inference for user interaction.
-        main_controller (MainController): The primary controller that registers application routes.
+        docker_agent (DockerAgent): Manages Docker-related operations like running and stopping containers.
+        tool_config_agent (ToolConfigAgent): Handles tool definitions and configuration management.
+        pipeline_agent (PipelineAgent): Manages pipeline selection and configuration.
+        chat_bot (ChatBotAgent): Handles chatbot inference for user interaction.
+        main_controller (SupervisorAgent): The primary controller that registers application routes.
     """
 
     def __init__(self, import_name: str, **kwargs) -> None:
@@ -32,17 +32,17 @@ class MyFlaskApp(Flask):
         self.secret_key = "your_secret_key"
         self.config["SESSION_TYPE"] = "filesystem"
 
-        # Instantiate managers
-        self.docker_manager = DockerManager()
-        self.tool_config_manager = ToolConfigManager(self.docker_manager)
-        self.pipeline_manager = PipelineManager()
-        self.chat_bot = ChatBotManager()
+        # Instantiate Agents
+        self.docker_agent = DockerAgent()
+        self.tool_config_agent = ToolConfigAgent(self.docker_agent)
+        self.pipeline_agent = PipelineAgent()
+        self.chat_bot = ChatBotAgent()
 
         # Setup the session
         Session(self)
 
         # Instantiate Controller(s) and register routes
-        self.main_controller = MainController(self)
+        self.main_controller = SupervisorAgent(self)
         self.main_controller.register_routes()
 
 

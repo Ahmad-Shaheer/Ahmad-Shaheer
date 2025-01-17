@@ -6,7 +6,7 @@ import yaml
 from typing import List, Dict, Tuple, Union
 
 
-class DockerManager:
+class DockerAgent:
     """
     Handles Docker commands (up/down) and merges Docker Compose files.
     Preserves the exact logic from the original procedural functions.

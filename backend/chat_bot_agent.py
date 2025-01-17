@@ -3,7 +3,7 @@ import json
 from typing import Dict
 
 
-class ChatBotManager:
+class ChatBotAgent:
     """
     Manages the inference/chat logic for interacting with a language model.
 

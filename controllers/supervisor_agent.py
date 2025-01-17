@@ -5,18 +5,18 @@ from typing import Dict, Tuple, Union
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 
 
-class MainController:
+class SupervisorAgent:
     """
     A controller class to organize Flask routes. 
-    Holds references to the parent Flask app's managers and config data.
+    Holds references to the parent Flask app's agents and config data.
     """
 
     def __init__(self, app: Flask) -> None:
         """
-        Initializes the MainController with a Flask app instance.
+        Initializes the SupervisorAgent with a Flask app instance.
 
         Args:
-            app (Flask): The parent Flask app instance, which holds references to the managers.
+            app (Flask): The parent Flask app instance, which holds references to the agents.
         """
         self.app = app
         # Load the tools configuration from a JSON file
@@ -58,7 +58,7 @@ class MainController:
         nature = request.form.get("nature")
         transformation_needed = request.form.get("transformation")
 
-        pipeline = self.app.pipeline_manager.get_pipeline(
+        pipeline = self.app.pipeline_agent.get_pipeline(
             data_type=data_type,
             end_goal=end_goal,
             nature=nature,
@@ -93,7 +93,7 @@ class MainController:
             "Orchestration Tool": orchestration_tool
         }
 
-        shortlisted_tools = self.app.tool_config_manager.tool_definition(
+        shortlisted_tools = self.app.tool_config_agent.tool_definition(
             pipeline_dict, self.tools_config
         )
 
@@ -113,7 +113,7 @@ class MainController:
             docker_config = json.load(f)
 
         form_data = request.form
-        updated_config, ports = self.app.tool_config_manager.retrieve_config_details(
+        updated_config, ports = self.app.tool_config_agent.retrieve_config_details(
             form_data=form_data, docker_config=docker_config
         )
 
@@ -122,9 +122,9 @@ class MainController:
         session["ports"] = ports
         session["flag"] = 0
 
-        self.app.tool_config_manager.generate_env_file(updated_config, output_file=".env")
+        self.app.tool_config_agent.generate_env_file(updated_config, output_file=".env")
 
-        thread = threading.Thread(target=self.app.docker_manager.run_docker_compose)
+        thread = threading.Thread(target=self.app.docker_agent.run_docker_compose)
         thread.start()
 
         return redirect(url_for("loading"))
@@ -137,7 +137,7 @@ class MainController:
             str: Rendered HTML for the loading page.
         """
         services = session.get("ports", {})
-        result, healthy_containers = self.app.docker_manager.check_containers_health()
+        result, healthy_containers = self.app.docker_agent.check_containers_health()
 
         if result is True:
             flag = session.get("flag", 0)
@@ -177,7 +177,7 @@ class MainController:
         """
         try:
             session.clear()
-            self.app.docker_manager.down_docker_compose()
+            self.app.docker_agent.down_docker_compose()
             return redirect(url_for("index"))
         except subprocess.CalledProcessError as exc:
             return f"Error occurred: {exc}", 500
@@ -190,7 +190,7 @@ class MainController:
             str: Rendered HTML for the final deployment page or an error page.
         """
         ports = session.get("ports", None)
-        signin_conf = self.app.tool_config_manager.extract_signin_configs(ports)
+        signin_conf = self.app.tool_config_agent.extract_signin_configs(ports)
 
         if not ports or not signin_conf:
             return render_template("deploy_error.html")
@@ -198,7 +198,7 @@ class MainController:
         if "nifi" in ports.keys():
             signin_conf.update({"nifi": ["admin", "ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB"]})
 
-        links = self.app.tool_config_manager.refine_access_links(ports=ports)
+        links = self.app.tool_config_agent.refine_access_links(ports=ports)
         return render_template("present.html",
                                ports=ports,
                                signin_conf=signin_conf,

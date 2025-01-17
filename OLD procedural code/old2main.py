@@ -9,10 +9,10 @@ import json
 from flask_session import Session
 
 # Adjust these import paths as needed to match your project structure:
-from backend.docker_manager import DockerManager
-from backend.tool_config_manager import ToolConfigManager
-from backend.pipeline_manager import PipelineManager
-from backend.chat_bot_manager import ChatInferenceManager, SYSTEM_PROMPT
+from backend.docker_agent import DockerManager
+from backend.tool_config_agent import ToolConfigManager
+from backend.pipeline_agent import PipelineManager
+from backend.chat_bot_agent import ChatInferenceManager, SYSTEM_PROMPT
 
 
 app = Flask(__name__)

@@ -274,7 +274,7 @@ class SupervisorAgent:
 
         if not ports or not signin_conf:
             return render_template("deploy_error.html")
-
+        print(f'these are the port before rendering \n\n\n\n\n\n {ports}')
         if "nifi" in ports.keys():
             signin_conf.update({"nifi": ["admin", "ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB"]})
 

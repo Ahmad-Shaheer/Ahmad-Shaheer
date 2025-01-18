@@ -138,7 +138,7 @@ class ToolConfigAgent:
             state["updated_config"] = {}
             state["ports"] = {}
             raise RuntimeError(f"Error merging Docker Compose files: {docker_state['error']}")
-
+        print(f'These are the updated configs')
         state["updated_config"] = updated_config
         state["ports"] = docker_state["ports"]
         return state
@@ -157,15 +157,22 @@ class ToolConfigAgent:
                 else:
                     extracted_services[service] = state["ports"][service][0].split(":")[0]
         state["updated_config"]["access_links"] = extracted_services
+        print(f'these are the extracted services --------------------{extracted_services}')
         return state
 
     def _extract_signin_configs(self, state: ToolConfigState) -> ToolConfigState:
         env_params_dict = {
-            "airflow-db": ["POSTGRES_USER", "POSTGRES_PASSWORD"],
-            "superset-metadata-db": ["POSTGRES_USER_SUPERSET", "POSTGRES_PASSWORD_SUPERSET"],
-            "mongo": ["MONGO_INITDB_ROOT_USERNAME", "MONGO_INITDB_ROOT_PASSWORD"],
+            'airflow-db': ['POSTGRES_USER', 'POSTGRES_PASSWORD'],
+            'superset-metadata-db': ['POSTGRES_USER_SUPERSET', 'POSTGRES_PASSWORD_SUPERSET'],
+            'airflow-webserver': ['AIRFLOW_ADMIN_USER', 'AIRFLOW_ADMIN_PASS'],
+            'mongo': ['MONGO_INITDB_ROOT_USERNAME', 'MONGO_INITDB_ROOT_PASSWORD'],
+            'mongo-express': ['ME_CONFIG_BASICAUTH_USERNAME', 'ME_CONFIG_BASICAUTH_PASSWORD'],
+            'mysql': ['MYSQL_USER', 'MYSQL_PASSWORD'],
+            'phpmyadmin': ['PMA_USER', 'PMA_PASSWORD'],
+            'neo4j': ['NEO4J_AUTH'],
+            'postgres': ['POSTGRES_USER_PG', 'POSTGRES_PASSWORD_PG'],
+            'pgadmin': ['PGADMIN_DEFAULT_EMAIL', 'PGADMIN_DEFAULT_PASSWORD']
         }
-
         signin_configs = {}
         if not os.path.exists(state["env_file_path"]):
             return state
@@ -182,8 +189,8 @@ class ToolConfigAgent:
         for service, config_needed in state["services_dict"].items():
             service_configs = {param: env_dict.get(param, None) for param in env_params_dict.get(service, [])}
             signin_configs[service] = service_configs
-
         state["updated_config"]["signin_configs"] = signin_configs
+
         return state
     
     
@@ -191,7 +198,6 @@ class ToolConfigAgent:
     
     def _all_services(self, state: ToolConfigState):
         filtered_dependencies = {}
-
         for key in state['ports'].keys():
             if key in self.tool_dependencies:
                 filtered_dependencies[key] = self.tool_dependencies[key]

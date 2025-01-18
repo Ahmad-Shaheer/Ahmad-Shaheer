@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Environment Configuration</title>
+  <title>Configuration</title>
   <link rel = "stylesheet"  href = "/static/style/config.css"> 
 
 
 </head>
 <body>
 
-  <h1>Environment Configuration</h1>
-  <p>Fill in the environment variables for each tool. Leave blank to use the default values.</p>
+  <h1>Configurations</h1>
+  <p>Fill in the configurationss for each tool. Leave blank to use the default values.</p>
 
   <form action="/deploy" method="POST">
     {% for tool_name, tool_details in tools.items() %}
@@ -53,11 +53,11 @@
 </form>
 <div class="coach">
     <div class='flowrence'>
-      Flowrence
+      Helper
     </div>
   
     <div class='flowrence_prompt'>
-      Stuck? Ask Flowrence for help with your data pipeline questions!
+      Stuck? Ask Helper for help with your data pipeline questions!
     </div>
     <br>
   

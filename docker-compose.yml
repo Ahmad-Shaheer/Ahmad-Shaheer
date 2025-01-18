@@ -70,6 +70,111 @@ services:
       timeout: 10s
       retries: 5
     restart: always
+  spark-master:
+    image: apache/spark:3.4.1
+    container_name: spark-master
+    command:
+    - /bin/bash
+    - -c
+    - /opt/spark/sbin/start-master.sh && tail -f /dev/null
+    environment:
+    - SPARK_WORKLOAD=${SPARK_WORKLOAD_MASTER}
+    - SPARK_MASTER_PORT=${SPARK_MASTER_PORT}
+    - SPARK_MASTER_WEBUI_PORT=${SPARK_MASTER_WEBUI_PORT}
+    ports:
+    - 8080:8080
+    - 7077:7077
+    networks:
+    - data_pipeline_network
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8080
+      interval: 30s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
+  spark-worker:
+    image: apache/spark:3.4.1
+    container_name: spark-worker
+    command:
+    - /bin/bash
+    - -c
+    - /opt/spark/sbin/start-worker.sh spark://spark-master:7077 && tail -f /dev/null
+    environment:
+    - SPARK_WORKLOAD=${SPARK_WORKLOAD_WORKER}
+    - SPARK_MASTER_URL=${SPARK_MASTER_URL}
+    - SPARK_WORKER_MEMORY=${SPARK_WORKER_MEMORY}
+    - SPARK_WORKER_CORES=${SPARK_WORKER_CORES}
+    depends_on:
+      spark-master:
+        condition: service_healthy
+    restart: always
+    ports:
+    - 8081:8081
+    networks:
+    - data_pipeline_network
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8081
+      interval: 30s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
+  superset-metadata-db:
+    image: postgres:14
+    container_name: superset-metadata-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER_SUPERSET}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_SUPERSET}
+      POSTGRES_DB: ${POSTGRES_DB_SUPERSET}
+    volumes:
+    - apachesuperset_superset-metadata-db_superset_db_data:/var/lib/postgresql/data
+    ports:
+    - 5433:5432
+    networks:
+    - data_pipeline_network
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U ${POSTGRES_USER_SUPERSET} -d ${POSTGRES_DB_SUPERSET}
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
+  superset:
+    build:
+      context: docker_templates/apachesuperset
+    container_name: superset
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_SUPERSET}
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+      SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI_SUPERSET}
+    depends_on:
+      superset-metadata-db:
+        condition: service_healthy
+    restart: always
+    ports:
+    - 8088:8088
+    networks:
+    - data_pipeline_network
+    healthcheck:
+      test:
+      - CMD
+      - python3
+      - -c
+      - import http.client; conn = http.client.HTTPConnection('localhost', 8088);
+        conn.request('GET', '/health'); response = conn.getresponse(); exit(0) if
+        response.status == 200 else exit(1)
+      interval: 10s
+      timeout: 10s
+      retries: 25
+      start_period: 30s
   airflow-db:
     image: postgres:14
     container_name: airflow-db
@@ -80,7 +185,7 @@ services:
     volumes:
     - airflow_airflow-db_airflow_db_data:/var/lib/postgresql/data
     ports:
-    - 5433:5432
+    - 5434:5432
     networks:
     - data_pipeline_network
     healthcheck:
@@ -167,7 +272,7 @@ services:
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
       AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
     ports:
-    - 8080:8080
+    - 8082:8080
     volumes:
     - airflow_airflow-webserver_airflow_dags:/opt/airflow/dags
     - airflow_airflow-webserver_airflow_logs:/opt/airflow/logs
@@ -190,6 +295,7 @@ networks:
   data_pipeline_network: {}
 volumes:
   postgres_postgres_postgres_data: {}
+  apachesuperset_superset-metadata-db_superset_db_data: {}
   airflow_airflow-db_airflow_db_data: {}
   airflow_airflow-scheduler_airflow_dags: {}
   airflow_airflow-scheduler_airflow_logs: {}

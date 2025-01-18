@@ -61,7 +61,7 @@ label {
     font-weight: bold;
     color: #ffffff;  /* Adjust if needed for better visibility on dark background */
     margin-bottom: 6px;
-    display: block;
+    display: inline-block;
 }
 
 /* Unordered list for services */

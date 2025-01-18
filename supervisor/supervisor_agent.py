@@ -81,6 +81,8 @@ class SupervisorAgent:
         structured_tool = request.form.get('structured_tool')
         semi_structured_tool = request.form.get('semi_structured_tool')
         orchestration_tool = request.form.get('orchestration_tool')
+        final_structured = request.form.get('final_structured_tool')
+        final_semi = request.form.get('final_semi_tool')
 
         pipeline_dict = {
             "Ingestion": ingestion_tool,
@@ -90,7 +92,9 @@ class SupervisorAgent:
             "Visualization": visualization_tool,
             "Structured Storage Tool": structured_tool,
             "Semi Structured Storage Tool": semi_structured_tool,
-            "Orchestration Tool": orchestration_tool
+            "Orchestration Tool": orchestration_tool,
+            "Final Structured": final_structured,
+            "Final Semi": final_semi
         }
 
         tool_config_state = {
@@ -178,8 +182,20 @@ class SupervisorAgent:
             "success": False,
             "error": "",
         }
+        tool_config_state = {
+            "pipeline_dict": {},
+            "tools_config": self.tools_config,
+            "config": {},
+            "tool_names": [],
+            "ports": services,
+            "services_dict": {},
+            "env_file_path": ".env",
+            "updated_config": {},
+        }
 
         docker_state = self.app.docker_agent.invoke_health(docker_state)
+        tool_config_state = self.app.tool_config_agent.invoke_all_services(tool_config_state)
+        all_services = tool_config_state['ports']
         if docker_state["success"]:
             flag = session.get("flag", 0)
             if flag == 2:
@@ -187,10 +203,10 @@ class SupervisorAgent:
                 return redirect(url_for("final"))
             session["flag"] = flag + 1
             return render_template("loading.html",
-                                   services=services,
+                                   services=all_services,
                                    healthy_containers=docker_state.get("ports", []))
         return render_template("loading.html",
-                               services=services,
+                               services=all_services,
                                healthy_containers=docker_state.get("ports", []))
 
     def ollama_chat(self) -> Tuple[Dict[str, Union[str, Dict]], int]:

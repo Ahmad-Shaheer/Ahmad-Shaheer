@@ -1,22 +1,52 @@
 <link rel = "stylesheet"  href = "/static/style/loading.css"> 
  
-<h2>Loading Services...</h2>
+<h2>Deploying Services...</h2>
 
 
-<ul id="services-list">
-    {% for service, port in services.items() %}
+<ul>
+    {% for key, values in services.items() %}
     <li>
-        <!-- We start with a spinner for every service -->
-        <span id="icon-{{ service }}" class="spinner" data-service="{{ service }}"></span>
-        <span>  {{ service }}
-        </span>  
+
+        <ul>
+            {% for value in values %}
+            <li style="margin-left: {{ loop.index * 40 }}px;">
+                {% if loop.index == 1 %} <!-- Add icon for the first element -->
+            <img 
+                src="
+                {% if value == 'airflow-db' %}static/images/Airflow.svg
+                {% elif value == 'jobmanager' %}static/images/Apache%20Flink.svg
+                {% elif value == 'zoo1' %}static/images/Apache%20Kafka.svg
+                {% elif value == 'spark-master' %}static/images/Apache%20Spark.svg
+                {% elif value == 'superset-metadata-db' %}static/images/Apache%20Superset.svg
+                {% elif value == 'namenode' %}static/images/Hadoop%20Standalone.svg
+                {% elif value == 'mongo' %}static/images/Mongo.svg
+                {% elif value == 'mysql' %}static/images/MySQL.svg
+                {% elif value == 'neo4j' %}static/images/Neo4j.svg
+                {% elif value == 'nifi' %}static/images/NiFi.svg
+                {% elif value == 'postgres' %}static/images/Postgres.svg
+                {% elif value == 'prefect-orion' %}static/images/Prefect.svg
+                {% elif value == 'cassandra' %}static/images/Cassandra.svg
+                {% elif value == 'conduktorDB' %}static/images/connector.svg
+
+                {% else %}static/images/default-icon.svg
+                {% endif %}
+                " 
+                alt="{{ value }} icon" 
+                style="width: 20px; height: 20px; margin-right: 5px;" 
+            />
+
+                {% endif %}
+                <span id="icon-{{ value }}" class="spinner" data-service="{{ value }}"></span>
+                <span>  {{ value }}
+                </span> 
+            </li>
+            {% endfor %}
+        </ul>
     </li>
     {% endfor %}
 </ul>
 
-<div id='rocket-container'>
-    <img scr='/static/images/rocket.svg' id ="rocket">
-</div>
+
     <script>
         window.healthyContainers = {{ healthy_containers|tojson }};
 

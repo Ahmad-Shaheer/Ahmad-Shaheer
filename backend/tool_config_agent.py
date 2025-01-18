@@ -26,7 +26,22 @@ class ToolConfigAgent:
             docker_agent (DockerAgent): An instance of DockerAgent.
         """
         self.docker_agent = docker_agent
-
+        self.tool_dependencies = {
+            "airflow-webserver": ["airflow-db", "airflow-init", "airflow-scheduler", "airflow-webserver"],
+            "jobmanager": ["jobmanager", "taskmanager"],
+            "zoo1": [ "zoo1", "kafka1", "kafka-schema-registry", "kafka-rest-proxy", "kafka-connect"],
+            "spark-master": ["spark-master", "spark-worker"],
+            "superset": ["superset-metadata-db", "superset"],
+            "namenode": ["namenode", "datanode"],
+            "mongo-express": ["mongo", "mongo-express"],
+            "phpmyadmin": ["mysql", "phpmyadmin"],
+            "neo4j": ["neo4j"],
+            "nifi": ["nifi"],
+            "pgadmin": ["postgres", "pgadmin"],
+            "prefect-orion": ["prefect-orion", "prefect-worker"],
+            "cassandra" : ["cassandra"],
+            "conduktorDB" : ["conduktorDB", "conduktor-console"]
+        }
         # Graph for tool definition
         self.tool_def_graph = StateGraph(ToolConfigState)
         self.tool_def_graph.add_node("DefineTools", self._tool_definition)
@@ -61,6 +76,13 @@ class ToolConfigAgent:
         self.signin_config_graph.add_edge(START, "ExtractSigninConfigs")
         self.signin_config_graph.add_edge("ExtractSigninConfigs", END)
         self.compiled_signin_config_graph = self.signin_config_graph.compile()
+        
+        # Graph for extracting sign-in configurations
+        self.all_services_graph = StateGraph(ToolConfigState)
+        self.all_services_graph.add_node("ExtractAllDependencies", self._all_services)
+        self.all_services_graph.add_edge(START, "ExtractAllDependencies")
+        self.all_services_graph.add_edge("ExtractAllDependencies", END)
+        self.compiled_all_services_graph = self.all_services_graph.compile()
 
     # NODE IMPLEMENTATIONS
     def _tool_definition(self, state: ToolConfigState) -> ToolConfigState:
@@ -163,6 +185,19 @@ class ToolConfigAgent:
 
         state["updated_config"]["signin_configs"] = signin_configs
         return state
+    
+    
+
+    
+    def _all_services(self, state: ToolConfigState):
+        filtered_dependencies = {}
+
+        for key in state['ports'].keys():
+            if key in self.tool_dependencies:
+                filtered_dependencies[key] = self.tool_dependencies[key]
+        state['ports'] = filtered_dependencies
+                
+        return state
 
     # PUBLIC METHODS TO INVOKE GRAPHS
     def invoke_tool_definition(self, state: ToolConfigState) -> ToolConfigState:
@@ -179,3 +214,6 @@ class ToolConfigAgent:
 
     def invoke_signin_configs_extraction(self, state: ToolConfigState) -> ToolConfigState:
         return self.compiled_signin_config_graph.invoke(state)
+    
+    def invoke_all_services(self, state: ToolConfigState) -> ToolConfigState:
+        return self.compiled_all_services_graph.invoke(state)

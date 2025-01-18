@@ -3,7 +3,7 @@ version: "3.9"
 services:
   cassandra:
     image: cassandra:4.0
-    container_name: cassandra_service
+    container_name: cassandra
     environment:
       CASSANDRA_CLUSTER_NAME: ${CASSANDRA_CLUSTER_NAME}
       CASSANDRA_SEEDS: ${CASSANDRA_SEEDS}

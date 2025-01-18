@@ -22,8 +22,8 @@ try{
         const checkboxEl = document.createElement('input');
         checkboxEl.type = 'checkbox';
         checkboxEl.id = 'checkbox-' + containerName;
-        checkboxEl.disabled = false; // Enable checkbox
-        checkboxEl.checked = true;  // Mark as checked
+        checkboxEl.disabled = false; 
+        checkboxEl.checked = true;  
 
         const labelEl = document.createElement('label');
         labelEl.htmlFor = 'checkbox-' + containerName;

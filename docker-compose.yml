@@ -26,141 +26,59 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-  postgres:
-    image: postgres:14
-    container_name: postgres
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
     environment:
-      POSTGRES_USER: ${POSTGRES_USER_PG}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PG}
-      POSTGRES_DB: ${POSTGRES_DB_PG}
-    ports:
-    - 5432:5432
+      CLUSTER_NAME: ${HADOOP_CLUSTER_NAME}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:8020
     volumes:
-    - postgres_postgres_postgres_data:/var/lib/postgresql/data
-    networks:
-    - data_pipeline_network
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - pg_isready -U $${POSTGRES_USER_PG} -d $${POSTGRES_DB_PG}
-      interval: 10s
-      timeout: 5s
-      retries: 8
-      start_period: 30s
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    - hadoopstandalone_namenode_namenode_data:/hadoop/dfs/name
     ports:
-    - 5050:80
+    - 9870:9870
+    - 8020:8020
     networks:
     - data_pipeline_network
-    depends_on:
-      postgres:
-        condition: service_healthy
     healthcheck:
       test:
       - CMD
-      - sh
-      - -c
-      - wget -q --spider http://localhost:80 || exit 1
+      - curl
+      - --fail
+      - http://localhost:9870/
       interval: 30s
       timeout: 10s
       retries: 5
-    restart: always
-  spark-master:
-    image: apache/spark:3.4.1
-    container_name: spark-master
-    command:
-    - /bin/bash
-    - -c
-    - /opt/spark/sbin/start-master.sh && tail -f /dev/null
-    environment:
-    - SPARK_WORKLOAD=${SPARK_WORKLOAD_MASTER}
-    - SPARK_MASTER_PORT=${SPARK_MASTER_PORT}
-    - SPARK_MASTER_WEBUI_PORT=${SPARK_MASTER_WEBUI_PORT}
-    ports:
-    - 8080:8080
-    - 7077:7077
-    networks:
-    - data_pipeline_network
-    healthcheck:
-      test:
-      - CMD
-      - curl
-      - -f
-      - http://localhost:8080
-      interval: 30s
-      timeout: 10s
-      retries: 8
       start_period: 30s
-  spark-worker:
-    image: apache/spark:3.4.1
-    container_name: spark-worker
-    command:
-    - /bin/bash
-    - -c
-    - /opt/spark/sbin/start-worker.sh spark://spark-master:7077 && tail -f /dev/null
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
     environment:
-    - SPARK_WORKLOAD=${SPARK_WORKLOAD_WORKER}
-    - SPARK_MASTER_URL=${SPARK_MASTER_URL}
-    - SPARK_WORKER_MEMORY=${SPARK_WORKER_MEMORY}
-    - SPARK_WORKER_CORES=${SPARK_WORKER_CORES}
-    depends_on:
-      spark-master:
-        condition: service_healthy
-    restart: always
-    ports:
-    - 8081:8081
-    networks:
-    - data_pipeline_network
-    healthcheck:
-      test:
-      - CMD
-      - curl
-      - -f
-      - http://localhost:8081
-      interval: 30s
-      timeout: 10s
-      retries: 8
-      start_period: 30s
-  superset-metadata-db:
-    image: postgres:14
-    container_name: superset-metadata-db
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER_SUPERSET}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_SUPERSET}
-      POSTGRES_DB: ${POSTGRES_DB_SUPERSET}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:8020
     volumes:
-    - apachesuperset_superset-metadata-db_superset_db_data:/var/lib/postgresql/data
-    ports:
-    - 5433:5432
+    - hadoopstandalone_datanode_datanode_data:/hadoop/dfs/data
     networks:
     - data_pipeline_network
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - pg_isready -U ${POSTGRES_USER_SUPERSET} -d ${POSTGRES_DB_SUPERSET}
-      interval: 15s
-      timeout: 5s
-      retries: 8
-      start_period: 30s
-  superset:
-    build:
-      context: docker_templates/apachesuperset
-    container_name: superset
-    environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_SUPERSET}
-      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
-      SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI_SUPERSET}
     depends_on:
-      superset-metadata-db:
+      namenode:
         condition: service_healthy
     restart: always
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - --fail
+      - http://localhost:9864/
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  prefect-orion:
+    image: prefecthq/prefect:2-latest
+    container_name: prefect-orion
+    command: "bash -c \"\n  prefect server start --host 0.0.0.0 --port 4200\n\"\n"
     ports:
-    - 8088:8088
+    - 4200:4200
+    volumes:
+    - prefect_prefect-orion_prefect_data:/root/.prefect
     networks:
     - data_pipeline_network
     healthcheck:
@@ -168,136 +86,40 @@ services:
       - CMD
       - python3
       - -c
-      - import http.client; conn = http.client.HTTPConnection('localhost', 8088);
-        conn.request('GET', '/health'); response = conn.getresponse(); exit(0) if
-        response.status == 200 else exit(1)
+      - import http.client; conn = http.client.HTTPConnection('localhost', 4200);
+        conn.request('GET', '/health'); exit(0) if conn.getresponse().status == 200
+        else exit(1)
       interval: 10s
       timeout: 10s
-      retries: 25
+      retries: 5
       start_period: 30s
-  airflow-db:
-    image: postgres:14
-    container_name: airflow-db
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-    - airflow_airflow-db_airflow_db_data:/var/lib/postgresql/data
-    ports:
-    - 5434:5432
-    networks:
-    - data_pipeline_network
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}
-      interval: 10s
-      timeout: 5s
-      retries: 8
-      start_period: 30s
-  airflow-init:
-    image: apache/airflow:2.6.2
-    container_name: airflow-init
+  prefect-worker:
+    image: prefecthq/prefect:2-latest
+    container_name: prefect-worker
     depends_on:
-      airflow-db:
+      prefect-orion:
         condition: service_healthy
     environment:
-      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
-      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
-      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
-    command: "bash -c \"\n  echo 'Initializing Airflow DB...' &&\n  airflow db init\
-      \ &&\n  echo 'Creating Airflow admin user...' &&\n  airflow users create --username\
-      \ ${AIRFLOW_ADMIN_USER} --password ${AIRFLOW_ADMIN_PASS} --firstname Airflow\
-      \ --lastname Admin --role Admin --email ${AIRFLOW_ADMIN_EMAIL} &&\n  echo 'Marking\
-      \ initialization as complete...' &&\n  touch /tmp/airflow-init-complete &&\n\
-      \  echo 'Airflow initialization is complete! Container will stay alive for healthcheck...'\
-      \ &&\n  tail -f /dev/null\n\"\n"
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - airflow db check && [ -f /tmp/airflow-init-complete ]
-      interval: 10s
-      timeout: 10s
-      retries: 8
-      start_period: 5s
-    networks:
-    - data_pipeline_network
-  airflow-scheduler:
-    image: apache/airflow:2.6.2
-    container_name: airflow-scheduler
-    depends_on:
-      airflow-db:
-        condition: service_healthy
-      airflow-init:
-        condition: service_healthy
-    restart: always
-    environment:
-      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
-      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
-      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
-      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
-    volumes:
-    - airflow_airflow-scheduler_airflow_dags:/opt/airflow/dags
-    - airflow_airflow-scheduler_airflow_logs:/opt/airflow/logs
-    command:
-    - airflow
-    - scheduler
-    networks:
-    - data_pipeline_network
+      PREFECT_API_URL: http://prefect-orion:4200/api
+    command: "bash -c \"\n  prefect worker start -p default\n\"\n"
     healthcheck:
       test:
       - CMD
-      - curl
-      - --fail
-      - http://localhost:8974/health
-      interval: 30s
+      - python3
+      - -c
+      - import http.client, json; conn = http.client.HTTPConnection('prefect-orion',
+        4200); conn.request('GET', '/api/health'); resp = conn.getresponse(); exit(0)
+        if resp.status == 200 else exit(1)
+      interval: 10s
       timeout: 10s
-      retries: 8
+      retries: 5
       start_period: 30s
-  airflow-webserver:
-    image: apache/airflow:2.6.2
-    container_name: airflow-webserver
-    depends_on:
-      airflow-scheduler:
-        condition: service_healthy
-      airflow-init:
-        condition: service_healthy
-    restart: always
-    environment:
-      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW_EXECUTOR}
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_CONN}
-      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
-      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW_LOAD_EXAMPLES}
-    ports:
-    - 8082:8080
-    volumes:
-    - airflow_airflow-webserver_airflow_dags:/opt/airflow/dags
-    - airflow_airflow-webserver_airflow_logs:/opt/airflow/logs
-    command:
-    - airflow
-    - webserver
     networks:
     - data_pipeline_network
-    healthcheck:
-      test:
-      - CMD
-      - curl
-      - --fail
-      - http://localhost:8080/health
-      interval: 30s
-      timeout: 10s
-      retries: 8
-      start_period: 30s
+    restart: always
 networks:
   data_pipeline_network: {}
 volumes:
-  postgres_postgres_postgres_data: {}
-  apachesuperset_superset-metadata-db_superset_db_data: {}
-  airflow_airflow-db_airflow_db_data: {}
-  airflow_airflow-scheduler_airflow_dags: {}
-  airflow_airflow-scheduler_airflow_logs: {}
-  airflow_airflow-webserver_airflow_dags: {}
-  airflow_airflow-webserver_airflow_logs: {}
+  hadoopstandalone_namenode_namenode_data: {}
+  hadoopstandalone_datanode_datanode_data: {}
+  prefect_prefect-orion_prefect_data: {}

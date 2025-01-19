@@ -1,10 +1,10 @@
 from flask import Flask, session
 from flask_session import Session
 from supervisor.supervisor_agent import SupervisorAgent
-from backend.docker_agent import DockerAgent
-from backend.tool_config_agent import ToolConfigAgent
-from backend.pipeline_agent import PipelineAgent
-from backend.chat_bot_agent import ChatBotAgent
+from agents.docker_agent import DockerAgent
+from agents.tool_config_agent import ToolConfigAgent
+from agents.pipeline_agent import PipelineAgent
+from agents.chat_bot_agent import ChatBotAgent
 
 
 class MyFlaskApp(Flask):
